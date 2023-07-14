@@ -46,13 +46,7 @@ xhr.onreadystatechange = function() {
 };
 
 
-const images = [
-  { url: 'https://img.alicdn.com/imgextra/i2/6000000006120/O1CN017UCQi11v50mRrliBX_!!6000000006120-0-octopus.jpg', alt: 'image 1' },
-  { url: 'https://img.alicdn.com/imgextra/i1/6000000002018/O1CN01YRcqHN1QmI7UPZ0rr_!!6000000002018-0-octopus.jpg', alt: 'image 2' },
-  { url: 'https://img.alicdn.com/imgextra/i4/6000000003879/O1CN01e0c4Eq1eWdC24ncT5_!!6000000003879-0-octopus.jpg', alt: 'image 3' },
-  { url: 'https://img.alicdn.com/imgextra/i1/6000000007229/O1CN01GgcsqS23Gw0zjsuxA_!!6000000007229-0-octopus.jpg', alt: 'image 4' },
-  { url: 'https://img.alicdn.com/imgextra/i3/6000000004438/O1CN01QnfX2c1ieeaw2DY5Y_!!6000000004438-0-octopus.jpg', alt: 'image 5' }
-]
+
 </script>
 
 <template>
@@ -70,16 +64,6 @@ const images = [
         <p class="hi">Hi!</p>
         <p class="name"><b>tdd2977094657</b></p>
       </div>
-    </div>
-    <div class="main">
-      <div class="banner">
-        <el-carousel indicator-position="outside">
-          <el-carousel-item v-for="(image, index) in images" :key="index">
-            <img  :src="image.url" :alt="image.alt">
-          </el-carousel-item>
-        </el-carousel>
-      </div>
-      <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
     </div>
   </div>
 </template>
@@ -132,13 +116,6 @@ const images = [
   z-index: 1;
 }
 
-.main {
-  margin: 70px 10% 0 10%;
-  padding: 20px 20px 0 20px;
-  border-radius: 20px;
-  background-color: white;
-}
-
 .up{
   height: 100%;
   width: 100%;
@@ -188,12 +165,12 @@ const images = [
 
 .location{
   top: 5px;
-  left: 18%;
+  left: 17%;
   position: absolute;
 }
 
 .sticky .location{
-  top: 10px;
+  margin: 5px 0 0 -10px;
 }
 
 .sticky .ip{
@@ -208,20 +185,13 @@ const images = [
   margin: 0;
 }
 
-.banner{
-  overflow: hidden;
-  border-radius: 10px;
-  margin: 10px 0 0 25%;
-  width: 48%;
-}
+
 
 img{
   width: 100%;
   height: 100%;
 }
 
-.el-carousel__item{
-  border-radius: 10px;
-}
+
 </style>
 
