@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import router from "@/router/router";
 
 const currentPage = ref(1)
 const Banner = ref([])
@@ -10,6 +11,11 @@ const banner = async () => {
   Banner.value = data.records
   currentPage.value = data.current
 }
+
+const goToProduct = (productId) => {
+  const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  window.open(url, '_blank');
+}
 onMounted(banner)
 </script>
 
@@ -17,7 +23,7 @@ onMounted(banner)
   <div class="banner">
     <el-carousel indicator-position="outside">
       <el-carousel-item v-for="Banner in Banner" :key="Banner.productId">
-        <img :src="Banner.img.slice(1, -1).split(',')[0]" :alt="Banner.productName">
+        <img :src="Banner.img.slice(1, -1).split(',')[0]" :alt="Banner.productName" @click="goToProduct(Banner.productId)">
       </el-carousel-item>
     </el-carousel>
   </div>

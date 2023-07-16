@@ -70,11 +70,16 @@ const goHome = () => {
   // 导航到首页
   router.push({ name: 'Home' });
 };
+
+const goToProduct = (productId) => {
+  const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  window.open(url, '_blank');
+}
 </script>
 
 <template>
   <div class="products">
-    <div v-for="product in products" :key="product.productId" class="product">
+    <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
       <img :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img">
       <div class="productName">
         {{ product.productName }}
@@ -95,7 +100,7 @@ const goHome = () => {
     <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
     <button @click="goToPage(totalPages)">尾页</button>
   </div>
-    <el-empty v-if="isEmpty">
+    <el-empty v-if="isEmpty" description="哇哦，您的搜索没有结果，这绝对是平行宇宙的错，换个关键词试试吧！">
       <el-button type="primary" @click="goHome">返回首页</el-button>
     </el-empty>
 

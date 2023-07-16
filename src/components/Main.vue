@@ -1,6 +1,6 @@
 <template>
     <div class="products">
-      <div v-for="product in products" :key="product.productId" class="product">
+      <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
         <img :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img">
         <div class="productName">
           {{ product.productName }}
@@ -25,11 +25,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {useRouter} from "vue-router";
 
 const currentPage = ref(1)
 const totalPages = ref(1)
 const products = ref([])
-const Banner = ref([])
 const randomSeed = ref(Math.floor(Math.random() * 10000)) // 添加 randomSeed ref
 
 const fetchProducts = async (page) => {
@@ -67,15 +67,14 @@ const pageNumbers = computed(() => {
   return numbers
 })
 
-const banner = async () => {
-  const response = await fetch(`http://1.14.126.98:8081/product/all?current=${currentPage.value}&size=5&sortField=score&isAsc=false`)
-  const data = await response.json()
-  Banner.value = data.records
-  currentPage.value = data.current
-}
-
 onMounted(() => fetchProducts(currentPage.value))
-onMounted(banner)
+
+const router = useRouter()
+
+const goToProduct = (productId) => {
+  const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  window.open(url, '_blank');
+}
 </script>
 
 <style scoped>

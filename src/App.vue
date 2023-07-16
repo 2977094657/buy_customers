@@ -5,6 +5,7 @@
       <router-view name="banner"></router-view>
       <router-view name="main"></router-view>
       <router-view name="search"></router-view>
+      <router-view name="description"></router-view>
     </div>
   </div>
 </template>
