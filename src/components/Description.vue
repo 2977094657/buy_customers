@@ -1,6 +1,5 @@
 <template>
   <div v-if="product && product.imgs" class="product-detail">
-
     <div class="image-section">
       <div class="image-gallery">
         <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}" v-show="index === currentImageIndex" class="large-image"></div>
@@ -12,7 +11,7 @@
 
     <div class="product-info">
       <h1>{{ product.productName }}</h1>
-      <div><h1>￥{{ product.price }}</h1></div><br>
+      <div class="productPrice"><h1>￥{{ product.price }}</h1></div><br>
       <h2 class="productDescription">{{ product.description }}</h2><br><br>
       <el-rate v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
       <p><br><br>收藏：{{ product.star }}</p><br>
@@ -27,7 +26,7 @@
 
   <div v-if="!httpError" class="comments-section">
     <h2>
-      评论
+      评论<div style="left: 280px;font-size: 25px;color: rgb(255,80,0);position: absolute">{{ comments.length }}</div>
       <div>
         <span class="sort-option"
               :class="{ 'highlight': currentSort === 'hottest' }"
@@ -40,29 +39,51 @@
     <div v-for="comment in comments" :key="comment.id" class="comment">
       <img :src="comment.userAvatar" alt="用户头像" class="user-avatar">
       <div class="comment-content">
-        <h3>{{ comment.userName }}</h3>
+        <h3>{{ comment.userName }}</h3><br>
         <p>{{ comment.comments }}</p>
         <div v-if="comment.imgId">
-          <img v-for="(imgUrl, index) in comment.imgId.slice(1, -1).split(', ')" :key="index" :src="imgUrl" class="comment-image"  alt=""/>
-        </div>
+          <el-image v-for="(imgUrl, index) in comment.imgId.slice(1, -1).split(', ')" :key="index" class="comment-image"  alt=""
+                    style="width: 100px; height: 100px"
+                    :src="imgUrl"
+                    :zoom-rate="1.2"
+                    :preview-src-list="comment.imgId.slice(1, -1).split(', ')"
+                    :initial-index="index"
+                    fit="cover"
+          />
+          <div class="demo-image__preview">
+          </div>
+        </div><br>
         <span>{{ comment.time }}</span>
       </div>
     </div>
-    <button @click="previousPage" :disabled="currentPage === 1">上一页</button>
-    <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+    <div class="pagination">
+      <button @click="goToPage(1)">首页</button>
+      <button @click="previousPage" :disabled="currentPage === 1">上一页</button>
+      <template v-for="page in pageNumbers">
+        <button v-if="page === currentPage" :class="{ 'current-page': true }" @click="goToPage(page)">{{ page }}</button>
+        <button v-else @click="goToPage(page)">{{ page }}</button>
+      </template>
+      <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+      <button @click="goToPage(totalPages)">尾页</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import router from "@/router/router";
+import { defineProps } from 'vue'
 
 const route = useRoute()
 const product = ref()
 const loading = ref(true)
 const httpError = ref(false)
 const currentImageIndex = ref(0)
+// 定义 props
+const props = defineProps({
+  productId: String,
+})
 
 onMounted(async () => {
   loading.value = true
@@ -83,7 +104,7 @@ onMounted(async () => {
     loading.value = false
   }
   // 在这里调用 fetchComments 函数
-  await fetchComments(currentSort.value)
+  await fetchComments(currentSort.value,currentPage.value)
 })
 
 const goHome = () => {
@@ -93,38 +114,55 @@ const goHome = () => {
 
 const comments = ref([])
 const currentPage = ref(1)
-const pageSize = ref(10)
 const totalPages = ref(1)
 const currentSort = ref('hottest')  // 默认按最新排序
 
-const fetchComments = async (sortOption) => {
+const fetchComments = async (sortOption,page) => {
   const sortByTime = sortOption === 'newest'
-  const response = await fetch(`http://1.14.126.98:8081/product/comments?productId=${route.params.productId}&pageNum=${currentPage.value}&pageSize=${pageSize.value}&sortByTime=${sortByTime}`)
+  const response = await fetch(`http://1.14.126.98:8081/product/comments?productId=${route.params.productId}&pageNum=${page}&sortByTime=${sortByTime}&pageSize=20`)
   const data = await response.json()
-  comments.value = data
-  totalPages.value = Math.ceil(data.length / pageSize.value)
-  console.log(data)
+  comments.value = data[0]  // 第一个元素是评论列表
+  const pageInfo = data[1] // 第二个元素是包含 pageNum，pageSize，sortByTime 参数的对象
+  // 更新 currentPage，pageSize 和 currentSort
+  currentPage.value = pageInfo.pageNum
+  totalPages.value = pageInfo.pages
+  currentSort.value = pageInfo.sortByTime ? 'newest' : 'hottest'
 }
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--
-    fetchComments(currentSort.value)
+    fetchComments(currentSort.value, currentPage.value - 1)
+    window.scrollTo(0, 0)
   }
 }
 
-const nextPage = () => {
+const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    fetchComments(currentSort.value)
+    await fetchComments(currentSort.value, currentPage.value + 1)
+    console.log(currentPage.value)
+    window.scrollTo(0, 0)
   }
 }
 
-const sortComments = (sortOption) => {
+const goToPage = (page) => {
+  fetchComments(currentSort.value, page)
+  window.scrollTo(0, 0)
+}
+
+const pageNumbers = computed(() => {
+  let numbers = []
+  for(let i = 1; i <= Math.min(7, totalPages.value); i++) {
+    numbers.push(i)
+  }
+  return numbers
+})
+
+const sortComments = async (sortOption) => {
   // 更新 currentSort 并重新获取评论
   currentSort.value = sortOption
-  fetchComments(sortOption)
+  await fetchComments(sortOption, currentPage.value)
 }
+
 </script>
 
 <style scoped>
