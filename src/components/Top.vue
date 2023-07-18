@@ -20,11 +20,14 @@ const isSticky = ref(false);
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
 });
+const isPlaceholderVisible = ref(false);
+
 const handleScroll = () => {
   const searchContainer = document.querySelector('.search-container');
   if (searchContainer) {
     const searchContainerHeight = searchContainer.offsetHeight;
     isSticky.value = window.pageYOffset > searchContainerHeight;
+    isPlaceholderVisible.value = isSticky.value;
   }
 };
 
@@ -78,22 +81,21 @@ const searchProduct = () => {
 </script>
 
 <template>
+  <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
   <el-backtop :bottom="100">
     <div class="up">▲<br>顶部</div>
   </el-backtop>
-  <div>
     <div class="search-container" :class="{ 'sticky': isSticky }">
       <el-icon :size="30" class="location"><Location /></el-icon>
       <p class="ip" id="result"></p>
       <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
-      <button @click="searchProduct" class="search-button">搜索</button>
+      <button @click="searchProduct" class="search-button"><b>搜索</b></button>
       <div class="head">
         <img class="img" src="http://1.14.126.98:5000/R.jpg" alt="头像">
         <p class="hi">Hi!</p>
         <p class="name"><b>tdd2977094657</b></p>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

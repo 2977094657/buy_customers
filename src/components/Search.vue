@@ -3,6 +3,7 @@ import {ref, onMounted, computed} from 'vue';
 import axios from 'axios';
 import { watchEffect } from 'vue';
 import router from "@/router/router";
+import HighlightText from './HighlightText.vue';
 
 
 const products = ref([])
@@ -82,8 +83,8 @@ const goToProduct = (productId) => {
     <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
       <img :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img">
       <div class="productName">
-        {{ product.productName }}
-        <br><br>
+        <HighlightText :text="product.productName" :keyword="props.keyword" />
+        <br>
         <el-rate v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
         <br><br>收藏：{{product.star}}
         <br><br><span style="color: rgb(255,80,0);"><b>￥{{ product.price }}</b></span>

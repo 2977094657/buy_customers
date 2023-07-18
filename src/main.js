@@ -1,11 +1,12 @@
 import { createApp } from 'vue'
+import Antd from 'ant-design-vue';
 import App from './App.vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './router/router' // 导入你的路由实例
 import ImagePreview from 'vue3-image-preview' // 导入 vue3-image-preview 组件
 
 const app = createApp(App)
-app.use(router) // 使用你的路由实例
+app.use(router,Antd)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
