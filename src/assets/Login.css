@@ -1,0 +1,131 @@
+input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 200px;
+    height: 300px;
+    margin: 0 30px 0 30px;
+}
+
+.vertical-line {
+    width: 1px;
+    height: 228px;
+    background-color: #e3e5e7;
+}
+
+.form-container {
+    width: 400px;
+    margin-left: 30px;
+}
+
+.form-switcher {
+    cursor: pointer;
+}
+
+.form-switcher.active {
+    color: #ff915e;
+}
+
+.form-container {
+    margin-left: 30px;
+}
+
+.line{
+    width: 1px;
+    height: 20px;
+    background: #e3e5e7;
+    border-radius: 8px;
+    margin: 0 21px; /* 增加左右间距以分离文字 */
+}
+
+.wz{
+    position: absolute;
+    top: 40px;
+    right: 220px;
+    display: flex;
+    align-items: center; /* 对齐到中心线 */
+    color: #505050;
+    font-size: 18px;
+    font-family: PingFang SC,HarmonyOS_Regular,Helvetica Neue,Microsoft YaHei,sans-serif!important;
+}
+
+.login{
+    border: 1px;
+    position: absolute;
+    top: 70px;
+    right: 70px;
+    width: 400px;
+    height: 150px;
+}
+
+.phone{
+    top: 15px;
+    right: 0;
+    width: 310px;
+    height: 20px;
+    position: absolute;
+}
+
+.password{
+    right: 0;
+    top: 70px;
+    width: 310px;
+    height: 20px;
+    position: absolute;
+}
+
+.input-phone{
+    position: absolute;
+    top: 30px;
+    border: 1px solid #e3e5e7;
+    border-radius: 8px;
+    width: 400px;
+    height: 90px;
+}
+
+input{
+    border: none;
+    font-size: 15px;
+}
+
+input::placeholder {
+    color: #c0c0c0;
+}
+
+input:focus {
+    outline: none;
+}
+
+.sjh{
+    position: absolute;
+    top: 12px;
+    left: 30px;
+}
+
+.input-group{
+    position: absolute;
+    right: 0;
+    top: -10px;
+}
+
+.dl{
+    position: absolute;
+    top: 160px;
+    left: 95px;
+    box-sizing: border-box;
+    width: 194px;
+    height: 40px;
+    cursor: pointer;
+    color: #fff;
+    background-image: linear-gradient(to right,#ff5000 0,#ff6000 100%);
+    border-radius: 8px;
+    border: none;
+}
