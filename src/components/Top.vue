@@ -93,7 +93,7 @@ const searchProduct = () => {
       <div class="head">
         <img class="img" src="http://1.14.126.98:5000/R.jpg" alt="头像">
         <p class="hi">Hi!</p>
-        <p class="name"><b>tdd2977094657</b></p>
+        <p class="name"><b></b></p>
       </div>
     </div>
 </template>

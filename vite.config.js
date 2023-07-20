@@ -30,4 +30,11 @@ export default defineConfig({
   server:{
     host:'0.0.0.0'
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "element-plus/lib/theme-chalk/index.scss";`
+      }
+    }
+  }
 })

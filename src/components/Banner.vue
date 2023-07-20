@@ -70,13 +70,17 @@ const handleOk = () => {
   open.value = false
 }
 
+const closeModal = () => {
+  open.value = false
+  console.log(1)
+}
 onMounted(banner)
 </script>
 
 <template>
-    <a-modal width="820px" :footer="null" :maskClosable="false" v-model:visible="open" @ok="handleOk">
-      <Login></Login>
-    </a-modal>
+  <a-modal width="820px" :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
+    <Login @close-modal="closeModal"></Login>
+  </a-modal>
 
   <div class="banner">
     <el-carousel indicator-position="outside">

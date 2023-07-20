@@ -1,33 +1,124 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref,computed } from 'vue';
+import login from "@/components/Login.vue";
+import axios from 'axios';
+import { defineEmits } from 'vue';
+const emit = defineEmits(['close-modal']);
 
 let currentForm = ref('login');
 let phoneNumber = ref('');
 let password = ref('');
-let phoneNumberTouched = ref(false);
+let verifyCode = ref('') // 存储从 API 获取的验证码
+let userInputVerifyCode = ref('') // 存储用户输入的验证码
+let getCaptchaBtnText = ref({ countdown: null, text: '点击获取验证码' })
+let countdownTimer = null // 存储计时器
+let currentMessageInstance = null
+let isBtnDisabled = ref(false)
+let isLoginButtonDisabled = computed(() => {
+  // 当手机号和密码都不为空时，返回 false，否则返回 true
+  return phoneNumber.value === '' || password.value === '';
+});
+
+const showMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例
+  currentMessageInstance = ElMessage({ message, type: 'error' })
+}
+
+const showSuccessMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例，消息类型设置为 'success'
+  currentMessageInstance = ElMessage({ message, type: 'success' })
+}
 
 const switchForm = form => {
   currentForm.value = form;
 }
 
-const phoneNumberIsValid = computed(() => /^1[3-9]\d{9}$/.test(phoneNumber.value));
+// 创建一个 ref 来存储验证码图片的 URL
+let captchaImgUrl = ref('')
 
-const handleBlur = () => {
-  phoneNumberTouched.value = true;
-}
-
-const handleFocus = () => {
-  phoneNumberTouched.value = false;
-}
-
-const login = () => {
-  if (!phoneNumberIsValid.value) {
-    alert('请输入有效的手机号码');
-
+// 修改 getCaptcha 函数，以获取验证码的值
+const getCaptcha = async () => {
+  let response = await fetch('https://www.mxnzp.com/api/verifycode/code?len=5&type=0&app_id=uiawjmtjkygeqlif&app_secret=UDBzbzNRd2psc3B1UnZ6RTVBZEFEUT09')
+  let data = await response.json()
+  if (data.code === 1) {
+    captchaImgUrl.value = data.data.verifyCodeImgUrl
+    verifyCode.value = data.data.verifyCode
+  } else {
+    console.error('获取验证码失败：' + data.msg)
   }
-
-  // 在这里添加登录逻辑
 }
+
+// 创建一个函数，用于处理用户点击获取验证码按钮
+const handleGetCaptchaBtnClick = () => {
+  if (userInputVerifyCode.value === '') {
+    // 提示用户输入验证码
+    showMessage('请输入图形验证码')
+  } else if (userInputVerifyCode.value !== verifyCode.value) {
+    // 验证码输入错误，提供错误提示
+    showMessage('图形验证码输入错误')
+  } else {
+    // 验证码输入正确，开始倒计时
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+    }
+    isBtnDisabled.value = true; // 禁用按钮
+    startCountdown()
+
+    // 清除验证码输入框的值并获取新的验证码
+    userInputVerifyCode.value = '';
+    getCaptcha();
+  }
+}
+
+const startCountdown = () => {
+  let countdown = 60
+  getCaptchaBtnText.value = { countdown, text: '秒后重新发送' }
+  countdownTimer = setInterval(() => {
+    countdown--
+    if (countdown <= 0) {
+      clearInterval(countdownTimer)
+      countdownTimer = null; // 清理倒计时
+      getCaptchaBtnText.value = { countdown: null, text: '点击获取验证码' }
+      isBtnDisabled.value = false; // 启用按钮
+    } else {
+      getCaptchaBtnText.value = { countdown, text: '秒后重新发送' }
+    }
+  }, 1000)
+}
+// 在组件初始化时获取验证码
+getCaptcha()
+const loginUser = async () => {
+  try {
+    const response = await axios.post(`http://1.14.126.98:8081/user/login?phone=${phoneNumber.value}&pwd=${password.value}`);
+    if (response.data.token) {
+      showSuccessMessage('登陆成功')
+      emit('close-modal')
+    } else {
+      // 登录失败，显示默认的错误消息
+      showMessage('登录失败');
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      // 服务器返回了一个 400 错误
+      // 可以从 error.response.data 中获取服务器返回的错误信息
+      showMessage('手机号或密码错误');
+    } else {
+      // 其他类型的错误
+      console.error(error);
+    }
+  }
+};
+
 </script>
 
 <template>
@@ -48,20 +139,60 @@ const login = () => {
           <div class="sjh">
             手机号
           </div>
-          <input placeholder="请输入手机号" class="phone" id="phone-number" type="tel" v-model="phoneNumber" @blur="handleBlur" @focus="handleFocus" required/>
+          <input autocomplete="tel" v-model="phoneNumber" placeholder="请输入手机号" class="phone" id="phone-number" type="tel" required/>
             <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
           <div style="left: 37px;top: 57px;position: absolute">
             密码
           </div>
           <div class="input-group">
-          <input placeholder="请输入密码" class="password" id="password" type="password" v-model="password" required/>
+          <input autocomplete="current-password" v-model="password" placeholder="请输入密码" class="password" id="password" type="password" required/>
         </div>
         </div>
-        <button class="dl">登录</button>
+        <button class="dl" @click="loginUser" :disabled="isLoginButtonDisabled">登录</button>
       </form>
 
-    <form v-else-if="currentForm === 'register'">
-      <!-- 注册表单的内容 -->222
+    <form v-else-if="currentForm === 'register'" class="register">
+      <div class="account">
+        <div class="zh">
+          昵称
+        </div>
+        <input autocomplete="nickname" placeholder="请输入昵称" class="phone" id="phone-number" type="tel" required/>
+        <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+        <div style="left: 37px;top: 57px;position: absolute">
+          密码
+        </div>
+        <div class="input-group">
+          <input autocomplete="current-password" placeholder="请输入密码" class="password" id="password" type="password" required/>
+        </div>
+        <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+        <div style="left: 22px;top: 102px;position: absolute">
+          确认密码
+        </div>
+        <div>
+          <input autocomplete="new-password" placeholder="确认密码" type="password" class="ConfirmPassword">
+        </div>
+        <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+        <div style="position: absolute;left: 29px;top: 147px;">
+            手机号
+        </div>
+        <button type="button" style="border:0;outline:none;background-color: transparent;cursor: pointer;position:absolute;left: 295px;top: 140px" @click="handleGetCaptchaBtnClick" :disabled="isBtnDisabled">
+  <span :class="{ 'countdown-active': getCaptchaBtnText.countdown !== null }">
+    {{ getCaptchaBtnText.countdown }}
+  </span>
+          {{ getCaptchaBtnText.text }}
+        </button>
+          <input class="phone1" placeholder="请输入手机号" type="number">
+        <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+        <input class="code" placeholder="请输入验证码" type="number">
+        <div style="position:absolute;left: 29px;top: 193px;">
+          <div class="line1"></div>
+          验证码
+        </div>
+        <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+        <input placeholder="请输入图形验证码，区分大小写" class="imgCode" v-model="userInputVerifyCode">
+        <img style="left: 3px;width: 90px;top: 232px;position: absolute" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">
+      </div>
+      <button class="zc">注册</button>
     </form>
   </div>
   </div>
