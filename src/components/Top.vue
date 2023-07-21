@@ -2,8 +2,11 @@
 import {ref, onMounted,watch} from 'vue';
 import {Location} from "@element-plus/icons-vue";
 import { useRouter,useRoute } from 'vue-router';
+import { useStore } from 'vuex'
+import Login from "@/components/Login.vue";
+import axios from "axios";
 
-
+const store = useStore()
 const route = useRoute();
 
 onMounted(() => {
@@ -78,9 +81,78 @@ const searchProduct = () => {
   }
 };
 
+let open = ref(false)
+
+const showModal = () => {
+  open.value = true
+}
+
+const handleOk = () => {
+  open.value = false
+}
+
+const closeModal = () => {
+  open.value = false
+}
+
+
+let title = ref(false);
+
+const MouseOver = () => {
+  title.value = true;
+};
+
+const MouseOut = () => {
+  title.value = false;
+};
+
+
+
+
+
+let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
+let Avatar = ref('http://1.14.126.98:5000/add/Afterclap-4_20230721_200107225.png'); // 同样，这里也不是一个对象，而是一个字符串
+
+const parseTokenAndUserInfo = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const response = await axios.get('http://1.14.126.98:8081/user/token', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.data) {
+        const userInfoResponse = await axios.get(`http://1.14.126.98:8081/user/all?userId=${response.data.userId}`);
+        if (userInfoResponse.data != null) {
+          userName.value = userInfoResponse.data.data.name;
+          Avatar.value = userInfoResponse.data.data.userAvatar;
+        } else {
+          console.log('获取用户信息失败');
+        }
+      } else {
+        console.log('Token 解析失败');
+      }
+    }
+  } catch (error) {
+    console.error('请求失败：', error);
+  }
+};
+
+// 在解析 token 的函数组件中调用解析函数并获取用户信息
+onMounted(async () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    await parseTokenAndUserInfo(token);
+  }
+});
 </script>
 
 <template>
+  <a-modal width="820px" :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
+    <Login @close-modal="closeModal"></Login>
+  </a-modal>
+
   <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
   <el-backtop :bottom="100">
     <div class="up">▲<br>顶部</div>
@@ -91,9 +163,16 @@ const searchProduct = () => {
       <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
       <button @click="searchProduct" class="search-button"><b>搜索</b></button>
       <div class="head">
-        <img class="img" src="http://1.14.126.98:5000/R.jpg" alt="头像">
+        <img class="img" :src="Avatar" alt="头像" @click="showModal">
         <p class="hi">Hi!</p>
-        <p class="name"><b></b></p>
+        <p class="name">
+          <span @click="showModal"
+            :class="{ 'name1': userName }"
+            @mouseover="MouseOver"
+            @mouseout="MouseOut"
+        >
+        <b>{{ userName }}</b>
+      </span></p>
       </div>
     </div>
 </template>

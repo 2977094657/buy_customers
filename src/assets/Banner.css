@@ -116,3 +116,8 @@ button{
     width: 65px;
     font: 12px/1.5 tahoma,arial,'Hiragino Sans GB','\5b8b\4f53',sans-serif;
 }
+
+.name:hover{
+    cursor: pointer;
+    color: #FF5000;
+}

@@ -3,6 +3,12 @@ import { ref,computed } from 'vue';
 import login from "@/components/Login.vue";
 import axios from 'axios';
 import { defineEmits } from 'vue';
+import { useStore } from 'vuex';
+import {  useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+
+const router = useRouter();
+const store = useStore()
 const emit = defineEmits(['close-modal']);
 
 let currentForm = ref('login');
@@ -14,6 +20,9 @@ let getCaptchaBtnText = ref({ countdown: null, text: '点击获取验证码' })
 let countdownTimer = null // 存储计时器
 let currentMessageInstance = null
 let isBtnDisabled = ref(false)
+let userName = ref('');
+let userAvatar = ref('');
+
 let isLoginButtonDisabled = computed(() => {
   // 当手机号和密码都不为空时，返回 false，否则返回 true
   return phoneNumber.value === '' || password.value === '';
@@ -101,8 +110,14 @@ const loginUser = async () => {
   try {
     const response = await axios.post(`http://1.14.126.98:8081/user/login?phone=${phoneNumber.value}&pwd=${password.value}`);
     if (response.data.token) {
-      showSuccessMessage('登陆成功')
-      emit('close-modal')
+      showSuccessMessage('登陆成功');
+      localStorage.setItem('token', response.data.token);
+      emit('close-modal');
+      // 更新 userInfo 的值，触发 name.value 的变化
+      store.commit('setUserInfo', {
+        name: userName.value,
+        userAvatar: userAvatar.value
+      });
     } else {
       // 登录失败，显示默认的错误消息
       showMessage('登录失败');
@@ -119,6 +134,43 @@ const loginUser = async () => {
   }
 };
 
+const parseTokenAndUserInfo = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const response = await axios.get('http://1.14.126.98:8081/user/token', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.data) {
+        const userInfoResponse = await axios.get(`http://1.14.126.98:8081/user/all?userId=${response.data.userId}`);
+        if (userInfoResponse.data && userInfoResponse.data.code === 0) {
+          userName.value = userInfoResponse.data.data.name;
+          userAvatar.value = userInfoResponse.data.data.userAvatar;
+          store.commit('setUserInfo', {
+            name: userName.value,
+            userAvatar: userAvatar.value
+          });
+        } else {
+          console.log('获取用户信息失败');
+        }
+      } else {
+        console.log('Token 解析失败');
+      }
+    }
+  } catch (error) {
+    console.error('请求失败：', error);
+  }
+};
+
+// 在解析 token 的函数组件中调用解析函数并获取用户信息
+onMounted(async () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    await parseTokenAndUserInfo(token);
+  }
+});
 </script>
 
 <template>
