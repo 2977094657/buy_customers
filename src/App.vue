@@ -10,6 +10,7 @@
       <router-view name="main"></router-view>
       <router-view name="search"></router-view>
       <router-view name="description"></router-view>
+      <router-view name="productComments"></router-view>
     </div>
   </div>
   </div>

@@ -4,6 +4,7 @@ import Main from '@/components/Main.vue';
 import Banner from '@/components/Banner.vue';
 import Search from "@/components/Search.vue";
 import Description from '@/components/Description.vue';
+import ProductComments from "@/components/ProductComments.vue";
 
 const routes = [
     {
@@ -30,6 +31,7 @@ const routes = [
         components: {
             top: Top,
             description: Description,
+            productComments:ProductComments
         },
         props: { description: true }
     }
