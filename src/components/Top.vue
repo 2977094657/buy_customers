@@ -106,10 +106,6 @@ const MouseOut = () => {
   title.value = false;
 };
 
-
-
-
-
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
 let Avatar = ref('http://1.14.126.98:5000/add/Afterclap-4_20230721_200107225.png'); // 同样，这里也不是一个对象，而是一个字符串
 
@@ -123,6 +119,7 @@ const parseTokenAndUserInfo = async () => {
         }
       });
       if (response.data) {
+        store.commit('setUserInfo', { userId: response.data.userId })
         const userInfoResponse = await axios.get(`http://1.14.126.98:8081/user/all?userId=${response.data.userId}`);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;

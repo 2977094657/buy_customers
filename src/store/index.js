@@ -6,7 +6,8 @@ export default createStore({
         return {
             userInfo: {
                 name:'',
-                userAvatar:''
+                userAvatar:'',
+                userId: null,
             }
         }
     },

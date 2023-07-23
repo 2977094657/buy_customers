@@ -2,16 +2,23 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import { defineProps } from 'vue'
-import { PictureOutlined } from '@ant-design/icons-vue';
+import axios from 'axios'
+import {Plus} from "@element-plus/icons-vue";
+import { useStore } from 'vuex';
+
 
 const route = useRoute()
 const product = ref()
 const loading = ref(true)
 const httpError = ref(false)
+const commentContent = ref('');
 // 定义 props
 const props = defineProps({
   productId: String,
 })
+
+const store = useStore();
+const userId = computed(() => store.state.userInfo.userId)
 
 onMounted(async () => {
   // 在这里调用 fetchComments 函数
@@ -19,6 +26,7 @@ onMounted(async () => {
 })
 
 const comments = ref([])
+const total = ref(0)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const currentSort = ref('hottest')  // 默认按最新排序
@@ -31,6 +39,7 @@ const fetchComments = async (sortOption,page) => {
   const pageInfo = data[1] // 第二个元素是包含 pageNum，pageSize，sortByTime 参数的对象
   // 更新 currentPage，pageSize 和 currentSort
   currentPage.value = pageInfo.pageNum
+  total.value = pageInfo.total
   totalPages.value = pageInfo.pages
   currentSort.value = pageInfo.sortByTime ? 'newest' : 'hottest'
 }
@@ -69,30 +78,73 @@ const sortComments = async (sortOption) => {
   await fetchComments(sortOption, currentPage.value)
 }
 
-const commentInput = ref('');
-const showFixedInput = ref(false);
-// 创建一个新地响应式引用，用于控制 fade-out 动画
-const startFadeOut = ref(false);
 
-onMounted(() => {
-  // 滚动事件监听器
-  window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    if (scrollY > 1000 && !showFixedInput.value) {
-      showFixedInput.value = true;
-    } else if (scrollY <= 1000 && showFixedInput.value) {
-      showFixedInput.value = false;
-      startFadeOut.value = true;
-      setTimeout(() => startFadeOut.value = false, 500);
-    }
+const files = ref([])
+const previewImages = ref([]);
+const onFilesChange = (event) => {
+  const newFiles = Array.from(event.target.files);
+
+  // 如果已经有5张图片，就不再添加新的图片
+  if (previewImages.value.length + newFiles.length > 5) {
+    alert('你最多只能上传5张图片');
+    return;
+  }
+
+  files.value = [...files.value, ...newFiles];
+  fileNames.value = [...fileNames.value, ...newFiles.map(file => file.name)];
+
+  newFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImages.value.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
   });
-});
+}
+
+const submitComment = async () =>
+{
+  const formData = new FormData()
+  formData.append('userId', userId.value)
+  formData.append('comments', commentContent.value.trim()) // 去除前后空格
+  formData.append('productId', route.params.productId)
+  files.value.forEach((file, index) => {
+    formData.append(`imgId`, file, file.name)
+  })
+
+  try {
+    await axios.post('http://1.14.126.98:8081/productComments/add', formData);
+    // 处理响应...
+  } catch (error) {
+    // 处理错误...
+  }
+  // 提交完成后，清空输入框和图片预览
+  commentContent.value = '';
+  files.value = [];
+  fileNames.value = [];
+  previewImages.value = [];
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+}
+
+const deleteImage = (index) => {
+  previewImages.value.splice(index, 1);
+  files.value.splice(index, 1);
+  fileNames.value.splice(index, 1);
+}
+
+const fileNames = ref([]);
+const fileInput = ref(null);
+const isCommentValid = computed(() => {
+  return commentContent.value.trim().length > 0
+})
 </script>
 
 <template>
   <div v-if="!httpError" class="comments-section">
     <h2>
-      评论<div style="left: 280px;font-size: 25px;color: rgb(255,80,0);position: absolute">{{ comments.length }}</div>
+      评论<div style="left: 280px;font-size: 25px;color: rgb(255,80,0);position: absolute">{{ total }}</div>
       <div>
         <span class="sort-option" :class="{ 'highlight': currentSort === 'hottest' }" @click="sortComments('hottest')">最新</span>
         <span class="sort-option" :class="{ 'highlight': currentSort === 'newest' }" @click="sortComments('newest')">最热</span>
@@ -101,17 +153,28 @@ onMounted(() => {
 
     <!-- 评论输入框开始 -->
     <div class="comment-input-box">
-      <textarea ref="commentInput" class="comment-input" placeholder="添加公开评论..."></textarea>
-      <input type="file" id="imageFile" name="imageFile" accept="image/*" class="image-input"><picture-outlined />
-      <button class="submit-comment" @click="submitComment">发布</button>
+      <textarea v-model="commentContent" class="comment-input" placeholder="添加公开评论..."></textarea>
+
+      <!-- 图片预览和上传组件 -->
+      <div class="image-previews">
+        <div class="image-container" v-for="(image, index) in previewImages" :key="index">
+          <img :src="image"  alt=""/>
+          <button class="delete-button" @click="deleteImage(index)">×</button>
+        </div>
+
+        <!-- 图片上传组件 -->
+        <label for="file-upload" class="custom-file-upload">
+          <el-upload list-type="picture-card" :disabled="true">
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+        </label>
+        <input id="file-upload" ref="fileInput" style="display:none;" type="file" @change="onFilesChange" multiple/>
+      </div>
+
+      <div class="file-names">{{ fileNames.join(', ') }}</div>
+      <button class="submit-comment1" @click="submitComment" :disabled="!isCommentValid">发布</button>
     </div>
     <!-- 评论输入框结束 -->
-
-    <!-- 固定的评论输入框 -->
-    <div v-show="showFixedInput || startFadeOut" class="fixed-comment-input-box" :class="{ 'fade-out': !showFixedInput && startFadeOut }">
-      <textarea ref="commentInput" class="fixed-comment-input" placeholder="添加公开评论..."></textarea>
-      <button class="submit-comment" @click="submitComment">发布</button>
-    </div>
 
     <div v-for="comment in comments" :key="comment.id" class="comment">
       <img :src="comment.userAvatar" alt="用户头像" class="user-avatar">
@@ -148,79 +211,4 @@ onMounted(() => {
 
 <style scoped>
 @import '../assets/ProductComments.css';
-/* 评论输入框和发布按钮的样式 */
-.comment-input-box {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.comment-input {
-  flex-grow: 1;
-  margin-right: 10px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  background-color: #F1F2F3;
-  border-radius: 5px;
-  outline: none;
-  resize: none;
-}
-
-.comment-input:hover,
-.comment-input:focus {
-  background-color: white; /* 鼠标悬停或输入框获得焦点时的背景颜色 */
-}
-
-.image-input {
-}
-
-.submit-comment {
-  padding: 10px 40px;
-  margin: 0 10px 0 0 ;
-  background-color: #ff9c76;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.submit-comment:hover {
-  background-color: rgb(255,80,0);
-}
-
-.fixed-comment-input-box {
-  z-index: 10;
-  position: fixed;
-  bottom: 0;
-  width: 1183px;
-  left: 158px;
-  background-color: white;
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  box-shadow: 0 -10px 10px -10px rgba(0, 0, 0, 0.1);
-  animation: fade-in 0.5s ease-out forwards;
-}
-
-.fixed-comment-input {
-  width: 80%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 10px;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.fade-out {
-  animation: fade-out 0.5s ease-out forwards;
-}
-
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
 </style>
