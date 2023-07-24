@@ -126,7 +126,7 @@
 }
 
 .sort-option.highlight {
-    color: black; /* 高亮（选中）颜色为黑色 */
+    color: #ff5000; /* 高亮（选中）颜色为黑色 */
 }
 
 h2 {
@@ -166,6 +166,7 @@ img{
 .comment-input:hover,
 .comment-input:focus {
     background-color: white; /* 鼠标悬停或输入框获得焦点时的背景颜色 */
+    border-color: #FF5000;
 }
 
 .submit-comment1 {

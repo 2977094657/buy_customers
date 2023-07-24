@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import router from "@/router/router";
 import {HeartOutlined} from '@ant-design/icons-vue';
 import {ChatDotSquare, Document, ShoppingCart} from "@element-plus/icons-vue";
@@ -8,6 +8,8 @@ import {useStore} from 'vuex';
 import axios from "axios";
 
 const store = useStore();
+const land = computed(() => store.state.userInfo.land)
+
 
 let title = ref(false);
 
@@ -77,6 +79,9 @@ const goToProduct = (productId) => {
 let open = ref(false)
 
 const showModal = () => {
+  if (land.value){
+    return
+  }
   open.value = true
 }
 
@@ -105,6 +110,12 @@ const parseTokenAndUserInfo = async () => {
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;
           Avatar.value = userInfoResponse.data.data.userAvatar;
+          store.commit('setUserInfo', {
+            name: userName.value,
+            userAvatar: Avatar.value,
+            userId: response.data.userId,
+            land: true
+          });
         } else {
           console.log('获取用户信息失败');
         }
@@ -122,6 +133,12 @@ onMounted(async () => {
   const token = localStorage.getItem('token');
   if (token) {
     await parseTokenAndUserInfo(token);
+  }else if (token==null){
+    store.commit('setUserInfo', {
+      name: userName.value,
+      userAvatar: Avatar.value,
+      land: false
+    });
   }
 });
 onMounted(banner)
@@ -155,8 +172,10 @@ onMounted(banner)
         <b>{{ userName }}</b>
       </span>
     </p>
-    <button class="bt1" @click="showModal">登录</button>
-    <button class="bt2" @click="showModal">注册</button>
+    <div style="position: absolute;left: 77px;top: 140px" v-if="!land">
+      <button class="bt1" @click="showModal">登录</button>
+      <button class="bt2" @click="showModal">注册</button>
+    </div>
     <br><br>
     <div @mouseover="handleMouseOver" @mouseout="handleMouseOut" class="clickable">
       <div class="heart1">
@@ -170,7 +189,7 @@ onMounted(banner)
     <br>
     <div class="clickable" @mouseover="handleOrderMouseOver" @mouseout="handleOrderMouseOut">
       <div class="Document">
-        <el-icon :style="{ fontSize: '20px', left: '75%', top: '8px'}" :class="{ 'highlight': isOrderHovered }">
+        <el-icon style="font-size: 20px;" :class="{ 'highlight': isOrderHovered }">
           <Document/>
         </el-icon>
       </div>

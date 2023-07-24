@@ -8,6 +8,7 @@ export default createStore({
                 name:'',
                 userAvatar:'',
                 userId: null,
+                land: null
             }
         }
     },

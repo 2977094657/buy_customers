@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted,watch} from 'vue';
+import {ref, onMounted,watch,computed} from 'vue';
 import {Location} from "@element-plus/icons-vue";
 import { useRouter,useRoute } from 'vue-router';
 import { useStore } from 'vuex'
@@ -8,6 +8,7 @@ import axios from "axios";
 
 const store = useStore()
 const route = useRoute();
+const land = computed(() => store.state.userInfo.land)
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
@@ -84,6 +85,9 @@ const searchProduct = () => {
 let open = ref(false)
 
 const showModal = () => {
+  if (land.value){
+    return
+  }
   open.value = true
 }
 
@@ -124,6 +128,12 @@ const parseTokenAndUserInfo = async () => {
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;
           Avatar.value = userInfoResponse.data.data.userAvatar;
+          store.commit('setUserInfo', {
+            name: userName.value,
+            userAvatar: Avatar.value,
+            userId: response.data.userId,
+            land: true
+          });
         } else {
           console.log('获取用户信息失败');
         }
@@ -141,6 +151,12 @@ onMounted(async () => {
   const token = localStorage.getItem('token');
   if (token) {
     await parseTokenAndUserInfo(token);
+  }else if (!token){
+    store.commit('setUserInfo', {
+      name: userName.value,
+      userAvatar: Avatar.value,
+      land: false
+    });
   }
 });
 </script>

@@ -90,7 +90,8 @@ const loginUser = async () => {
       // 更新 userInfo 的值，触发 name.value 的变化
       store.commit('setUserInfo', {
         name: userName.value,
-        userAvatar: userAvatar.value
+        userAvatar: userAvatar.value,
+        land: true
       });
     } else {
       // 登录失败，显示默认的错误消息
@@ -124,7 +125,8 @@ const parseTokenAndUserInfo = async () => {
           userAvatar.value = userInfoResponse.data.data.userAvatar;
           store.commit('setUserInfo', {
             name: userName.value,
-            userAvatar: userAvatar.value
+            userAvatar: userAvatar.value,
+            land: true
           });
         } else {
           console.log('获取用户信息失败');
@@ -143,6 +145,11 @@ onMounted(async () => {
   const token = localStorage.getItem('token');
   if (token) {
     await parseTokenAndUserInfo(token);
+  } else if (!token) {
+    store.commit('setUserInfo', {
+      name: userName.value,
+      land: false
+    });
   }
 });
 
@@ -273,13 +280,15 @@ const registerUser = async () => {
           <div class="zh">
             昵称
           </div>
-          <input autocomplete="nickname" v-model="name" placeholder="请输入昵称" class="phone" id="phone-number" type="tel" required/>
+          <input autocomplete="nickname" v-model="name" placeholder="请输入昵称" class="phone" id="phone-number"
+                 type="tel" required/>
           <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
           <div style="left: 37px;top: 57px;position: absolute">
             密码
           </div>
           <div class="input-group">
-            <input autocomplete="current-password" v-model="password" placeholder="请输入密码" class="password" id="password"
+            <input autocomplete="current-password" v-model="password" placeholder="请输入密码" class="password"
+                   id="password"
                    type="password" required/>
           </div>
           <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
@@ -287,7 +296,8 @@ const registerUser = async () => {
             确认密码
           </div>
           <div>
-            <input autocomplete="new-password" v-model="confirmPassword" placeholder="确认密码" type="password" class="ConfirmPassword">
+            <input autocomplete="new-password" v-model="confirmPassword" placeholder="确认密码" type="password"
+                   class="ConfirmPassword">
           </div>
           <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
           <div style="position: absolute;left: 29px;top: 147px;">
