@@ -1,23 +1,27 @@
 .productPrice{
     left: 80%;
-    top: 30%;
+    top: 230px;
     color: rgb(255,80,0);
     position: absolute
 }
+
 .product-detail {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
 }
+
 .image-section {
     width: 60%;
 }
+
 .image-gallery {
     width: 100%;
     display: flex;
     justify-content: left;
     overflow: hidden;
 }
+
 .large-image {
     width: 62%;
     height: 0;
@@ -27,12 +31,14 @@
     border: 2px solid transparent;
     border-radius: 10px;
 }
+
 .small-images {
     display: flex;
     justify-content: left;
     flex-wrap: wrap;
     margin-top: 10px;
 }
+
 .small-image {
     width: 10%;
     height: 0;
@@ -44,9 +50,11 @@
     background-position: center;
     overflow: hidden;
 }
+
 .small-image:hover {
     border-color: #fd5102;
 }
+
 .product-info {
     padding:  0 20px 0 30px;
     border-radius: 10px;
@@ -54,29 +62,6 @@
     width: 50%;
     height: 20%;
     margin-left: -17%;
-}
-
-/* 首页和尾页的颜色 */
-button:first-child, button:last-child {
-    background-color: #e15f00; /* 首页和尾页的背景色 */
-    color: white; /* 首页和尾页的文本色 */
-}
-
-/* 上一页和下一页的颜色 */
-button:nth-child(2), button:nth-last-child(2) {
-    border: 1px #dddddd solid;
-    background-color: white; /* 上一页和下一页的背景色 */
-    color: black; /* 上一页和下一页的文本色 */
-}
-
-button {
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 16px;
-    margin: 0 5px;
-    font-size: 16px;
-    cursor: pointer;
 }
 
 .comment-content h3 {

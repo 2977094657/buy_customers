@@ -196,7 +196,7 @@ const sendSMSCode = async () => {
         // 开始倒计时
         let countdown = 60;
         getCaptchaBtnText.value = {countdown, text: '秒后重新发送'};
-        countdownTimer = setInterval(() => {
+        countdownTimer = () => {
           countdown--;
           if (countdown <= 0) {
             clearInterval(countdownTimer);
@@ -207,7 +207,7 @@ const sendSMSCode = async () => {
           } else {
             getCaptchaBtnText.value = {countdown, text: '秒后重新发送'};
           }
-        }, 1000);
+        }
       } else {
         // 短信验证码发送失败，显示错误信息
         showMessage(response.data.SendStatusSet[0].Message || '验证码发送失败');

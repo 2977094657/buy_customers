@@ -170,7 +170,7 @@ img{
 }
 
 .submit-comment1 {
-    top: 777px;
+    top: 807px;
     font-size: 20px;
     position: absolute;
     right: 12%;
@@ -184,4 +184,8 @@ img{
 
 .submit-comment1:hover {
     background-color: rgb(255,80,0);
+}
+
+.comments-section{
+    margin: 50px 0 0 0;
 }

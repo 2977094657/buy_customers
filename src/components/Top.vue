@@ -1,6 +1,5 @@
 <script setup>
 import {ref, onMounted,watch,computed} from 'vue';
-import {Location} from "@element-plus/icons-vue";
 import { useRouter,useRoute } from 'vue-router';
 import { useStore } from 'vuex'
 import Login from "@/components/Login.vue";
@@ -35,36 +34,36 @@ const handleScroll = () => {
   }
 };
 
-// 创建XMLHttpRequest对象
-const xhr = new XMLHttpRequest();
-
-// 设置请求方法和请求地址
-xhr.open('GET', 'https://restapi.amap.com/v3/ip?key=60e8251375335c948c8aed72f3d53824', true);
-
-// 发送HTTP请求
-xhr.send();
-
-// 处理响应
-xhr.onreadystatechange = function() {
-  // 如果响应已经完成
-  if (xhr.readyState === 4) {
-    // 如果HTTP状态码是200，表示请求成功
-    if (xhr.status === 200) {
-      // 解析响应体
-      const response = JSON.parse(xhr.responseText);
-
-      // 获取城市名
-      const city = response.city;
-
-      // 将城市名展示在页面上
-      const resultElem = document.getElementById('result');
-      resultElem.innerHTML = city;
-    } else {
-      // 如果HTTP状态码不是200，表示请求失败
-      console.error('请求失败，HTTP状态码：' + xhr.status);
-    }
-  }
-};
+// // 高德地图IP定位
+// const xhr = new XMLHttpRequest();
+//
+// // 设置请求方法和请求地址
+// xhr.open('GET', 'https://restapi.amap.com/v3/ip?key=60e8251375335c948c8aed72f3d53824', true);
+//
+// // 发送HTTP请求
+// xhr.send();
+//
+// // 处理响应
+// xhr.onreadystatechange = function() {
+//   // 如果响应已经完成
+//   if (xhr.readyState === 4) {
+//     // 如果HTTP状态码是200，表示请求成功
+//     if (xhr.status === 200) {
+//       // 解析响应体
+//       const response = JSON.parse(xhr.responseText);
+//
+//       // 获取城市名
+//       const city = response.city;
+//
+//       // 将城市名展示在页面上
+//       const resultElem = document.getElementById('result');
+//       resultElem.innerHTML = city;
+//     } else {
+//       // 如果HTTP状态码不是200，表示请求失败
+//       console.error('请求失败，HTTP状态码：' + xhr.status);
+//     }
+//   }
+// };
 
 
 const inputValue = ref('');
@@ -171,7 +170,7 @@ onMounted(async () => {
     <div class="up">▲<br>顶部</div>
   </el-backtop>
     <div class="search-container" :class="{ 'sticky': isSticky }">
-      <el-icon :size="30" class="location"><Location /></el-icon>
+<!--      <el-icon :size="30" class="location"><Location /></el-icon>--><!-- 由于高德在小地方请求不稳定,暂时禁掉定位图标及程序-->
       <p class="ip" id="result"></p>
       <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
       <button @click="searchProduct" class="search-button"><b>搜索</b></button>
