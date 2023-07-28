@@ -1,9 +1,12 @@
 <script setup>
-import {ref, onMounted,watch,computed} from 'vue';
+import {ref, onMounted,watch,computed,onBeforeUnmount } from 'vue';
 import { useRouter,useRoute } from 'vue-router';
 import { useStore } from 'vuex'
 import Login from "@/components/Login.vue";
 import axios from "axios";
+import {ChatDotSquare, Document} from "@element-plus/icons-vue";
+import {HeartOutlined} from "@ant-design/icons-vue";
+import ShoppingCart from "@/components/ShoppingCart.vue";
 
 const store = useStore()
 const route = useRoute();
@@ -158,6 +161,38 @@ onMounted(async () => {
     });
   }
 });
+
+let drawer = ref(false)
+const dd = ref(false)
+const pj = ref(false)
+const sc = ref(false)
+
+const isSidebarVisible = ref(false);
+
+const checkScroll = () => {
+  isSidebarVisible.value = window.scrollY > 100;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', checkScroll);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', checkScroll);
+});
+
+const size=ref('50%')
+
+const loadKey = ref(0);
+
+const reload = () => {
+  loadKey.value++;
+};
+
+const openDrawer = () => {
+  drawer = true;
+  reload();
+};
 </script>
 
 <template>
@@ -166,9 +201,6 @@ onMounted(async () => {
   </a-modal>
 
   <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
-  <el-backtop :bottom="100">
-    <div class="up">▲<br>顶部</div>
-  </el-backtop>
     <div class="search-container" :class="{ 'sticky': isSticky }">
 <!--      <el-icon :size="30" class="location"><Location /></el-icon>--><!-- 由于高德在小地方请求不稳定,暂时禁掉定位图标及程序-->
       <p class="ip" id="result"></p>
@@ -187,6 +219,70 @@ onMounted(async () => {
       </span></p>
       </div>
     </div>
+  <div class="cbl" v-show="isSidebarVisible">
+    <el-button class="sticky-button" type="primary" @click="openDrawer">
+      <div class="sticky-button1">
+        <div style="margin: 30px 0 0 0;">
+          &nbsp购物车
+        </div>
+      </div>
+    </el-button>
+    <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="drawer" :with-header="false">
+      <h1>购物车</h1>
+      <ShoppingCart></ShoppingCart>
+    </el-drawer>
+    <br>
+    <el-button class="sticky-button" type="primary" @click="dd = true">
+      <div class="sticky-button2">
+        <el-icon style="font-size: 20px;">
+          <Document/>
+        </el-icon>
+        <div style="margin: 5px 0 0 0;">
+          我的订单
+        </div>
+      </div>
+    </el-button>
+    <el-drawer v-model="dd" title="I am the title" :with-header="false">
+      <span>我的订单</span>
+    </el-drawer>
+    <br>
+    <el-button class="sticky-button" type="primary" @click="pj = true">
+      <div class="sticky-button2">
+        <el-icon style="font-size: 20px;">
+          <ChatDotSquare/>
+        </el-icon>
+        <div style="margin: 5px 0 0 0;">
+          我的评价
+        </div>
+      </div>
+    </el-button>
+    <el-drawer v-model="pj" title="I am the title" :with-header="false">
+      <span>我的评价</span>
+    </el-drawer>
+    <br>
+    <el-button class="sticky-button" type="primary" @click="sc = true">
+      <div class="sticky-button2">
+        <HeartOutlined style="font-size: 20px"/>
+        <div style="margin: 5px 0 0 0;">
+          宝贝收藏
+        </div>
+      </div>
+    </el-button>
+    <el-drawer v-model="sc" title="I am the title" :with-header="false">
+      <span>宝贝收藏</span>
+    </el-drawer>
+    <br>
+    <el-backtop :bottom="100" style="
+    position: absolute;
+    right: 0;
+    top: 290px;
+    height: 60px;
+    width: 60px;
+    border-radius: 15px 0 0 15px;box-shadow: none">
+      <div class="up"><br>&nbsp&nbsp&nbsp▲<br>&nbsp&nbsp&nbsp顶部</div>
+    </el-backtop>
+  </div>
+
 </template>
 
 <style scoped>

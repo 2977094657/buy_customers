@@ -12,7 +12,7 @@
     width: 100%;
     height: 60px;
     background-color: white;
-    z-index: 1;
+    z-index: 100;
 }
 
 .search {
@@ -51,8 +51,6 @@
 .up{
     height: 100%;
     width: 100%;
-    background-color: var(--el-bg-color-overlay);
-    box-shadow: var(--el-box-shadow-lighter);
     text-align: center;
     color: #8b8c8d;
     border-radius: 10px;
@@ -125,4 +123,49 @@
 img{
     width: 100%;
     height: 100%;
+}
+
+.sticky-button {
+    background-color: white;
+    border: none;
+    text-align: center;
+    display: block;
+    font-size: 12px;
+    text-decoration: none;
+    width: 60px;
+    height: 47px;
+}
+
+.sticky-button1 {
+    color: black;
+    background-image: url("http://1.14.126.98:5000/add/TaobaoGWC_20230728_141428873.png");
+    display: block;
+    height: 24px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 28px;
+}
+
+.sticky-button2 {
+    color: black;
+    display: block;
+    height: 24px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 28px;
+    position: absolute;
+    right: 0;
+}
+
+.cbl{
+    box-shadow: -10px 0 10px rgba(197, 176, 176, 0.2), 0 -10px 10px rgba(166, 158, 158, 0.1);
+    border-radius: 15px 0 0 15px;
+    z-index: 1000;
+    padding: 26px 0;
+    background-color: white;
+    top: 200px;
+    right: 0;
+    position: fixed;
+    width: 60px;
+    height: 269px;
 }

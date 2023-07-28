@@ -14,16 +14,16 @@
       <div class="productPrice"><h1>￥{{ product.price }}</h1></div><br>
       <h2 class="productDescription">{{ product.description }}</h2><br><br>
       <el-rate class="text" v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
-      <p><br><br>收藏：<span style="color: #ff5000">{{ product.star }}</span></p><br>
+      <p><br><br>收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span></p><br>
     </div>
     <div style="position: absolute;top: 485px;right: 390px">
       数量:
     </div>
-    <el-input-number class="number" v-model="num" :min="1" :max="10" @change="handleChange" />
+    <el-input-number class="number" v-model="num" :min="1" :max="50" @change="handleChange" />
     <!-- 添加 "加入购物车"和"立即购买"按钮 -->
     <div class="action-buttons">
       <button class="gm">立即购买</button>
-      <button class="gwc">加入购物车</button>
+      <button class="gwc" @click="addToCart">加入购物车</button>
       <div class="sc">
           <heart-outlined  style="color: #666666;font-size: 25px;" />
         <b style="color: #666666;margin: 0 0 0 20px;">收藏</b>
@@ -39,21 +39,25 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import router from "@/router/router";
 import { defineProps } from 'vue'
 import { HeartOutlined } from '@ant-design/icons-vue';
+import axios from 'axios'
+import store from "@/store";
 
 const route = useRoute()
 const product = ref()
 const loading = ref(true)
 const httpError = ref(false)
 const currentImageIndex = ref(0)
+const userid = computed(() => store.state.userInfo.userId)
 // 定义 props
 const props = defineProps({
   productId: String,
 })
+const land = computed(() => store.state.userInfo.land)
 
 onMounted(async () => {
   loading.value = true
@@ -84,83 +88,46 @@ const comments = ref([])
 const currentPage = ref(1)
 
 const num = ref(1)
-const handleChange = value => {
-  console.log(value)
+
+let currentMessageInstance = null
+const showMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例
+  currentMessageInstance = ElMessage({message, type: 'error'})
+}
+
+const showSuccessMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例，消息类型设置为 'success'
+  currentMessageInstance = ElMessage({message, type: 'success'})
+}
+const addToCart = async () => {
+  if (!land.value){
+    console.log(land.value)
+    showMessage('请先登陆')
+    return
+  }
+  try {
+    const response = await axios.post(`http://1.14.126.98:8081/cart/add?userId=${userid.value}&productId=${route.params.productId}&quantity=${num.value}`);
+    if (response.data.message==='您的购物车商品总数已满，请先清理后继续加入购物车'){
+      showMessage(response.data.message)
+      return
+    }
+    showSuccessMessage(response.data.message)
+  } catch (error) {
+    console.error(error);
+  }
 }
 </script>
 
 <style scoped>
 @import '../assets/Description.css';
-.action-buttons {
-  position: absolute;
-  width: 288px;
-  height: 48px;
-  right: 450px;
-  top: 630px;
-}
-
-.gm{
-  border-top-left-radius: 34px;
-  border-bottom-left-radius: 34px;
-  background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0));
-  box-shadow: rgba(255, 119, 0, 0.2) 0 9px 13px 0;
-  vertical-align: top;
-  display: inline;
-  font-size: 16px;
-  font-weight: bold;
-  color: rgb(255, 255, 255);
-  height: 48px;
-  width: 136px;
-  outline: 0;
-  border: 0;
-  cursor: pointer;
-  line-height: 22px;
-  text-align: center;
-}
-
-.gwc{
-  background: linear-gradient(90deg, rgb(255, 203, 0), rgb(255, 148, 2));
-  box-shadow: rgba(255, 203, 0, 0.2) 0 9px 13px 0;
-  vertical-align: top;
-  border-top-right-radius: 34px;
-  border-bottom-right-radius: 34px;
-  outline: 0;
-  border: 0;
-  cursor: pointer;
-  height: 48px;
-  line-height: 22px;
-  text-align: center;
-  display: inline;
-  font-size: 16px;
-  font-weight: bold;
-  color: rgb(255, 255, 255);
-  width: 152px;
-}
-.number{
-  --el-color-primary: #ff915e;
-  position: absolute;
-  top: 480px;
-  right: 210px;
-}
-
-.text {
-  --el-rate-text-color:rgb(247,186,42);
-  font-weight: bold;
-}
-
-.sc{
-  width: 77px;
-  height: 40px;
-  padding: 10px 20px 0 20px;
-  border-radius: 10px;
-  position: absolute;
-  top: 0;
-  right: -200px;
-}
-
-.sc:hover{
-  cursor: pointer;
-  transition: background-color .2s;
-  background: rgba(0,0,0,.06);
-}
 </style>
