@@ -2,16 +2,19 @@
   <div v-if="product && product.imgs" class="product-detail">
     <div class="image-section">
       <div class="image-gallery">
-        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}" v-show="index === currentImageIndex" class="large-image"></div>
+        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}"
+             v-show="index === currentImageIndex" class="large-image"></div>
       </div>
       <div class="small-images">
-        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}" @mouseover="currentImageIndex = index" class="small-image"></div>
+        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}"
+             @mouseover="currentImageIndex = index" class="small-image"></div>
       </div>
     </div>
 
     <div class="product-info">
       <h1>{{ product.productName }}</h1>
-      <div class="productPrice"><h1>￥{{ product.price }}</h1></div><br>
+      <div class="productPrice"><h1>￥{{ product.price }}</h1></div>
+      <br>
       <h2 class="productDescription">{{ product.description }}</h2><br><br>
       <el-rate class="text" v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
       <p><br><br>收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span></p><br>
@@ -19,13 +22,13 @@
     <div style="position: absolute;top: 485px;right: 390px">
       数量:
     </div>
-    <el-input-number class="number" v-model="num" :min="1" :max="50" @change="handleChange" />
+    <el-input-number class="number" v-model="num" :min="1" :max="50" @change="handleChange"/>
     <!-- 添加 "加入购物车"和"立即购买"按钮 -->
     <div class="action-buttons">
       <button class="gm">立即购买</button>
       <button class="gwc" @click="addToCart">加入购物车</button>
-      <div class="sc">
-          <heart-outlined  style="color: #666666;font-size: 25px;" />
+      <div class="sc" @click="addToFavorites">
+        <heart-outlined style="color: #666666;font-size: 25px;"/>
         <b style="color: #666666;margin: 0 0 0 20px;">收藏</b>
       </div>
     </div>
@@ -42,8 +45,8 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import router from "@/router/router";
-import { defineProps } from 'vue'
-import { HeartOutlined } from '@ant-design/icons-vue';
+import {defineProps} from 'vue'
+import {HeartOutlined} from '@ant-design/icons-vue';
 import axios from 'axios'
 import store from "@/store";
 
@@ -81,7 +84,7 @@ onMounted(async () => {
 
 const goHome = () => {
   // 导航到首页
-  router.push({ name: 'Home' });
+  router.push({name: 'Home'});
 };
 
 const comments = ref([])
@@ -110,14 +113,14 @@ const showSuccessMessage = (message) => {
   currentMessageInstance = ElMessage({message, type: 'success'})
 }
 const addToCart = async () => {
-  if (!land.value){
+  if (!land.value) {
     console.log(land.value)
     showMessage('请先登陆')
     return
   }
   try {
     const response = await axios.post(`http://1.14.126.98:8081/cart/add?userId=${userid.value}&productId=${route.params.productId}&quantity=${num.value}`);
-    if (response.data.message==='您的购物车商品总数已满，请先清理后继续加入购物车'){
+    if (response.data.message === '您的购物车商品总数已满，请先清理后继续加入购物车') {
       showMessage(response.data.message)
       return
     }
@@ -125,6 +128,32 @@ const addToCart = async () => {
   } catch (error) {
     console.error(error);
   }
+}
+
+async function addToFavorites() {
+  axios.post('http://1.14.126.98:8081/star/staradd', {
+    userId: userid.value,
+    productId: route.params.productId
+  }, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    transformRequest: [(data) => {
+      let ret = '';
+      for (let key in data) {
+        ret += encodeURIComponent(key) + '=' + encodeURIComponent(data[key]) + '&';
+      }
+      return ret;
+    }]
+  }).then(response => {
+    if (response.data.code===-1){
+      showMessage(response.data.msg)
+    }else if (response.data.code===0){
+      showSuccessMessage(response.data.data);
+    }
+  }).catch(error => {
+    console.error('添加到收藏夹时出错：', error);
+  });
 }
 </script>
 

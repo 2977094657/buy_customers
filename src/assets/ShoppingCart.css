@@ -21,6 +21,11 @@ img:hover{
     outline: 1px transparent solid;
 }
 
+.selected {
+    outline: 1px solid rgb(255,80,0);
+    background-color: rgb(255,249,246);
+}
+
 .cart:hover{
     color: rgb(253,81,2);
     outline: 1px #ff915e solid;
@@ -31,7 +36,7 @@ img:hover{
 
 .price{
     position:absolute;
-    left: 200px;
+    left: 220px;
     margin: -65px 0 0 120px;
     color: #3c3c3c;
     font-family: Verdana,Tahoma,arial,serif;
@@ -39,14 +44,14 @@ img:hover{
 
 .productName{
     position: absolute;
-    left: 170px;
+    left: 200px;
     margin: -100px 0 0 0;
 }
 
 .description{
     width: 100px;
     position: absolute;
-    left: 170px;
+    left: 200px;
     margin: -60px 0 0 0;
     font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
 }
@@ -85,4 +90,32 @@ img:hover{
     position: absolute;
     right: 20px;
     margin: -70px 0 0 0;
+}
+
+.checkout-bar {
+    z-index: 100;
+    position: absolute;
+    left: 10px;
+    top: 632px;
+    width: 90%;
+    height: 40px;
+    background: #fff;
+    border-top: 1px solid #e6e6e6;
+    align-items: center;
+    padding: 20px;
+}
+
+.checkout-btn {
+    background: #f60;
+    color: #fff;
+    border-radius: 20px;
+    padding: 10px 20px;
+    border: none;
+}
+
+.delete1{
+    left: 40px;
+    z-index: 200;
+    position: absolute;
+    bottom: 25px
 }

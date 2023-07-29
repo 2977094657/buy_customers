@@ -108,8 +108,8 @@ const removeCartItem = async (id) => {
 
 const open = (id) => {
   ElMessageBox.confirm(
-      '删除后将无法恢复,确认要删除购物车里的此商品吗?',
-      '删除商品？',
+      '确认要删除该宝贝吗?',
+      '删除宝贝',
       {
         confirmButtonText: '删除',
         cancelButtonText: '取消',
@@ -127,6 +127,60 @@ const open = (id) => {
         })
       })
 }
+
+const open1 = () => {
+  ElMessageBox.confirm(
+      '确认要删除该宝贝吗?',
+      '删除宝贝',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true,
+      }
+  )
+      .then(() => {
+        removeSelectedItems()
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消删除',
+        })
+      })
+}
+
+const selectAll = ref(false)
+const handleSelectAllChange = () => {
+  for (const item of cartItems.value) {
+    item.checked = selectAll.value
+  }
+}
+
+const removeSelectedItems = async () => {
+  const selectedIds = cartItems.value
+      .filter(item => item.checked)
+      .map(item => item.id)
+
+  console.log(selectedIds.length)
+  if (selectedIds.length === 0) {
+    showMessage('请至少选择一个商品')
+    return
+  }
+
+  try {
+    const response = await axios.delete('http://1.14.126.98:8081/cart/deleteAll', {
+      params: {
+        id: selectedIds.join(',')
+      }
+    })
+
+    showSuccessMessage(response.data.message)
+    await loadCartItems()
+  } catch (error) {
+    showMessage('批量删除购物车商品失败')
+  }
+}
 </script>
 
 <template>
@@ -137,26 +191,31 @@ const open = (id) => {
     <div style="color: rgb(255,80,0);width: 100px;position: relative;top: -62px;left: 150px;">
       <h1>{{ totalCount }}</h1>
     </div>
-    <div style="width: 700px;position: sticky; top: -20px;z-index: 1000;background-color: white;height: 40px;">
-      <div class="sticky" style="margin: -60px 0 20px 170px;">
+    <div style="width: 730px;position: sticky; top: -20px;z-index: 1000;background-color: white;height: 30px;margin: 0 0 10px -20px;">
+      <div style="position:absolute;left: 30px;background-color: white">
+        <input type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
+        <label for="selectAll"><b>全选</b></label>
+      </div>
+      <div style="margin: -60px 0 20px 215px;">
         <b>商品信息</b>
       </div>
-      <div class="sticky" style="margin: -40px 0 20px 317px;">
+      <div style="margin: -40px 0 20px 357px;">
         <b>单价</b>
       </div>
-      <div class="sticky" style="margin: -40px 0 20px 455px;">
+      <div style="margin: -40px 0 20px 475px;">
         <b>数量</b>
       </div>
-      <div class="sticky" style="margin: -40px 0 20px 570px;">
+      <div style="margin: -40px 0 20px 590px;">
         <b>总价</b>
       </div>
-      <div class="sticky" style="margin: -40px 0 20px 642px;">
+      <div  style="margin: -40px 0 20px 662px;">
         <b>操作</b>
       </div>
     </div>
     <div v-for="(item, index) in cartItems" :key="item.id">
-      <div class="cart" @click="goToProduct(item.productId)">
-        <img style="width: 100px;height: 100px;" :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image" />
+      <div class="cart" @click="goToProduct(item.productId)" :class="{ 'selected': item.checked }">
+        <input type="checkbox" v-model="item.checked" @click.stop>
+        <img style="margin: 0 0 0 30px;width: 100px;height: 100px;" :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image" />
         <div class="productName">
           {{ productResponses[index].data.productName }}
         </div>
@@ -176,12 +235,26 @@ const open = (id) => {
           ￥{{ item.number * productResponses[index].data.price }}
         </div>
         <div class="delete">
-          <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
-                     @click.stop text
-                     @click="open(item.id)">删除</el-button>
+          <el-button
+              style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+              @click.stop text
+              @click="open(item.id)"
+          >
+            删除
+          </el-button>
         </div>
       </div>
       <br>
+      <div class="delete1">
+        <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+                   @click.stop text
+                   @click="open1()">删除</el-button>
+      </div>
+    </div><br><br><br><br><br><br>
+    <div class="checkout-bar">
+      <div style="margin: 0 0 0 600px">
+        <button class="checkout-btn">去结算</button>
+      </div>
     </div>
   </div>
 </template>

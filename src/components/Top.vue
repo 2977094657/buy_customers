@@ -165,7 +165,7 @@ onMounted(async () => {
 let drawer = ref(false)
 const dd = ref(false)
 const pj = ref(false)
-const sc = ref(false)
+let sc = ref(false)
 
 const isSidebarVisible = ref(false);
 
@@ -192,6 +192,15 @@ const reload = () => {
 const openDrawer = () => {
   drawer = true;
   reload();
+};
+
+const reload4 = () => {
+  loadKey.value++;
+};
+
+const openDrawer4 = () => {
+  sc = true;
+  reload4();
 };
 </script>
 
@@ -229,7 +238,7 @@ const openDrawer = () => {
     </el-button>
     <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="drawer" :with-header="false">
       <h1>购物车</h1>
-      <ShoppingCart></ShoppingCart>
+        <ShoppingCart></ShoppingCart>
     </el-drawer>
     <br>
     <el-button class="sticky-button" type="primary" @click="dd = true">
@@ -260,7 +269,7 @@ const openDrawer = () => {
       <span>我的评价</span>
     </el-drawer>
     <br>
-    <el-button class="sticky-button" type="primary" @click="sc = true">
+    <el-button class="sticky-button" type="primary" @click="openDrawer4">
       <div class="sticky-button2">
         <HeartOutlined style="font-size: 20px"/>
         <div style="margin: 5px 0 0 0;">
@@ -268,8 +277,8 @@ const openDrawer = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer v-model="sc" title="I am the title" :with-header="false">
-      <span>宝贝收藏</span>
+    <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="sc" :with-header="false">
+      <h1>宝贝收藏</h1>
     </el-drawer>
     <br>
     <el-backtop :bottom="100" style="
