@@ -7,6 +7,7 @@ import axios from "axios";
 import {ChatDotSquare, Document} from "@element-plus/icons-vue";
 import {HeartOutlined} from "@ant-design/icons-vue";
 import ShoppingCart from "@/components/ShoppingCart.vue";
+import Star from "@/components/Star.vue";
 
 const store = useStore()
 const route = useRoute();
@@ -279,6 +280,7 @@ const openDrawer4 = () => {
     </el-button>
     <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="sc" :with-header="false">
       <h1>宝贝收藏</h1>
+      <Star></Star>
     </el-drawer>
     <br>
     <el-backtop :bottom="100" style="
@@ -287,7 +289,7 @@ const openDrawer4 = () => {
     top: 290px;
     height: 60px;
     width: 60px;
-    border-radius: 15px 0 0 15px;box-shadow: none">
+    border-radius: 15px 0 0 15px;box-shadow: none" :visibility-height="600">
       <div class="up"><br>&nbsp&nbsp&nbsp▲<br>&nbsp&nbsp&nbsp顶部</div>
     </el-backtop>
   </div>

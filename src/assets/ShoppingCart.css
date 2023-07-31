@@ -119,3 +119,19 @@ img:hover{
     position: absolute;
     bottom: 25px
 }
+
+.total-symbol{
+    font-size: 14px;
+    font-family: verdana,serif;
+    font-weight: 400;
+    color: #f40;
+    font-style: normal;
+}
+
+.price-sum{
+    color: #f40;
+    font-weight: 700;
+    font-size: 22px;
+    font-family: tohoma,arial,serif;
+    font-style: normal;
+}

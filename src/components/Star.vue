@@ -3,7 +3,6 @@ import {ref, onMounted, computed} from 'vue'
 import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
-import { debounce } from 'lodash'
 
 
 const isLoading = ref(true)
@@ -13,7 +12,7 @@ const userid = computed(() => store.state.userInfo.userId)
 
 const loadCartItems = async () => {
   try {
-    const response = await axios.get('http://1.14.126.98:8081/cart/list', {
+    const response = await axios.get('http://1.14.126.98:8081/star/select', {
       params: {
         userId: userid.value
       }
@@ -75,25 +74,9 @@ const totalCount = computed(() => {
   return cartItems.value.length
 })
 
-const updateQuantity = debounce(async (id, quantity) => {
-  try {
-    const response = await axios.put(`http://1.14.126.98:8081/cart/update?id=${id}&quantity=${quantity}`)
-    showSuccessMessage(response.data.message)
-    if (response.data.message==='超出购物车最大限制，请将所有商品数量控制在50以内'){
-      showMessage(response.data.message)
-    }
-  } catch (error) {
-    showMessage('更新购物车失败')
-  }
-}, 1000)
-
-const handleChange = (value, id) => {
-  updateQuantity(id, value)
-}
-
 const removeCartItem = async (id) => {
   try {
-    await axios.delete(`http://1.14.126.98:8081/cart/delete`, {
+    await axios.delete(`http://1.14.126.98:8081/star/delete`, {
       params: {
         id: id
       }
@@ -102,7 +85,7 @@ const removeCartItem = async (id) => {
     // After deleting item, we refresh the cart items
     await loadCartItems();
   } catch (error) {
-    showMessage('删除购物车失败');
+    showMessage('删除失败');
   }
 }
 
@@ -169,7 +152,7 @@ const removeSelectedItems = async () => {
   }
 
   try {
-    const response = await axios.delete('http://1.14.126.98:8081/cart/deleteAll', {
+    const response = await axios.delete('http://1.14.126.98:8081/star/deleteAll', {
       params: {
         id: selectedIds.join(',')
       }
@@ -181,17 +164,6 @@ const removeSelectedItems = async () => {
     showMessage('批量删除购物车商品失败')
   }
 }
-
-const totalPrice = computed(() => {
-  let sum = 0
-  for (const item of cartItems.value) {
-    if (item.checked) {
-      const productIndex = cartItems.value.findIndex(product => product.id === item.id)
-      sum += item.number * productResponses.value[productIndex].data.price
-    }
-  }
-  return sum
-})
 </script>
 
 <template>
@@ -210,14 +182,8 @@ const totalPrice = computed(() => {
       <div style="margin: -60px 0 20px 215px;">
         <b>商品信息</b>
       </div>
-      <div style="margin: -40px 0 20px 357px;">
+      <div style="margin: -40px 0 20px 470px;">
         <b>单价</b>
-      </div>
-      <div style="margin: -40px 0 20px 475px;">
-        <b>数量</b>
-      </div>
-      <div style="margin: -40px 0 20px 590px;">
-        <b>总价</b>
       </div>
       <div  style="margin: -40px 0 20px 662px;">
         <b>操作</b>
@@ -230,20 +196,19 @@ const totalPrice = computed(() => {
         <div class="productName">
           {{ productResponses[index].data.productName }}
         </div>
-        <div class="description">
+        <div class="description1">
           {{ productResponses[index].data.description }}
         </div>
-        <div class="price">
-          ￥{{ productResponses[index].data.price }}
-        </div>
-        <div class="number">
-          <el-input-number @click.stop class="number1" v-model="item.number" :min="1" :max="50" @change="(val) => handleChange(val, item.id)" />
+        <div class="price1">
+          <span class="total-symbol">
+            ￥
+          </span>
+          <span class="price-sum">
+            {{ productResponses[index].data.price }}
+          </span>
         </div>
         <div class="time">
           {{ formatDate(item.time) }}
-        </div>
-        <div class="total">
-          ￥{{ item.number * productResponses[index].data.price }}
         </div>
         <div class="delete">
           <el-button
@@ -256,29 +221,37 @@ const totalPrice = computed(() => {
         </div>
       </div>
       <br>
-      <div class="delete1">
+      <div class="delete2">
         <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
                    @click.stop text
                    @click="open1()">删除</el-button>
       </div>
     </div><br><br><br><br><br><br>
     <div class="checkout-bar">
-      <div style="position:absolute;right: 130px;bottom: 25px">
-        合计（不含运费）：
-        <span class="total-symbol">
-          ￥
-        </span>
-        <span class="price-sum">
-          {{ totalPrice }}
-        </span>
-      </div>
-      <div style="margin: 0 0 0 600px">
-        <button class="checkout-btn">去结算</button>
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 @import '../assets/ShoppingCart.css';
+.description1{
+  width: 200px;
+  position: absolute;
+  left: 200px;
+  margin: -60px 0 0 0;
+  font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
+}
+
+.price1{
+  position:absolute;
+  left: 220px;
+  margin: -65px 0 0 228px;
+}
+
+.delete2{
+  left: 360px;
+  z-index: 200;
+  position: absolute;
+  bottom: 25px
+}
 </style>
