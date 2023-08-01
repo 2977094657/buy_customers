@@ -199,10 +199,10 @@ const totalPrice = computed(() => {
     Loading...
   </div>
   <div v-else>
-    <div style="color: rgb(255,80,0);width: 100px;position: relative;top: -62px;left: 150px;">
+    <div class="zj">
       <h1>{{ totalCount }}</h1>
     </div>
-    <div style="width: 730px;position: sticky; top: -20px;z-index: 1000;background-color: white;height: 30px;margin: 0 0 10px -20px;">
+    <div class="db">
       <div style="position:absolute;left: 30px;background-color: white">
         <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
         <label for="selectAll"><b>全选</b></label>
@@ -210,16 +210,16 @@ const totalPrice = computed(() => {
       <div style="margin: -60px 0 20px 215px;">
         <b>商品信息</b>
       </div>
-      <div style="margin: -40px 0 20px 357px;">
+      <div style="margin: -42px 0 20px 357px;">
         <b>单价</b>
       </div>
-      <div style="margin: -40px 0 20px 475px;">
+      <div style="margin: -39px 0 20px 475px;">
         <b>数量</b>
       </div>
-      <div style="margin: -40px 0 20px 590px;">
+      <div style="margin: -42px 0 20px 590px;">
         <b>总价</b>
       </div>
-      <div  style="margin: -40px 0 20px 662px;">
+      <div  class="cz">
         <b>操作</b>
       </div>
     </div>
@@ -272,7 +272,7 @@ const totalPrice = computed(() => {
           {{ totalPrice }}
         </span>
       </div>
-      <div style="margin: 0 0 0 600px">
+      <div class="btn">
         <button class="checkout-btn">去结算</button>
       </div>
     </div>

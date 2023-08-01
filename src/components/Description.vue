@@ -87,9 +87,6 @@ const goHome = () => {
   router.push({name: 'Home'});
 };
 
-const comments = ref([])
-const currentPage = ref(1)
-
 const num = ref(1)
 
 let currentMessageInstance = null
@@ -131,6 +128,10 @@ const addToCart = async () => {
 }
 
 async function addToFavorites() {
+  if (userid.value==null){
+    showMessage('请先登陆')
+  }
+
   axios.post('http://1.14.126.98:8081/star/staradd', {
     userId: userid.value,
     productId: route.params.productId

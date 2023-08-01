@@ -135,3 +135,29 @@ img:hover{
     font-family: tohoma,arial,serif;
     font-style: normal;
 }
+
+.btn{
+    margin: 0 0 0 600px
+}
+
+.cz{
+    margin: -39px 0 20px 662px;
+}
+
+.db{
+    width: 730px;
+    position: sticky;
+    top: -20px;
+    z-index: 1000;
+    background-color: white;
+    height: 30px;
+    margin: 0 0 10px -20px;
+}
+
+.zj{
+    color: rgb(255,80,0);
+    width: 100px;
+    position: relative;
+    top: -62px;
+    left: 150px;
+}

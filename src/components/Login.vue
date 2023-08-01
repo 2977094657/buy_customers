@@ -7,9 +7,10 @@ import {useStore} from 'vuex';
 import {useRouter} from 'vue-router';
 import {onMounted} from 'vue';
 
+
 const router = useRouter();
 const store = useStore()
-const emit = defineEmits(['close-modal']);
+const emit = defineEmits(['close-modal','login-success']);
 
 let currentForm = ref('login');
 let phoneNumber = ref('');
@@ -85,8 +86,11 @@ const loginUser = async () => {
     const response = await axios.post(`http://1.14.126.98:8081/user/login?phone=${phoneNumber1.value}&pwd=${password1.value}`);
     if (response.data.token) {
       showSuccessMessage('登陆成功');
+      // 延迟一段时间后刷新页面
+      setTimeout(() => {
+        location.reload();
+      }, 1000); // 1秒延迟
       localStorage.setItem('token', response.data.token);
-      emit('close-modal');
       // 更新 userInfo 的值，触发 name.value 的变化
       store.commit('setUserInfo', {
         name: userName.value,

@@ -98,10 +98,6 @@ const handleOk = () => {
   open.value = false
 }
 
-const closeModal = () => {
-  open.value = false
-}
-
 
 let title = ref(false);
 
@@ -203,11 +199,15 @@ const openDrawer4 = () => {
   sc = true;
   reload4();
 };
+
+const PersonalCenter = () => {
+  router.push({ name: 'PersonalCenter' });
+};
 </script>
 
 <template>
   <a-modal width="820px" :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
-    <Login @close-modal="closeModal"></Login>
+    <Login></Login>
   </a-modal>
 
   <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
@@ -217,7 +217,7 @@ const openDrawer4 = () => {
       <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
       <button @click="searchProduct" class="search-button"><b>搜索</b></button>
       <div class="head">
-        <img class="img" :src="Avatar" alt="头像" @click="showModal">
+        <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
         <p class="hi">Hi!</p>
         <p class="name">
           <span @click="showModal"

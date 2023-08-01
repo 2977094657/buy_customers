@@ -145,11 +145,8 @@ onMounted(banner)
 </script>
 
 <template>
-  <div style="display: none;">
-    <Login></Login>
-  </div>
   <a-modal width="820px" :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
-    <Login @close-modal="closeModal"></Login>
+    <Login></Login>
   </a-modal>
 
   <div class="banner">

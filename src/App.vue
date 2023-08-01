@@ -11,6 +11,8 @@
       <router-view name="search"></router-view>
       <router-view name="description"></router-view>
       <router-view name="productComments"></router-view>
+      <router-view name="personalCenter"></router-view>
+      <router-view name="shoppingCart"></router-view>
     </div>
   </div>
   </div>

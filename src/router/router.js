@@ -5,6 +5,7 @@ import Banner from '@/components/Banner.vue';
 import Search from "@/components/Search.vue";
 import Description from '@/components/Description.vue';
 import ProductComments from "@/components/ProductComments.vue";
+import PersonalCenter from "@/components/PersonalCenter.vue";
 
 const routes = [
     {
@@ -34,6 +35,14 @@ const routes = [
             productComments:ProductComments
         },
         props: { description: true }
+    },
+    {
+        path: '/PersonalCenter',
+        name: 'PersonalCenter',
+        components: {
+            top: Top,
+            personalCenter: PersonalCenter,
+        },
     }
 ]
 
