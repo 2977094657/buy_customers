@@ -50,10 +50,6 @@ const fetchProducts = async (page) => {
   totalPages.value = data.pages
 }
 
-const onImageLoad = (product) => {
-  product.loading = true // 设置对应产品的 loading 属性为 false
-}
-
 const previousPage = () => {
   if (currentPage.value > 1) {
     fetchProducts(currentPage.value - 1)
