@@ -8,6 +8,7 @@ import {ChatDotSquare, Document} from "@element-plus/icons-vue";
 import {HeartOutlined} from "@ant-design/icons-vue";
 import ShoppingCart from "@/components/ShoppingCart.vue";
 import Star from "@/components/Star.vue";
+import { lock, unlock } from 'tua-body-scroll-lock'
 
 const store = useStore()
 const route = useRoute();
@@ -37,37 +38,6 @@ const handleScroll = () => {
     isPlaceholderVisible.value = isSticky.value;
   }
 };
-
-// // 高德地图IP定位
-// const xhr = new XMLHttpRequest();
-//
-// // 设置请求方法和请求地址
-// xhr.open('GET', 'https://restapi.amap.com/v3/ip?key=60e8251375335c948c8aed72f3d53824', true);
-//
-// // 发送HTTP请求
-// xhr.send();
-//
-// // 处理响应
-// xhr.onreadystatechange = function() {
-//   // 如果响应已经完成
-//   if (xhr.readyState === 4) {
-//     // 如果HTTP状态码是200，表示请求成功
-//     if (xhr.status === 200) {
-//       // 解析响应体
-//       const response = JSON.parse(xhr.responseText);
-//
-//       // 获取城市名
-//       const city = response.city;
-//
-//       // 将城市名展示在页面上
-//       const resultElem = document.getElementById('result');
-//       resultElem.innerHTML = city;
-//     } else {
-//       // 如果HTTP状态码不是200，表示请求失败
-//       console.error('请求失败，HTTP状态码：' + xhr.status);
-//     }
-//   }
-// };
 
 
 const inputValue = ref('');
@@ -110,7 +80,7 @@ const MouseOut = () => {
 };
 
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
-let Avatar = ref('http://1.14.126.98:5000/add/Afterclap-4_20230721_200107225.png'); // 同样，这里也不是一个对象，而是一个字符串
+let Avatar = ref('http://1.14.126.98:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
 
 const parseTokenAndUserInfo = async () => {
   try {
@@ -188,20 +158,25 @@ const reload = () => {
 
 const openDrawer = () => {
   drawer = true;
+  lock()
   reload();
 };
 
-const reload4 = () => {
-  loadKey.value++;
-};
-
 const openDrawer4 = () => {
+  lock()
   sc = true;
-  reload4();
+  reload();
 };
 
 const PersonalCenter = () => {
-  router.push({ name: 'PersonalCenter' });
+  if (land.value){
+    const url = router.resolve({ name: 'PersonalCenter'}).href;
+    window.open(url, '_blank');
+  }
+};
+const handleClose = () => {
+  // 在这里执行事件
+  unlock()
 };
 </script>
 
@@ -212,7 +187,6 @@ const PersonalCenter = () => {
 
   <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
     <div class="search-container" :class="{ 'sticky': isSticky }">
-<!--      <el-icon :size="30" class="location"><Location /></el-icon>--><!-- 由于高德在小地方请求不稳定,暂时禁掉定位图标及程序-->
       <p class="ip" id="result"></p>
       <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
       <button @click="searchProduct" class="search-button"><b>搜索</b></button>
@@ -220,7 +194,7 @@ const PersonalCenter = () => {
         <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
         <p class="hi">Hi!</p>
         <p class="name">
-          <span @click="showModal"
+          <span @click="showModal();PersonalCenter()"
             :class="{ 'name1': userName }"
             @mouseover="MouseOver"
             @mouseout="MouseOut"
@@ -237,12 +211,12 @@ const PersonalCenter = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="drawer" :with-header="false">
+    <el-drawer :key="loadKey" :size="size" v-model="drawer" :with-header="false" @close="handleClose">
       <h1>购物车</h1>
         <ShoppingCart></ShoppingCart>
     </el-drawer>
     <br>
-    <el-button class="sticky-button" type="primary" @click="dd = true">
+    <el-button class="sticky-button" type="primary" @click="dd = true;lock()">
       <div class="sticky-button2">
         <el-icon style="font-size: 20px;">
           <Document/>
@@ -252,11 +226,11 @@ const PersonalCenter = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer v-model="dd" title="I am the title" :with-header="false">
+    <el-drawer v-model="dd" :with-header="false" @close="handleClose">
       <span>我的订单</span>
     </el-drawer>
     <br>
-    <el-button class="sticky-button" type="primary" @click="pj = true">
+    <el-button class="sticky-button" type="primary" @click="pj = true;lock()">
       <div class="sticky-button2">
         <el-icon style="font-size: 20px;">
           <ChatDotSquare/>
@@ -266,7 +240,7 @@ const PersonalCenter = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer v-model="pj" title="I am the title" :with-header="false">
+    <el-drawer v-model="pj" title="I am the title" :with-header="false" @close="handleClose">
       <span>我的评价</span>
     </el-drawer>
     <br>
@@ -278,7 +252,7 @@ const PersonalCenter = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer :key="loadKey" :size="size" class="el-drawer__container" v-model="sc" :with-header="false">
+    <el-drawer :key="loadKey" :size="size" v-model="sc" :with-header="false" @close="handleClose">
       <h1>宝贝收藏</h1>
       <Star></Star>
     </el-drawer>

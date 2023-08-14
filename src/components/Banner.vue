@@ -1,11 +1,15 @@
 <script setup>
-import {ref, onMounted, computed} from 'vue'
+import {ref, onMounted, computed } from 'vue'
 import router from "@/router/router";
 import {HeartOutlined} from '@ant-design/icons-vue';
 import {ChatDotSquare, Document, ShoppingCart} from "@element-plus/icons-vue";
 import Login from "@/components/Login.vue";
 import {useStore} from 'vuex';
 import axios from "axios";
+import Star from "@/components/Star.vue";
+import Cart from "@/components/ShoppingCart.vue";
+import {lock, unlock} from "tua-body-scroll-lock";
+
 
 const store = useStore();
 const land = computed(() => store.state.userInfo.land)
@@ -89,12 +93,8 @@ const handleOk = () => {
   open.value = false
 }
 
-const closeModal = () => {
-  open.value = false
-}
-
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
-let Avatar = ref('http://1.14.126.98:5000/add/Afterclap-4_20230721_200107225.png'); // 同样，这里也不是一个对象，而是一个字符串
+let Avatar = ref('http://1.14.126.98:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
 
 const parseTokenAndUserInfo = async () => {
   try {
@@ -141,12 +141,54 @@ onMounted(async () => {
     });
   }
 });
+
+const PersonalCenter = () => {
+  if (land.value){
+    const url = router.resolve({ name: 'PersonalCenter'}).href;
+    window.open(url, '_blank');
+  }
+};
 onMounted(banner)
+
+const loadKey = ref(0);
+let sc = ref(false)
+const size=ref('50%')
+let drawer = ref(false)
+const reload = () => {
+  loadKey.value++;
+};
+
+const openDrawer4 = () => {
+  lock()
+  sc = true;
+  reload();
+};
+
+const openDrawer = () => {
+  lock()
+  drawer = true;
+  reload();
+};
+const handleClose = () => {
+  // 在这里执行事件
+  unlock()
+};
+
+const childRef = ref();
+const fnCallChild = () => {
+  open.value = true
+  childRef.value.switchForm('register');
+};
+
+const dl = () => {
+  open.value = true
+  childRef.value.switchForm('login');
+};
 </script>
 
 <template>
   <a-modal width="820px" :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
-    <Login></Login>
+    <Login ref="childRef"></Login>
   </a-modal>
 
   <div class="banner">
@@ -159,9 +201,10 @@ onMounted(banner)
   </div>
 
   <div class="head">
-    <img class="img" :src="Avatar" alt="头像" @click="showModal">
-    <p>
-      <span @click="showModal"
+    <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
+    <br>
+    <p>Hi!
+      <span @click="showModal();PersonalCenter()"
             :class="{ 'name': userName }"
             @mouseover="MouseOver"
             @mouseout="MouseOut"
@@ -170,15 +213,15 @@ onMounted(banner)
       </span>
     </p>
     <div style="position: absolute;left: 77px;top: 140px" v-if="!land">
-      <button class="bt1" @click="showModal">登录</button>
-      <button class="bt2" @click="showModal">注册</button>
+      <button class="bt1" @click="dl">登录</button>
+      <button class="bt2" @click="fnCallChild">注册</button>
     </div>
     <br><br>
     <div @mouseover="handleMouseOver" @mouseout="handleMouseOut" class="clickable">
       <div class="heart1">
-        <HeartOutlined :style="{ fontSize: '20px' }" :class="{ 'highlight': isHovered }"/>
+        <HeartOutlined @click="openDrawer4" :style="{ fontSize: '20px' }" :class="{ 'highlight': isHovered }"/>
       </div>
-      <div class="heart-outlined" :class="{ 'highlight': isHovered }">
+      <div class="heart-outlined" :class="{ 'highlight': isHovered }" @click="openDrawer4">
         宝贝收藏
       </div>
     </div>
@@ -208,15 +251,23 @@ onMounted(banner)
 
     <div class="clickable" @mouseover="handleCartMouseOver" @mouseout="handleCartMouseOut">
       <div class="ShoppingCart">
-        <el-icon style="font-size: 20px;" :class="{ 'highlight': isCartHovered }">
+        <el-icon style="font-size: 20px;" :class="{ 'highlight': isCartHovered }" @click="openDrawer">
           <ShoppingCart/>
         </el-icon>
       </div>
-      <div class="Shopping" :class="{ 'highlight': isCartHovered }">
+      <div class="Shopping" @click="openDrawer" :class="{ 'highlight': isCartHovered }">
         购物车
       </div>
     </div>
   </div>
+  <el-drawer :key="loadKey" :size="size" v-model="sc" :with-header="false" @close="handleClose">
+    <h1>宝贝收藏</h1>
+    <Star></Star>
+  </el-drawer>
+  <el-drawer :key="loadKey" :size="size" v-model="drawer" :with-header="false" @close="handleClose">
+    <h1>购物车</h1>
+    <Cart></Cart>
+  </el-drawer>
 </template>
 
 <style scoped>

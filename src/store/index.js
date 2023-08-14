@@ -8,8 +8,8 @@ export default createStore({
                 name:'',
                 userAvatar:'',
                 userId: null,
-                land: null
-            }
+                land: null,
+            },
         }
     },
 
@@ -17,10 +17,9 @@ export default createStore({
     mutations: {
         setUserInfo(state, userInfo) {
             state.userInfo = userInfo;
-        }
+        },
     },
 
-    // actionss
     actions: {
 
     },

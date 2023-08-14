@@ -1,7 +1,17 @@
 <template>
     <div class="products">
       <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
-        <img :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img">
+        <div v-if="!product.loading">
+          <el-skeleton :animated="true">
+            <template #template>
+              <el-skeleton-item variant="image" width="100" class="img" style="border-radius: 10px;" />
+            </template>
+          </el-skeleton>
+        </div>
+        <div style="display: none">
+          <img @load="product.loading=true" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img" >
+        </div>
+        <img v-if="product.loading" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img" >
         <div class="productName">
           {{ product.productName }}
           <br><br>
@@ -35,9 +45,13 @@ const randomSeed = ref(Math.floor(Math.random() * 10000)) // 添加 randomSeed r
 const fetchProducts = async (page) => {
   const response = await fetch(`http://1.14.126.98:8081/product/all?current=${page}&size=12&randomSeed=${randomSeed.value}`) // 添加 randomSeed 参数
   const data = await response.json()
-  products.value = data.records
+  products.value = data.records.map(product => ({ ...product, loading: false }))
   currentPage.value = data.current
   totalPages.value = data.pages
+}
+
+const onImageLoad = (product) => {
+  product.loading = true // 设置对应产品的 loading 属性为 false
 }
 
 const previousPage = () => {

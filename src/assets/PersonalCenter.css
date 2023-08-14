@@ -1,0 +1,98 @@
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+    border: none;
+    top: 100px;
+    width: 200px;
+    height: 480px;
+}
+
+.el-menu-item.is-active {
+    color: #F40; /* 这里可以替换成你想要的颜色值 */
+}
+
+.el-menu-item:hover{
+    background-color: #f5f5f5; /* 这里可以替换成你想要的背景色值 */
+}
+
+/deep/.checkout-bar {
+    margin: -100px 0 0 0;
+    z-index: 100;
+    position: sticky;
+    left: 10px;
+    width: 95%;
+    height: 40px;
+    background: #fff;
+    border-top: 1px solid #e6e6e6;
+    align-items: center;
+    padding: 20px;
+}
+
+/deep/.cz{
+    margin: -40px 0 20px 760px;
+}
+
+/deep/.db{
+    width: 850px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+    height: 30px;
+    margin: 0 0 10px -20px;
+}
+
+/deep/.btn{
+    margin: 0 0 0 680px
+}
+
+/deep/.zj{
+    z-index: 100;
+    color: rgb(255,80,0);
+    width: 100px;
+    position: relative;
+    top: -73px;
+    left: 100px;
+}
+
+.el-menu-item {
+    margin-bottom: 20px;
+}
+
+.divider {
+    top: 200px;
+    z-index: 100;
+    left: 407px;
+    height: 550px;
+    /* 垂直线样式 */
+    border-left: 1px solid #ccc;
+    position: absolute;
+}
+
+/deep/.time1{
+    position: absolute;
+    left: 660px;
+    margin: -15px 0 0 0;
+    font-size: 10px;
+}
+
+/deep/.cz1{
+    width: 32px;
+    margin: -40px 0 20px 760px;
+}
+
+/deep/.db1{
+    width: 850px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+    height: 30px;
+    margin: 0 0 10px -20px;
+}
+
+/deep/.zs{
+    color: rgb(255,80,0);
+    width: 100px;
+    position: relative;
+    top: -73px;
+    left: 110px;
+}

@@ -243,6 +243,10 @@ const registerUser = async () => {
     console.error(error);
   }
 };
+defineExpose({
+  switchForm
+});
+
 </script>
 
 <template>

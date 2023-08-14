@@ -171,10 +171,10 @@ const removeSelectedItems = async () => {
     Loading...
   </div>
   <div v-else>
-    <div style="color: rgb(255,80,0);width: 100px;position: relative;top: -62px;left: 150px;">
+    <div class="zs">
       <h1>{{ totalCount }}</h1>
     </div>
-    <div style="width: 730px;position: sticky; top: -20px;z-index: 1000;background-color: white;height: 30px;margin: 0 0 10px -20px;">
+    <div class="db1">
       <div style="position:absolute;left: 30px;background-color: white">
         <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
         <label for="selectAll"><b>全选</b></label>
@@ -185,7 +185,7 @@ const removeSelectedItems = async () => {
       <div style="margin: -40px 0 20px 470px;">
         <b>单价</b>
       </div>
-      <div  style="margin: -40px 0 20px 662px;">
+      <div  class="cz1">
         <b>操作</b>
       </div>
     </div>
@@ -207,7 +207,7 @@ const removeSelectedItems = async () => {
             {{ productResponses[index].data.price }}
           </span>
         </div>
-        <div class="time">
+        <div class="time1">
           {{ formatDate(item.time) }}
         </div>
         <div class="delete">
@@ -253,5 +253,27 @@ const removeSelectedItems = async () => {
   z-index: 200;
   position: absolute;
   bottom: 25px
+}
+
+.cz1{
+  margin: -40px 0 20px 662px;
+}
+
+.db1{
+  width: 730px;
+  position: sticky;
+  top: -20px;
+  z-index: 1000;
+  background-color: white;
+  height: 30px;
+  margin: 0 0 10px -20px;
+}
+
+.zs{
+  color: rgb(255,80,0);
+  width: 100px;
+  position: relative;
+  top: -62px;
+  left: 150px;
 }
 </style>
