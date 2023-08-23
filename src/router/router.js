@@ -4,7 +4,6 @@ import Main from '@/components/Main.vue';
 import Banner from '@/components/Banner.vue';
 import Search from "@/components/Search.vue";
 import Description from '@/components/Description.vue';
-import ProductComments from "@/components/ProductComments.vue";
 import PersonalCenter from "@/components/PersonalCenter.vue";
 
 const routes = [
