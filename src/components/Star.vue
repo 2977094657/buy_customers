@@ -5,34 +5,39 @@ import store from "@/store";
 import router from "@/router/router";
 
 
-const isLoading = ref(true)
 const cartItems = ref([])
 const productResponses = ref([])
 const userid = computed(() => store.state.userInfo.userId)
+const empty = ref(false)
+const land = computed(() => store.state.userInfo.land)
 
 const loadCartItems = async () => {
-  try {
-    const response = await axios.get('http://1.14.126.98:8081/star/select', {
-      params: {
-        userId: userid.value
+  if (land.value){
+    try {
+      const response = await axios.get('http://1.14.126.98:8081/star/select', {
+        params: {
+          userId: userid.value
+        }
+      })
+      cartItems.value = response.data
+      if (cartItems.value.length===0){
+        empty.value=true
       }
-    })
-    cartItems.value = response.data
 
-    const productRequests = cartItems.value.map(item =>
-        axios.get('http://1.14.126.98:8081/product/selectById', {
-          params: {
-            productId: item.productId
-          }
-        })
-    )
+      const productRequests = cartItems.value.map(item =>
+          axios.get('http://1.14.126.98:8081/product/selectById', {
+            params: {
+              productId: item.productId
+            }
+          })
+      )
 
-    productResponses.value = await Promise.all(productRequests)
+      productResponses.value = await Promise.all(productRequests)
 
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isLoading.value = false
+    } catch (error) {
+    }
+  }else {
+    empty.value=true
   }
 }
 
@@ -167,22 +172,19 @@ const removeSelectedItems = async () => {
 </script>
 
 <template>
-  <div v-if="isLoading">
-    Loading...
-  </div>
-  <div v-else>
+  <div>
     <div class="zs">
       <h1>{{ totalCount }}</h1>
     </div>
     <div class="db1">
       <div style="position:absolute;left: 30px;background-color: white">
         <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
-        <label for="selectAll"><b>全选</b></label>
+        <label for="selectAll"><b style="position:absolute;width: 32px;margin: 2px 0 0 0">全选</b></label>
       </div>
       <div style="margin: -60px 0 20px 215px;">
         <b>商品信息</b>
       </div>
-      <div style="margin: -40px 0 20px 470px;">
+      <div style="margin: -42px 0 20px 470px;">
         <b>单价</b>
       </div>
       <div  class="cz1">
@@ -230,6 +232,7 @@ const removeSelectedItems = async () => {
     <div class="checkout-bar">
     </div>
   </div>
+    <el-empty v-if="empty" style="margin: -150px 0 0 0" :image-size="400" description="发现更多精彩，将心动的宝贝加入收藏夹，随时回来再次欣赏！" image="http://1.14.126.98:5000/state/Star-empty.png"></el-empty>
 </template>
 
 <style scoped>

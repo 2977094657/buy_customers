@@ -21,63 +21,40 @@
         </div>
       </div>
     </div>
-    <div class="pagination">
-      <button @click="goToPage(1)">首页</button>
-      <button @click="previousPage" :disabled="currentPage === 1">上一页</button>
-      <template v-for="page in pageNumbers">
-        <button v-if="page === currentPage" :class="{ 'current-page': true }" @click="goToPage(page)">{{ page }}</button>
-        <button v-else @click="goToPage(page)">{{ page }}</button>
-      </template>
-      <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
-      <button @click="goToPage(totalPages)">尾页</button>
-    </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import {useRouter} from "vue-router";
 
 const currentPage = ref(1)
 const totalPages = ref(1)
 const products = ref([])
 const randomSeed = ref(Math.floor(Math.random() * 10000)) // 添加 randomSeed ref
+const loadingMore = ref(false) // 添加 loadingMore 状态
 
 const fetchProducts = async (page) => {
-  const response = await fetch(`http://1.14.126.98:8081/product/all?current=${page}&size=12&randomSeed=${randomSeed.value}`) // 添加 randomSeed 参数
+  loadingMore.value = true // 开始加载数据
+  const response = await fetch(`http://1.14.126.98:8081/product/all?current=${page}&size=12&randomSeed=${randomSeed.value}`)
   const data = await response.json()
-  products.value = data.records.map(product => ({ ...product, loading: false }))
+  // 当加载更多数据时，将新数据添加到 products 数组中，而不是替换它
+  products.value = [...products.value, ...data.records.map(product => ({ ...product, loading: false }))]
   currentPage.value = data.current
   totalPages.value = data.pages
+  loadingMore.value = false // 加载完成
 }
 
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    fetchProducts(currentPage.value - 1)
-    window.scrollTo(0, 0)
-  }
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
+const checkScroll = () => {
+  const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 500
+  if (nearBottom && !loadingMore.value && currentPage.value < totalPages.value) {
     fetchProducts(currentPage.value + 1)
-    window.scrollTo(0, 0)
   }
 }
 
-const goToPage = (page) => {
-  fetchProducts(page)
-  window.scrollTo(0, 0)
-}
-
-const pageNumbers = computed(() => {
-  let numbers = []
-  for(let i = 1; i <= Math.min(7, totalPages.value); i++) {
-    numbers.push(i)
-  }
-  return numbers
+onMounted(() => {
+  fetchProducts(currentPage.value)
+  window.addEventListener('scroll', checkScroll) // 添加滚动事件监听器
 })
-
-onMounted(() => fetchProducts(currentPage.value))
 
 const router = useRouter()
 

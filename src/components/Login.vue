@@ -2,7 +2,6 @@
 import {ref, computed} from 'vue';
 import login from "@/components/Login.vue";
 import axios from 'axios';
-import {defineEmits} from 'vue';
 import {useStore} from 'vuex';
 import {useRouter} from 'vue-router';
 import {onMounted} from 'vue';
@@ -10,7 +9,6 @@ import {onMounted} from 'vue';
 
 const router = useRouter();
 const store = useStore()
-const emit = defineEmits(['close-modal','login-success']);
 
 let currentForm = ref('login');
 let phoneNumber = ref('');

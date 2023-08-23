@@ -226,7 +226,7 @@ const handleClose = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer v-model="dd" :with-header="false" @close="handleClose">
+    <el-drawer v-model="dd" :size="size" :with-header="false" @close="handleClose">
       <span>我的订单</span>
     </el-drawer>
     <br>
@@ -240,7 +240,7 @@ const handleClose = () => {
         </div>
       </div>
     </el-button>
-    <el-drawer v-model="pj" title="I am the title" :with-header="false" @close="handleClose">
+    <el-drawer v-model="pj" :size="size" title="I am the title" :with-header="false" @close="handleClose">
       <span>我的评价</span>
     </el-drawer>
     <br>

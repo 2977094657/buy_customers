@@ -1,25 +1,27 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import { defineProps } from 'vue'
 import axios from 'axios'
 import {Plus} from "@element-plus/icons-vue";
 import { useStore } from 'vuex';
 
 
 const route = useRoute()
-const product = ref()
-const loading = ref(true)
 const httpError = ref(false)
 const commentContent = ref('');
-// 定义 props
-const props = defineProps({
-  productId: String,
-})
+const show = ref(true)
 
 const store = useStore();
 const userId = computed(() => store.state.userInfo.userId)
 let currentMessageInstance = null
+
+const switchShow = () => {
+  show.value = false
+}
+
+defineExpose({
+  switchShow
+});
 
 const showMessage = (message) => {
   // 如果当前有消息正在显示，先关闭它
@@ -53,16 +55,21 @@ const totalPages = ref(1)
 const currentSort = ref('hottest')  // 默认按最新排序
 
 const fetchComments = async (sortOption,page) => {
-  const sortByTime = sortOption === 'newest'
-  const response = await fetch(`http://1.14.126.98:8081/product/comments?productId=${route.params.productId}&pageNum=${page}&sortByTime=${sortByTime}&pageSize=20`)
-  const data = await response.json()
-  comments.value = data[0]  // 第一个元素是评论列表
-  const pageInfo = data[1] // 第二个元素是包含 pageNum，pageSize，sortByTime 参数的对象
-  // 更新 currentPage，pageSize 和 currentSort
-  currentPage.value = pageInfo.pageNum
-  total.value = pageInfo.total
-  totalPages.value = pageInfo.pages
-  currentSort.value = pageInfo.sortByTime ? 'newest' : 'hottest'
+  if (!isNaN(route.params.productId)){
+    const sortByTime = sortOption === 'newest'
+    const response = await fetch(`http://1.14.126.98:8081/product/comments?productId=${route.params.productId}&pageNum=${page}&sortByTime=${sortByTime}&pageSize=20`)
+    const data = await response.json()
+    comments.value = data[0]  // 第一个元素是评论列表
+    if(comments.value.length===0){
+      httpError.value=true
+    }
+    const pageInfo = data[1] // 第二个元素是包含 pageNum，pageSize，sortByTime 参数的对象
+    // 更新 currentPage，pageSize 和 currentSort
+    currentPage.value = pageInfo.pageNum
+    total.value = pageInfo.total
+    totalPages.value = pageInfo.pages
+    currentSort.value = pageInfo.sortByTime ? 'newest' : 'hottest'
+  }
 }
 
 const previousPage = () => {
@@ -178,7 +185,7 @@ const submitComment = async () => {
   formData.append('userId', userId.value)
   formData.append('comments', commentContent.value.trim()) // 去除前后空格
   formData.append('productId', route.params.productId)
-  files.value.forEach((file, index) => {
+  files.value.forEach((file) => {
     formData.append(`imgId`, file, file.name)
   })
 
@@ -190,6 +197,7 @@ const submitComment = async () => {
     showMessage('评论失败')
   }
   showSuccessMessage('评论成功')
+  httpError.value=false
   // 提交完成后，清空输入框和图片预览
   commentContent.value = '';
   files.value = [];
@@ -217,7 +225,7 @@ const isCommentValid = computed(() => {
 </script>
 
 <template>
-  <div v-if="!httpError" class="comments-section">
+  <div v-if="show" class="comments-section">
     <h2>
       评论<div style="left: 280px;font-size: 25px;color: rgb(255,80,0);position: absolute">{{ total }}</div>
       <div>
@@ -230,27 +238,30 @@ const isCommentValid = computed(() => {
     <!-- 评论输入框开始 -->
     <div class="comment-input-box">
       <textarea v-model="commentContent" class="comment-input" placeholder="添加公开评论..."></textarea>
-
-      <!-- 图片预览和上传组件 -->
-      <div class="image-previews">
-        <div class="image-container" v-for="(image, index) in previewImages" :key="index">
-          <img :src="image"  alt=""/>
-          <button class="delete-button" @click="deleteImage(index)">×</button>
-        </div>
-
-        <!-- 图片上传组件 -->
-        <label for="file-upload" class="custom-file-upload">
-          <el-upload list-type="picture-card" :disabled="true">
-            <el-icon><Plus /></el-icon>
-          </el-upload>
-        </label>
-        <input id="file-upload" ref="fileInput" style="display:none;" type="file" @change="onFilesChange" multiple/>
+      <div style="display: inline-block">
+        <button class="submit-comment1" @click="submitComment" :disabled="!isCommentValid">发布</button>
       </div>
 
-      <div class="file-names">{{ fileNames.join(', ') }}</div>
-      <button class="submit-comment1" @click="submitComment" :disabled="!isCommentValid">发布</button>
     </div>
     <!-- 评论输入框结束 -->
+
+    <!-- 图片预览和上传组件 -->
+    <div class="image-previews">
+      <div class="image-container" v-for="(image, index) in previewImages" :key="index">
+        <img :src="image"  alt=""/>
+        <button class="delete-button" @click="deleteImage(index)">×</button>
+      </div>
+
+      <!-- 图片上传组件 -->
+      <label for="file-upload" class="custom-file-upload">
+        <el-upload list-type="picture-card" :disabled="true">
+          <el-icon><Plus /></el-icon>
+        </el-upload>
+      </label>
+      <input id="file-upload" ref="fileInput" style="display:none;" type="file" @change="onFilesChange" multiple/>
+    </div>
+
+    <div class="file-names">{{ fileNames.join(', ') }}</div>
 
     <div v-for="comment in comments" :key="comment.id" class="comment">
       <img :src="comment.userAvatar" alt="用户头像" class="user-avatar">
@@ -272,7 +283,8 @@ const isCommentValid = computed(() => {
         <span>{{ comment.time }}</span>
       </div>
     </div>
-    <div class="pagination">
+      <el-empty style="margin: -200px 0 0 0" v-if="httpError" :image-size="300" image="http://1.14.126.98:5000/state/Comment-empty.png" description="这个商品如此神秘，连评论都默默无闻。你可以给它一点关注吗？它会感激不尽的！" />
+    <div v-if="!httpError" class="pagination">
       <button @click="goToPage(1)" class="button">首页</button>
       <button @click="previousPage" :disabled="currentPage === 1" class="button">上一页</button>
       <template v-for="page in pageNumbers">

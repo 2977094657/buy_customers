@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted, computed} from 'vue';
+import {ref, onMounted, computed, reactive} from 'vue';
 import store from "@/store";
 import {Female, Male} from "@element-plus/icons-vue";
 import axios from 'axios';
@@ -74,70 +74,117 @@ onMounted(async () => {
   }
 });
 
-const showEditLabel = ref(false);
+
+const ruleFormRef = ref()
+const ruleForm = reactive({
+  address: '',
+  name: '',
+  region: '',
+  count: '',
+  date1: '',
+  date2: '',
+  delivery: false,
+  type: [],
+  resource: '',
+  desc: '',
+})
+
+
+const tableData = [
+  {
+    consignee: '14863',
+    address: '四川省 眉山市 仁寿县 视高街道',
+    fullAddress: '四川科技职业学院10号公寓',
+    phoneNumber: '17628887613',
+  },
+]
 </script>
 
 <template>
   <div class="user-avatar-container">
     <div class="avatar" :style="{'background-image': `url(${avatarUrl})`}"></div>
+    <div style="margin: -180px 0 0 0;">
+      <img :src="avatarUrl" alt="用户头像" class="user-avatar"/>
+    </div>
   </div>
+  <div class="user-info-wrapper">
     <div v-if="userInfo" class="user-info-container">
-      <img :src="userInfo.userAvatar" alt="用户头像" class="user-avatar" />
       <div class="user-info-details">
-        <h1 class="user-info-title">
+        <h1 style="margin: 30px 0 40px 0">
           {{ userInfo.name }}
           <span>
-          <el-icon style="color: rgb(95,212,242);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='男性'"><Male /></el-icon>
-          <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='保密'"><Female /></el-icon>
-        </span>
+            <el-icon style="color: rgb(95,212,242);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='男性'"><Male/></el-icon>
+            <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='保密'"><Female/></el-icon>
+          </span>
         </h1>
-        <div class="user-info-item" @mouseover="showEditLabel=true" @mouseleave="showEditLabel=false">
-          <span v-if="showEditLabel" class="edit-label">点击修改个性标签</span>
-          {{ userInfo.description }}
+        <span>
+          <span style="color:#606266;">个性标签：</span>{{ userInfo.description }}
+        </span>
+        <span style="margin: 0 0 0 100px">
+          <span style="color:#606266;">绑定手机：</span>{{ formatPhoneNumber(userInfo.phone) }}
+        </span>
+        <span style="margin: 0 0 0 100px">
+          <span style="color:#606266;">注册时间：</span>{{ formatTime(userInfo.signupTime) }}
+        </span>
+        <div style="margin: 20px 0 0 0"><span style="color:#606266;">当前默认收货地址：</span>{{ userInfo.address }}
         </div>
-        <div>
-          <p>绑定手机：{{ formatPhoneNumber(userInfo.phone) }}</p>
-        </div>
-        <div>
-          <p>注册时间：{{ formatTime(userInfo.signupTime) }}</p>
-        </div>
-        <div>
-          <p>收货地址：{{ userInfo.address }}</p>
-        </div>
-      </div>
-      <div>
-        <el-cascader
-            placeholder="请选择收货地址"
-            v-model="selectedRegion"
-            :options="regions"
-            :props="props"
-        ></el-cascader>
+        <el-button style="margin: 15px 0 40px 43%;" type="primary" size="large" @click="">修改个人信息</el-button>
+        <el-alert :closable="false" style="background-color: #e3f2fd;" title=" 已保存4了条地址，还能保存16条地址"
+                  type="info" show-icon/>
+        <el-table :border="true" :data="tableData" height="400" style="width: 100%;margin: 20px 0 0 0">
+          <el-table-column prop="consignee" label="收货人" width="130"/>
+          <el-table-column prop="address" label="所在地区" width="175"/>
+          <el-table-column prop="fullAddress" label="详细地址" width="175"/>
+          <el-table-column prop="phoneNumber" label="手机号" width="175"/>
+          <el-table-column label="操作">
+            <el-button size="small" @click="">修改</el-button>
+            <el-button size="small" type="danger" @click="">删除</el-button>
+            <el-button size="small" type="warning" @click="">设为默认</el-button>
+          </el-table-column>
+        </el-table>
       </div>
     </div>
+    <!--      <el-form-->
+    <!--          style="margin: 25px 0 0 -40px"-->
+    <!--          ref="ruleFormRef"-->
+    <!--          label-width="120px"-->
+    <!--          class="demo-ruleForm"-->
+    <!--          status-icon-->
+    <!--      >-->
+    <!--        <el-form-item label="地址信息" :required="true">-->
+    <!--          <el-cascader-->
+    <!--              placeholder="请选择省 / 市 / 区"-->
+    <!--              v-model="selectedRegion"-->
+    <!--              :options="regions"-->
+    <!--              :props="props"-->
+    <!--          ></el-cascader>-->
+    <!--        </el-form-item>-->
+    <!--        <el-form-item label="详细地址" :required="true">-->
+    <!--          <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.region" placeholder="请输入详细地址信息，如道路、门牌号、小区、楼栋号、单-->
+    <!--元等信息"/>-->
+    <!--        </el-form-item>-->
+    <!--        <el-form-item label="收货人姓名" :required="true">-->
+    <!--          <el-input v-model="ruleForm.name"/>-->
+    <!--        </el-form-item>-->
+    <!--        <el-form-item label="手机号" :required="true">-->
+    <!--          <div>-->
+    <!--            <el-input placeholder="请输入手机号">-->
+    <!--              <template #prepend>-->
+    <!--                <el-select placeholder="中国大陆 +86" style="width: 130px">-->
+    <!--                  <el-option label="抱歉，暂时只支持中国大陆手机号"/>-->
+    <!--                </el-select>-->
+    <!--              </template>-->
+    <!--            </el-input>-->
+    <!--          </div>-->
+    <!--        </el-form-item>-->
+    <!--      </el-form>-->
+
+
+  </div>
+
+
 </template>
 
 <style scoped>
 @import '../assets/InforMation.css';
-.user-avatar-container {
-  width: 100%; /* 设置容器宽度 */
-  height: 250px; /* 设置容器高度 */
-  overflow: hidden; /* 超出容器部分隐藏 */
-}
-.user-avatar-container:after {
-  position: absolute;
-  content: '';
-  width: 100%;
-  height: 250px;
-  top: 0;
-  left: 0;
-  box-shadow:0 0 80px 30px #ffffff inset;
-}
-.avatar {
-  background-size: cover; /* 背景图片按比例缩放，保持填充容器 */
-  background-repeat: no-repeat; /* 不重复平铺背景图片 */
-  width: 100%; /* 图片宽度占满容器 */
-  height: 100%; /* 图片高度占满容器 */
-  background-position: center; /* 背景图片居中对齐 */
-  filter: blur(25px); /* 高斯模糊效果，值可根据需要调整 */
-}
 </style>

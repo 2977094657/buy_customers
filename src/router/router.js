@@ -32,7 +32,6 @@ const routes = [
         components: {
             top: Top,
             description: Description,
-            productComments:ProductComments
         },
         props: { description: true }
     },

@@ -33,10 +33,11 @@
       </div>
     </div>
   </div>
+  <ProductComments ref="childRef"></ProductComments>
 
   <div v-if="httpError">
-    <el-empty description="哎呀，这个商品已经被外星人带走了！">
-      <el-button type="primary" @click="goHome">返回首页</el-button>
+    <el-empty :image-size="300" image="http://1.14.126.98:5000/state/Product-empty.png" description="哎呀，这个商品已经被外星人带走了！">
+      <el-button style="background-color: #e15f00;border: none" type="primary" @click="goHome">返回首页</el-button>
     </el-empty>
   </div>
 </template>
@@ -45,40 +46,35 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import router from "@/router/router";
-import {defineProps} from 'vue'
 import {HeartOutlined} from '@ant-design/icons-vue';
 import axios from 'axios'
 import store from "@/store";
+import ProductComments from "@/components/ProductComments.vue";
 
 const route = useRoute()
 const product = ref()
-const loading = ref(true)
 const httpError = ref(false)
 const currentImageIndex = ref(0)
 const userid = computed(() => store.state.userInfo.userId)
-// 定义 props
-const props = defineProps({
-  productId: String,
-})
 const land = computed(() => store.state.userInfo.land)
+const childRef = ref();
 
 onMounted(async () => {
-  loading.value = true
-  try {
-    const response = await fetch(`http://1.14.126.98:8081/product/selectById?productId=${route.params.productId}`);
-    if (!response.ok) { // 检查 HTTP 状态码
-      throw new Error('HTTP error ' + response.status);
+  if (!isNaN(route.params.productId)){
+    try {
+      const response = await fetch(`http://1.14.126.98:8081/product/selectById?productId=${route.params.productId}`);
+      const data = await response.json();
+      data.imgs = data.img.slice(1, -1).split(',');
+      product.value = data;
+    } catch (error) {
+      if (error.message.startsWith('HTTP error 404')) { // 如果是 404 错误，设置 httpError 为 true
+        childRef.value.switchShow()
+        httpError.value = true;
+      }
     }
-    const data = await response.json();
-    data.imgs = data.img.slice(1, -1).split(',');
-    product.value = data;
-  } catch (error) {
-    console.error('There has been a problem with your fetch operation: ', error);
-    if (error.message.startsWith('HTTP error 404')) { // 如果是 404 错误，设置 httpError 为 true
-      httpError.value = true;
-    }
-  } finally {
-    loading.value = false
+  }else {
+    httpError.value = true;
+    childRef.value.switchShow()
   }
 })
 

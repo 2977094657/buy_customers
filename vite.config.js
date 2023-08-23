@@ -5,10 +5,14 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {AntDesignVueResolver, ElementPlusResolver} from 'unplugin-vue-components/resolvers'
+import Inspector from "vite-plugin-vue-inspector"
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    Inspector({
+      toggleComboKey: 'alt-x' // 设置快捷键为 alt加x
+    }),
     AutoImport({
       resolvers: [ElementPlusResolver()],
     }),

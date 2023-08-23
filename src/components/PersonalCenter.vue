@@ -67,7 +67,7 @@ onMounted(() => {
           <div v-if="showIndex===5">
             <h1 style="margin: 0 0 50px 60px;">
             购物车
-          </h1>
+            </h1>
             <div style="position:relative;width: 800px;left: 50px;">
               <MyCart></MyCart>
             </div>
@@ -77,7 +77,9 @@ onMounted(() => {
             <h1 style="margin: 0 0 50px 60px;">
               宝贝收藏
             </h1>
-            <Star  style="position:relative;width: 800px;left: 50px;"></Star>
+            <div style="position:relative;width: 800px;left: 50px;">
+              <Star></Star>
+            </div>
           </div>
         </el-scrollbar>
       </el-main>

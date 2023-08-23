@@ -1,33 +1,35 @@
 .user-avatar{
-    top: 80px;
     left: 45%;
-    position: absolute;
+    position: sticky;
     width: 100px;
     height: 100px;
     border-radius: 50%;
     border: 2px solid white;
 }
 .user-info-container{
-    padding: 20px 50px 60px 50px;
+    padding: 20px 0 0 20px;
     background-color: rgb(244,245,247);
+    width: 100%;
 }
-.user-info-item{
-    cursor: pointer;
-    transition: all .3s ease;
-    border-radius: 5px;
-    border: none;
-    height: 26px;
-    margin-left: -5px;
-    padding: 0 5px;
+.user-avatar-container {
+    width: 100%; /* 设置容器宽度 */
+    height: 250px; /* 设置容器高度 */
+    overflow: hidden; /* 超出容器部分隐藏 */
 }
-.user-info-item:hover{
-    color: rgb(170,171,172);
-    background-color: rgba(0, 0, 0, 0.3);
+.avatar {
+    background-size: cover; /* 背景图片按比例缩放，保持填充容器 */
+    background-repeat: no-repeat; /* 不重复平铺背景图片 */
+    width: 100%; /* 图片宽度占满容器 */
+    height: 100%; /* 图片高度占满容器 */
+    background-position: center; /* 背景图片居中对齐 */
+    filter: blur(25px); /* 高斯模糊效果，值可根据需要调整 */
 }
-.edit-label {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    line-height: 26px;
-    color: white;
+
+.user-info-wrapper {
+    display: flex;
+    justify-content: start;
+}
+
+.user-info-details{
+    margin: 0 40px 20px 20px;
 }

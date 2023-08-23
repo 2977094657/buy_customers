@@ -101,13 +101,9 @@ const goToProduct = (productId) => {
     <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
     <button @click="goToPage(totalPages)">尾页</button>
   </div>
-    <el-empty v-if="isEmpty" description="哇哦，您的搜索没有结果，这绝对是平行宇宙的错，换个关键词试试吧！">
+    <el-empty v-if="isEmpty" :image-size="300" image="http://1.14.126.98:5000/state/Search-empty.png" description="哇哦，您的搜索没有结果，这绝对是平行宇宙的错，换个关键词试试吧！">
       <el-button type="primary" @click="goHome">返回首页</el-button>
     </el-empty>
-
-
-
-
 </template>
 
 <style scoped>
