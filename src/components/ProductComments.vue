@@ -130,7 +130,7 @@ const onFilesChange = (event) => {
   for (let file of newFiles) {
     // 验证文件类型是不是图片
     if (!file.type.startsWith('image/')) {
-      showMessage('只能上传图片文件');
+      showMessage('只能上传图片文件!');
       continue;
     }
 

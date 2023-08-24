@@ -1,12 +1,13 @@
 <script setup>
 import {ref, onMounted, computed, reactive} from 'vue';
 import store from "@/store";
-import {Female, Male} from "@element-plus/icons-vue";
+import {Female, Male,Plus} from "@element-plus/icons-vue";
 import axios from 'axios';
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
 const avatarUrl = ref('');
+const imageUrl1 = ref('')
 
 const fetchUserInfo = async () => {
   const userId = userid.value;
@@ -16,6 +17,7 @@ const fetchUserInfo = async () => {
     if (data.code === 0) {
       userInfo.value = data.data;
       avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
+      imageUrl1.value = data.data.userAvatar;
     } else {
       console.error('获取用户信息失败');
     }
@@ -98,13 +100,136 @@ const tableData = [
     phoneNumber: '17628887613',
   },
 ]
+
+let open = ref(false)
+const land = computed(() => store.state.userInfo.land)
+
+let currentMessageInstance = null
+const showMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例
+  currentMessageInstance = ElMessage({message, type: 'error'})
+}
+
+const showSuccessMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例，消息类型设置为 'success'
+  currentMessageInstance = ElMessage({message, type: 'success'})
+}
+
+
+const showModal = () => {
+  if (land.value) {
+    open.value = true
+  } else {
+    showMessage('请先登录')
+  }
+}
+
+const handleOk = async () => {
+  const result = await uploadAvatar(file);
+  if (result) {
+    open.value = false
+    // 延迟一段时间后刷新页面
+    setTimeout(() => {
+      location.reload();
+    }, 500);
+  } else {
+    showMessage('请选择图片！')
+  }
+}
+
+const imageUrl = ref('')
+const file = ref()
+
+const beforeAvatarUpload = (rawFile) => {
+  if (!rawFile.type.startsWith('image/')) {
+    showMessage('只能上传图片文件！')
+    return false
+  } else if (rawFile.size / 1024 / 1024 > 1) {
+    showMessage('头像图片大小不能超过 1MB！')
+    return false
+  } else if (rawFile.name.length > 20) {
+    showMessage('文件名不能超过20个字符');
+    return false
+  }
+  imageUrl.value = URL.createObjectURL(rawFile)
+  imageUrl1.value = URL.createObjectURL(rawFile)
+  file.value = rawFile
+}
+
+const uploadAvatar = async (uploadFile) => {
+  if (uploadFile.value === undefined) {
+    return false
+  } else if (uploadFile.value.size > 0) {
+    const data = new FormData()
+    data.append('image', uploadFile.value)
+    data.append('userid', userid.value)
+    const response = await axios.put('http://1.14.126.98:8081/user/updateAvatar', data)
+    if (response.status === 200) {
+      showSuccessMessage('头像修改成功')
+      return true
+    } else if (response.status === 400) {
+      showMessage(response.data.message)
+      return true
+    }
+  }
+}
+
+const test = () => {
+
+}
+
+const remove = () => {
+  imageUrl.value = false
+  imageUrl1.value = avatarUrl.value
+  file.value = undefined
+}
+
+const exceed = () => {
+  showMessage('最多只能上传一张图片')
+}
+
 </script>
 
 <template>
   <div class="user-avatar-container">
     <div class="avatar" :style="{'background-image': `url(${avatarUrl})`}"></div>
-    <div style="margin: -180px 0 0 0;">
-      <img :src="avatarUrl" alt="用户头像" class="user-avatar"/>
+    <div class="user-avatar" @click="showModal()">
+      <div class="avatar-mask">更换头像</div>
+      <img :src="avatarUrl" style="margin: -183px 0 0 -45px;position: absolute" class="user-avatar"/>
+    </div>
+    <div>
+      <a-modal width="40%" style="text-align: center;top: 20%;" title="请选择图片上传：支持JPG、PNG等格式，图片需小于1M"
+               v-model:open="open" @ok="handleOk" ok-text="修改" cancel-text="取消">
+        <div style="display: flex; align-items: center;margin: 30px 0 0 40px">
+          <el-upload
+              class="avatar-uploader"
+              :limit="1"
+              :show-file-list="true"
+              :before-upload="beforeAvatarUpload"
+              :http-request="test"
+              :on-remove="remove"
+              :on-exceed="exceed"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar1" alt=""/>
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus/>
+            </el-icon>
+          </el-upload>
+          <el-divider direction="vertical" style="height: 180px; margin: 0 80px;"/>
+          <img :src="imageUrl1" class="user-avatar1"/>
+          <span style="margin: 120px 0 0 -65px">预览</span>
+        </div>
+      </a-modal>
     </div>
   </div>
   <div class="user-info-wrapper">
@@ -114,7 +239,7 @@ const tableData = [
           {{ userInfo.name }}
           <span>
             <el-icon style="color: rgb(95,212,242);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='男性'"><Male/></el-icon>
-            <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='保密'"><Female/></el-icon>
+            <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='女性'"><Female/></el-icon>
           </span>
         </h1>
         <span>
@@ -128,7 +253,9 @@ const tableData = [
         </span>
         <div style="margin: 20px 0 0 0"><span style="color:#606266;">当前默认收货地址：</span>{{ userInfo.address }}
         </div>
-        <el-button style="margin: 15px 0 40px 43%;" type="primary" size="large" @click="">修改个人信息</el-button>
+        <div style="text-align: center">
+          <el-button style="margin: 15px 0 40px 0;" type="primary" size="large" @click="">修改个人信息</el-button>
+        </div>
         <el-alert :closable="false" style="background-color: #e3f2fd;" title=" 已保存4了条地址，还能保存16条地址"
                   type="info" show-icon/>
         <el-table :border="true" :data="tableData" height="400" style="width: 100%;margin: 20px 0 0 0">
@@ -187,4 +314,42 @@ const tableData = [
 
 <style scoped>
 @import '../assets/InforMation.css';
+</style>
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  background-color: rgb(250, 250, 250);
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+
+:where(.css-dev-only-do-not-override-eq3tly).ant-modal .ant-modal-footer {
+  text-align: center;
+  background: transparent;
+  padding: 30px 0 20px 0;
+}
+
+:where(.css-dev-only-do-not-override-eq3tly).ant-btn {
+  left: 28px;
+  font-size: 14px;
+  height: 32px;
+  padding: 4px 15px;
+  border-radius: 6px;
+  margin: 0 30px 0 0;
+}
 </style>

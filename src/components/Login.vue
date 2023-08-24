@@ -87,7 +87,7 @@ const loginUser = async () => {
       // 延迟一段时间后刷新页面
       setTimeout(() => {
         location.reload();
-      }, 1000); // 1秒延迟
+      }, 500); // 1秒延迟
       localStorage.setItem('token', response.data.token);
       // 更新 userInfo 的值，触发 name.value 的变化
       store.commit('setUserInfo', {
