@@ -1,13 +1,15 @@
 <script setup>
-import {ref, onMounted, computed, reactive} from 'vue';
+import {ref, onMounted, computed, reactive,watch } from 'vue';
 import store from "@/store";
-import {Female, Male,Plus} from "@element-plus/icons-vue";
+import {Edit, Female, Male, Plus} from "@element-plus/icons-vue";
 import axios from 'axios';
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
 const avatarUrl = ref('');
 const imageUrl1 = ref('')
+const empty = ref(false)
+
 
 const fetchUserInfo = async () => {
   const userId = userid.value;
@@ -57,13 +59,13 @@ onMounted(async () => {
     const data = response.data;
     if (data.code === 1) {
       regions.value = data.data.map(region => ({
-        value: region.code,
+        value: region.name,
         label: region.name,
         children: region.pchilds.map(city => ({
-          value: city.code,
+          value: city.name,
           label: city.name,
           children: city.cchilds.map(district => ({
-            value: district.code,
+            value: district.name,
             label: district.name
           }))
         }))
@@ -79,29 +81,27 @@ onMounted(async () => {
 
 const ruleFormRef = ref()
 const ruleForm = reactive({
-  address: '',
-  name: '',
-  region: '',
-  count: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  type: [],
-  resource: '',
-  desc: '',
+  consignee: '',
+  fullAddress: '',
+  phone: '',
 })
 
 
-const tableData = [
-  {
-    consignee: '14863',
-    address: '四川省 眉山市 仁寿县 视高街道',
-    fullAddress: '四川科技职业学院10号公寓',
-    phoneNumber: '17628887613',
-  },
-]
+const tableData = reactive({
+  data: [
+    {
+      consignee: '',
+      address: '',
+      fullAddress: '',
+      phoneNumber: '',
+    },
+  ],
+  version: 0,
+});
 
 let open = ref(false)
+let open1 = ref(false)
+let open2 = ref(false)
 const land = computed(() => store.state.userInfo.land)
 
 let currentMessageInstance = null
@@ -133,7 +133,6 @@ const showModal = () => {
     showMessage('请先登录')
   }
 }
-
 const handleOk = async () => {
   const result = await uploadAvatar(file);
   if (result) {
@@ -144,6 +143,26 @@ const handleOk = async () => {
     }, 500);
   } else {
     showMessage('请选择图片！')
+  }
+}
+
+
+const showModal1 = () => {
+  if (land.value) {
+    open1.value = true
+  } else {
+    showMessage('请先登录')
+  }
+}
+const handleOk1 = async () => {
+    open1.value = false
+}
+
+const showModal2 = () => {
+  if (land.value) {
+    open2.value = true
+  } else {
+    showMessage('请先登录')
   }
 }
 
@@ -198,6 +217,71 @@ const exceed = () => {
   showMessage('最多只能上传一张图片')
 }
 
+const fetchUserAddresses = async () => {
+  const userId = userid.value;
+  if (userId) {
+    const response = await fetch(`http://1.14.126.98:8081/address/all?userId=${userId}`);
+    const data = await response.json();
+    if (data.code === 200) {
+      if (data.data.length === 0){
+        empty.value=true
+      }else {
+        empty.value=false
+        tableData.value = data.data.map(item => ({
+          consignee: item.consignee,
+          address: item.area,
+          fullAddress: item.fullAddress,
+          phoneNumber: item.phone,
+        }));
+      }
+    } else {
+      console.error('获取用户收货地址失败');
+    }
+  } else {
+    setTimeout(fetchUserAddresses, 1);
+  }
+};
+
+onMounted(fetchUserAddresses);
+watch(() => tableData.version, fetchUserAddresses);
+
+const addAddress = async () => {
+  // 验证表单字段是否都已填写
+  if (!ruleForm.consignee || selectedRegion.value.length === 0 || !ruleForm.fullAddress || !ruleForm.phone) {
+    showMessage('请填写所有字段');
+    return;
+  }
+
+  try {
+    const response = await axios.post('http://1.14.126.98:8081/address/add', null, {
+      params: {
+        userId: userid.value,
+        consignee: ruleForm.consignee,
+        area: selectedRegion.value.join('/'),
+        fullAddress: ruleForm.fullAddress,
+        phone: ruleForm.phone,
+      }
+    });
+
+    if (response.data.code === 200) {
+      showSuccessMessage(response.data.msg);
+      open2.value = false
+      tableData.version++;
+      console.log(tableData.value.num++)
+      // 重新获取收货地址
+      await fetchUserAddresses();
+    }
+  } catch (error) {
+    if (error.response) {
+      // 请求已经发送，服务器也已响应，但是状态码超出了 2xx 的范围
+      showMessage(error.response.data.msg);
+    } else if (error.request) {
+      // 请求已经发送，但没有收到任何服务器响应
+      showMessage('服务器没有响应');
+    }
+  }
+};
+
 </script>
 
 <template>
@@ -234,12 +318,13 @@ const exceed = () => {
   </div>
   <div class="user-info-wrapper">
     <div v-if="userInfo" class="user-info-container">
-      <div class="user-info-details">
+      <div style="margin: 0 40px 20px 20px">
         <h1 style="margin: 30px 0 40px 0">
           {{ userInfo.name }}
           <span>
             <el-icon style="color: rgb(95,212,242);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='男性'"><Male/></el-icon>
             <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='女性'"><Female/></el-icon>
+            <el-button style="margin: 0 0 0 80%" type="warning" :icon="Edit" />
           </span>
         </h1>
         <span>
@@ -251,62 +336,102 @@ const exceed = () => {
         <span style="margin: 0 0 0 100px">
           <span style="color:#606266;">注册时间：</span>{{ formatTime(userInfo.signupTime) }}
         </span>
-        <div style="margin: 20px 0 0 0"><span style="color:#606266;">当前默认收货地址：</span>{{ userInfo.address }}
+        <div style="margin: 20px 0 20px 0"><span style="color:#606266;">当前默认收货地址：</span>{{ userInfo.address }}
         </div>
-        <div style="text-align: center">
-          <el-button style="margin: 15px 0 40px 0;" type="primary" size="large" @click="">修改个人信息</el-button>
-        </div>
-        <el-alert :closable="false" style="background-color: #e3f2fd;" title=" 已保存4了条地址，还能保存16条地址"
-                  type="info" show-icon/>
-        <el-table :border="true" :data="tableData" height="400" style="width: 100%;margin: 20px 0 0 0">
+        <el-alert :closable="false" style="background-color: #e3f2fd;" title=" 已保存了1条地址，还能保存19条地址" type="info" show-icon/>
+        <el-button style="margin: 20px 0 0 0;" type="primary" size="large" @click="showModal2()">添加收货地址</el-button>
+
+<!--        添加收货地址弹窗-->
+        <a-modal style="text-align: center;" title="添加收货地址"
+                 v-model:open="open2" @ok="addAddress()" ok-text="添加" cancel-text="取消">
+          <el-form
+              style="margin: 25px 0 0 -40px"
+              ref="ruleFormRef"
+              label-width="120px"
+              class="demo-ruleForm"
+              status-icon
+          >
+            <el-form-item label="收货人" :required="true" >
+              <el-input v-model="ruleForm.consignee" placeholder="不能超过20个字符"/>
+            </el-form-item>
+            <el-form-item label="所在地区" :required="true">
+              <el-cascader style="width: 100%"
+                           placeholder="请选择省 / 市 / 区"
+                           v-model="selectedRegion"
+                           :options="regions"
+                           :props="props"
+              ></el-cascader>
+            </el-form-item>
+            <el-form-item label="详细地址" :required="true">
+              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.fullAddress" placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+            </el-form-item>
+            <el-form-item label="手机号" :required="true">
+              <div style="width: 100%">
+                <el-input v-model="ruleForm.phone" placeholder="请输入手机号">
+                  <template #prepend>
+                    <el-select placeholder="中国大陆 +86" style="width: 130px">
+                      <el-option label="抱歉，暂时只支持中国大陆手机号"/>
+                    </el-select>
+                  </template>
+                </el-input>
+              </div>
+            </el-form-item>
+          </el-form>
+        </a-modal>
+
+
+<!--        收货地址表格-->
+        <el-table empty-text="你的包裹在问：请问去哪儿？快填写收货地址吧！" :stripe="true" :border="true" :data="tableData.value" height="400" style="width: 100%;margin: 20px 0 0 0">
           <el-table-column prop="consignee" label="收货人" width="130"/>
           <el-table-column prop="address" label="所在地区" width="175"/>
           <el-table-column prop="fullAddress" label="详细地址" width="175"/>
           <el-table-column prop="phoneNumber" label="手机号" width="175"/>
           <el-table-column label="操作">
-            <el-button size="small" @click="">修改</el-button>
+            <el-button size="small" type="primary" @click="showModal1()">修改</el-button>
             <el-button size="small" type="danger" @click="">删除</el-button>
             <el-button size="small" type="warning" @click="">设为默认</el-button>
           </el-table-column>
         </el-table>
+
+<!--        修改收货地址弹窗-->
+        <a-modal style="text-align: center;" title="修改收货地址"
+                 v-model:open="open1" @ok="handleOk1" ok-text="修改" cancel-text="取消">
+          <el-form
+              style="margin: 25px 0 0 -40px"
+              ref="ruleFormRef"
+              label-width="120px"
+              class="demo-ruleForm"
+              status-icon
+          >
+            <el-form-item label="收货人" :required="true" >
+              <el-input v-model="ruleForm.name" placeholder="不能超过20个字符"/>
+            </el-form-item>
+            <el-form-item label="所在地区" :required="true">
+              <el-cascader style="width: 100%"
+                  placeholder="请选择省 / 市 / 区"
+                  v-model="selectedRegion"
+                  :options="regions"
+                  :props="props"
+              ></el-cascader>
+            </el-form-item>
+            <el-form-item label="详细地址" :required="true">
+              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.region" placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+            </el-form-item>
+            <el-form-item label="手机号" :required="true">
+              <div style="width: 100%">
+                <el-input placeholder="请输入手机号">
+                  <template #prepend>
+                    <el-select placeholder="中国大陆 +86" style="width: 130px">
+                      <el-option label="抱歉，暂时只支持中国大陆手机号"/>
+                    </el-select>
+                  </template>
+                </el-input>
+              </div>
+            </el-form-item>
+          </el-form>
+        </a-modal>
       </div>
     </div>
-    <!--      <el-form-->
-    <!--          style="margin: 25px 0 0 -40px"-->
-    <!--          ref="ruleFormRef"-->
-    <!--          label-width="120px"-->
-    <!--          class="demo-ruleForm"-->
-    <!--          status-icon-->
-    <!--      >-->
-    <!--        <el-form-item label="地址信息" :required="true">-->
-    <!--          <el-cascader-->
-    <!--              placeholder="请选择省 / 市 / 区"-->
-    <!--              v-model="selectedRegion"-->
-    <!--              :options="regions"-->
-    <!--              :props="props"-->
-    <!--          ></el-cascader>-->
-    <!--        </el-form-item>-->
-    <!--        <el-form-item label="详细地址" :required="true">-->
-    <!--          <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.region" placeholder="请输入详细地址信息，如道路、门牌号、小区、楼栋号、单-->
-    <!--元等信息"/>-->
-    <!--        </el-form-item>-->
-    <!--        <el-form-item label="收货人姓名" :required="true">-->
-    <!--          <el-input v-model="ruleForm.name"/>-->
-    <!--        </el-form-item>-->
-    <!--        <el-form-item label="手机号" :required="true">-->
-    <!--          <div>-->
-    <!--            <el-input placeholder="请输入手机号">-->
-    <!--              <template #prepend>-->
-    <!--                <el-select placeholder="中国大陆 +86" style="width: 130px">-->
-    <!--                  <el-option label="抱歉，暂时只支持中国大陆手机号"/>-->
-    <!--                </el-select>-->
-    <!--              </template>-->
-    <!--            </el-input>-->
-    <!--          </div>-->
-    <!--        </el-form-item>-->
-    <!--      </el-form>-->
-
-
   </div>
 
 

@@ -263,7 +263,7 @@ const totalPrice = computed(() => {
                    @click="open1()">删除</el-button>
       </div>
     </div><br><br><br><br><br><br>
-    <div class="checkout-bar">
+    <div v-if="!empty" class="checkout-bar">
       <div style="position:absolute;right: 130px;bottom: 25px">
         合计（不含运费）：
         <span class="total-symbol">
@@ -278,7 +278,7 @@ const totalPrice = computed(() => {
       </div>
     </div>
   </div>
-  <el-empty v-if="empty" style="margin: -150px 0 0 0" :image-size="400" description="购物车竟然是空的，再忙，也要记得买点什么犒劳自己~" image="http://1.14.126.98:5000/state/ShoppingCart-empty.png"></el-empty>
+  <el-empty v-if="empty" style="margin: -80px 0 0 0" :image-size="350" description="购物车竟然是空的，再忙，也要记得买点什么犒劳自己~" image="http://1.14.126.98:5000/state/ShoppingCart-empty.png"></el-empty>
 </template>
 
 <style scoped>

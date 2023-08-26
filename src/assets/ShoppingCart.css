@@ -103,7 +103,7 @@ img:hover{
     z-index: 100;
     position: absolute;
     left: 10px;
-    top: 632px;
+    top: 600px;
     width: 90%;
     height: 40px;
     background: #fff;
@@ -168,3 +168,4 @@ img:hover{
     top: -62px;
     left: 150px;
 }
+

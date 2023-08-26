@@ -10,9 +10,11 @@ const productResponses = ref([])
 const userid = computed(() => store.state.userInfo.userId)
 const empty = ref(false)
 const land = computed(() => store.state.userInfo.land)
+const loading = ref(true)
 
 const loadCartItems = async () => {
-  if (land.value){
+  loading.value = true
+  if (land.value) {
     try {
       const response = await axios.get('http://1.14.126.98:8081/star/select', {
         params: {
@@ -20,8 +22,8 @@ const loadCartItems = async () => {
         }
       })
       cartItems.value = response.data
-      if (cartItems.value.length===0){
-        empty.value=true
+      if (cartItems.value.length === 0) {
+        empty.value = true
       }
 
       const productRequests = cartItems.value.map(item =>
@@ -31,13 +33,14 @@ const loadCartItems = async () => {
             }
           })
       )
-
       productResponses.value = await Promise.all(productRequests)
-
+      // 数据加载完成后
+      loading.value = false
     } catch (error) {
     }
-  }else {
-    empty.value=true
+  } else {
+    loading.value = false
+    empty.value = true
   }
 }
 
@@ -71,7 +74,7 @@ const showSuccessMessage = (message) => {
 }
 
 const goToProduct = (productId) => {
-  const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  const url = router.resolve({name: 'Product', params: {productId}}).href;
   window.open(url, '_blank');
 }
 
@@ -173,71 +176,82 @@ const removeSelectedItems = async () => {
 
 <template>
   <div>
-    <div class="zs">
-      <h1>{{ totalCount }}</h1>
-    </div>
-    <div class="db1">
-      <div style="position:absolute;left: 30px;background-color: white">
-        <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
-        <label for="selectAll"><b style="position:absolute;width: 32px;margin: 2px 0 0 0">全选</b></label>
+    <a-spin style="display: flex;justify-content: center;align-items: center;height: 50vh;" v-if="loading"
+            tip="Loading..." size="large">
+      <br>
+    </a-spin>
+    <div v-else>
+      <div class="zs">
+        <h1>{{ totalCount }}</h1>
       </div>
-      <div style="margin: -60px 0 20px 215px;">
-        <b>商品信息</b>
-      </div>
-      <div style="margin: -42px 0 20px 470px;">
-        <b>单价</b>
-      </div>
-      <div  class="cz1">
-        <b>操作</b>
-      </div>
-    </div>
-    <div v-for="(item, index) in cartItems" :key="item.id">
-      <div class="cart" @click="goToProduct(item.productId)" :class="{ 'selected': item.checked }">
-        <input style="width: 20px;height: 20px;" type="checkbox" v-model="item.checked" @click.stop>
-        <img style="margin: 0 0 0 30px;width: 100px;height: 100px;" :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image" />
-        <div class="productName">
-          {{ productResponses[index].data.productName }}
+      <div class="db1">
+        <div style="position:absolute;left: 30px;background-color: white">
+          <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
+          <label for="selectAll"><b style="position:absolute;width: 32px;margin: 2px 0 0 0">全选</b></label>
         </div>
-        <div class="description1">
-          {{ productResponses[index].data.description }}
+        <div style="margin: -60px 0 20px 215px;">
+          <b>商品信息</b>
         </div>
-        <div class="price1">
+        <div style="margin: -42px 0 20px 470px;">
+          <b>单价</b>
+        </div>
+        <div class="cz1">
+          <b>操作</b>
+        </div>
+      </div>
+      <div v-for="(item, index) in cartItems" :key="item.id">
+        <div class="cart" @click="goToProduct(item.productId)" :class="{ 'selected': item.checked }">
+          <input style="width: 20px;height: 20px;" type="checkbox" v-model="item.checked" @click.stop>
+          <img style="margin: 0 0 0 30px;width: 100px;height: 100px;"
+               :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image"/>
+          <div class="productName">
+            {{ productResponses[index].data.productName }}
+          </div>
+          <div class="description1">
+            {{ productResponses[index].data.description }}
+          </div>
+          <div class="price1">
           <span class="total-symbol">
             ￥
           </span>
-          <span class="price-sum">
+            <span class="price-sum">
             {{ productResponses[index].data.price }}
           </span>
+          </div>
+          <div class="time1">
+            {{ formatDate(item.time) }}
+          </div>
+          <div class="delete">
+            <el-button
+                style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+                @click.stop text
+                @click="open(item.id)"
+            >
+              删除
+            </el-button>
+          </div>
         </div>
-        <div class="time1">
-          {{ formatDate(item.time) }}
-        </div>
-        <div class="delete">
-          <el-button
-              style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
-              @click.stop text
-              @click="open(item.id)"
-          >
-            删除
+        <br>
+        <div class="delete2">
+          <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+                     @click.stop text
+                     @click="open1()">删除
           </el-button>
         </div>
       </div>
-      <br>
-      <div class="delete2">
-        <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
-                   @click.stop text
-                   @click="open1()">删除</el-button>
+      <br><br><br><br><br><br>
+      <div class="checkout-bar">
       </div>
-    </div><br><br><br><br><br><br>
-    <div class="checkout-bar">
     </div>
   </div>
-    <el-empty v-if="empty" style="margin: -150px 0 0 0" :image-size="400" description="发现更多精彩，将心动的宝贝加入收藏夹，随时回来再次欣赏！" image="http://1.14.126.98:5000/state/Star-empty.png"></el-empty>
+  <el-empty v-if="empty" style="margin: -80px 0 0 0" :image-size="350"
+            description="发现更多精彩，将心动的宝贝加入收藏夹，随时回来再次欣赏！"
+            image="http://1.14.126.98:5000/state/Star-empty.png"></el-empty>
 </template>
 
 <style scoped>
 @import '../assets/ShoppingCart.css';
-.description1{
+.description1 {
   width: 200px;
   position: absolute;
   left: 200px;
@@ -245,24 +259,24 @@ const removeSelectedItems = async () => {
   font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
 }
 
-.price1{
-  position:absolute;
+.price1 {
+  position: absolute;
   left: 220px;
   margin: -65px 0 0 228px;
 }
 
-.delete2{
+.delete2 {
   left: 360px;
   z-index: 200;
   position: absolute;
   bottom: 25px
 }
 
-.cz1{
+.cz1 {
   margin: -40px 0 20px 662px;
 }
 
-.db1{
+.db1 {
   width: 730px;
   position: sticky;
   top: -20px;
@@ -272,11 +286,30 @@ const removeSelectedItems = async () => {
   margin: 0 0 10px -20px;
 }
 
-.zs{
-  color: rgb(255,80,0);
+.zs {
+  color: rgb(255, 80, 0);
   width: 100px;
   position: relative;
   top: -62px;
   left: 150px;
+}
+
+
+/*本地加载的css，不知道为什么打包后css悔发生变化因此本地和服务器各一份*/
+/deep/ :where(.css-dev-only-do-not-override-eq3tly).ant-spin .ant-spin-dot-item {
+  background-color: #ff915e;
+}
+
+/deep/ :where(.css-dev-only-do-not-override-eq3tly).ant-spin {
+  color: #ff915e;
+}
+
+/*服务器加载的css*/
+/deep/:where(.css-eq3tly).ant-spin .ant-spin-dot-item {
+  background-color: #ff915e;
+}
+
+/deep/:where(.css-eq3tly).ant-spin {
+  color: #ff915e;
 }
 </style>

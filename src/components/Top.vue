@@ -141,11 +141,19 @@ const checkScroll = () => {
 };
 
 onMounted(() => {
-  window.addEventListener('scroll', checkScroll);
+  if (router.currentRoute.value.path === '/PersonalCenter') {
+    isSidebarVisible.value = false;
+  }else {
+    window.addEventListener('scroll', checkScroll);
+  }
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', checkScroll);
+  if (router.currentRoute.value.path === '/PersonalCenter') {
+    isSidebarVisible.value = false;
+  }else {
+    window.removeEventListener('scroll', checkScroll);
+  }
 });
 
 const size=ref('50%')
@@ -203,6 +211,7 @@ const handleClose = () => {
       </span></p>
       </div>
     </div>
+
   <div class="cbl" v-show="isSidebarVisible">
     <el-button class="sticky-button" type="primary" @click="openDrawer">
       <div class="sticky-button1">
