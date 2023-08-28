@@ -183,8 +183,8 @@ input::-webkit-inner-spin-button{
 }
 
 .phone1{
-    right: 130px;
-    top: 149px;
+    top: 2px;
+    left: 60px;
     width: 180px;
     height: 20px;
     position: absolute;
@@ -192,24 +192,22 @@ input::-webkit-inner-spin-button{
 
 .code{
     right: 0;
-    top: 195px;
+    top: 240px;
     width: 310px;
     height: 20px;
     position: absolute;
 }
 
 .imgCode{
-    right: 0;
-    top: 238px;
+    margin: 7px 0 0 86px;
     width: 310px;
     height: 20px;
-    position: absolute;
 }
 
 .line1{
     position: absolute;
-    top: -43px;
-    left: 255px;
+    top: 0;
+    left: 270px;
     width: 1px;
     height: 20px;
     background: #e3e5e7;

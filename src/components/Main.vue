@@ -14,10 +14,10 @@
         <img v-if="product.loading" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img" >
         <div class="productName">
           {{ product.productName }}
-          <br><br>
-          <el-rate v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
-          <br><br>收藏：{{product.star}}
-          <br><br><span style="color: rgb(255,80,0);"><b>￥{{ product.price }}</b></span>
+        </div>
+        <div style="text-align: right;margin: 120px 40px 0 0;">
+          <span class="jge">￥</span>
+          <span class="price" >{{ product.price }}</span>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted, computed, reactive,watch } from 'vue';
+import {ref, onMounted, computed, reactive, watch} from 'vue';
 import store from "@/store";
 import {Edit, Female, Male, Plus} from "@element-plus/icons-vue";
 import axios from 'axios';
@@ -9,6 +9,7 @@ const userid = computed(() => store.state.userInfo.userId)
 const avatarUrl = ref('');
 const imageUrl1 = ref('')
 const empty = ref(false)
+const number = ref()
 
 
 const fetchUserInfo = async () => {
@@ -154,9 +155,6 @@ const showModal1 = () => {
     showMessage('请先登录')
   }
 }
-const handleOk1 = async () => {
-    open1.value = false
-}
 
 const showModal2 = () => {
   if (land.value) {
@@ -223,16 +221,22 @@ const fetchUserAddresses = async () => {
     const response = await fetch(`http://1.14.126.98:8081/address/all?userId=${userId}`);
     const data = await response.json();
     if (data.code === 200) {
-      if (data.data.length === 0){
-        empty.value=true
-      }else {
-        empty.value=false
-        tableData.value = data.data.map(item => ({
+      if (data.data.length === 0) {
+        empty.value = true
+      } else {
+        empty.value = false
+        number.value = data.data.length
+        let addresses = data.data.map(item => ({
+          id: item.id,
           consignee: item.consignee,
           address: item.area,
           fullAddress: item.fullAddress,
           phoneNumber: item.phone,
+          defaultOperate: item.defaultOperate,
         }));
+        // 按照默认地址排序，将默认地址放在第一位
+        addresses.sort((a, b) => b.defaultOperate - a.defaultOperate);
+        tableData.value = addresses;
       }
     } else {
       console.error('获取用户收货地址失败');
@@ -250,6 +254,14 @@ const addAddress = async () => {
   if (!ruleForm.consignee || selectedRegion.value.length === 0 || !ruleForm.fullAddress || !ruleForm.phone) {
     showMessage('请填写所有字段');
     return;
+  } else {
+    // 使用正则表达式验证手机号码
+    const phoneNumberReg = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
+    if (!phoneNumberReg.test(ruleForm.phone)) {
+      // 如果电话号码不符合正则表达式，显示错误信息并返回，不继续发送请求
+      showMessage('请输入正确的手机号码');
+      return;
+    }
   }
 
   try {
@@ -266,10 +278,10 @@ const addAddress = async () => {
     if (response.data.code === 200) {
       showSuccessMessage(response.data.msg);
       open2.value = false
+      // 通过更新表格值来刷新收货地址
       tableData.version++;
-      console.log(tableData.value.num++)
-      // 重新获取收货地址
-      await fetchUserAddresses();
+    }else {
+      showMessage(response.data.msg)
     }
   } catch (error) {
     if (error.response) {
@@ -282,6 +294,125 @@ const addAddress = async () => {
   }
 };
 
+const currentAddress = ref(null);
+const currentAddressId = ref(null);
+const editAddress = (row) => {
+  currentAddressId.value = row.id;
+  // 拆分地址字符串为数组
+  const addressArray = row.address.split('/');
+  currentAddress.value = {
+    ...row,
+    address: addressArray, // 将拆分后的数组赋值给 address 属性
+  };
+  showModal1();
+};
+
+const handleOk1 = async () => {
+  // 验证表单字段是否都已填写
+  if (!currentAddress.value.consignee || currentAddress.value.address.join('/') === null || !currentAddress.value.fullAddress || !currentAddress.value.phoneNumber) {
+    showMessage('请填写所有字段');
+    return;
+  } else {
+    // 使用正则表达式验证手机号码
+    const phoneNumberReg = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
+    if (!phoneNumberReg.test(currentAddress.value.phoneNumber)) {
+      // 如果电话号码不符合正则表达式，显示错误信息并返回，不继续发送请求
+      showMessage('请输入正确的手机号码');
+      return;
+    }
+  }
+  try {
+    const params = {
+      id: currentAddressId.value,
+      consignee: currentAddress.value.consignee,
+      area: currentAddress.value.address.join('/'), // 将数组组合成字符串
+      fullAddress: currentAddress.value.fullAddress,
+      phone: currentAddress.value.phoneNumber,
+    };
+    const response = await axios.put('http://1.14.126.98:8081/address/update', null, {params});
+    if (response.data.code===200){
+      open1.value=false
+      tableData.version++;
+      showSuccessMessage(response.data.msg)
+    }else {
+      showMessage(response.data.msg)
+    }
+  } catch (error) {
+    showMessage('请求接口出错：' + error.message);
+  }
+};
+
+const schu = (row) => {
+  ElMessageBox.confirm(
+      '确认要删除该地址吗?',
+      '删除地址',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true,
+      }
+  )
+      .then(() => {
+        removeAddress(row.id);
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消删除',
+        })
+      })
+}
+
+const removeAddress = async (id) => {
+  try {
+    const response = await axios.delete(`http://1.14.126.98:8081/address/delete`, {
+      params: {
+        id: id
+      }
+    });
+    if (response.data.code===200){
+      showSuccessMessage(response.data.msg);
+    }else {
+      showMessage(response.data.msg);
+    }
+    tableData.version++
+  } catch (error) {
+    showSuccessMessage('删除失败');
+  }
+}
+
+const setDefaultAddress = async (row) => {
+  try {
+    // 找到当前的默认地址
+    const currentDefault = tableData.value.find(item => item.defaultOperate === 1);
+    if (currentDefault) {
+      // 取消当前的默认地址
+      await axios.put('http://1.14.126.98:8081/address/updateDefault', null, {
+        params: {
+          id: currentDefault.id,
+          defaultOperate: 0,
+        },
+      });
+    }
+    // 设置新的默认地址
+    const response = await axios.put('http://1.14.126.98:8081/address/updateDefault', null, {
+      params: {
+        id: row.id,
+        defaultOperate: 1,
+      },
+    });
+    if (response.data.code === 200) {
+      // 如果成功更新了默认地址，重新获取地址列表
+      await fetchUserAddresses();
+      showSuccessMessage(response.data.msg)
+    } else {
+      showMessage('设置默认地址失败：' + response.data.msg);
+    }
+  } catch (error) {
+    showMessage('请求接口出错：' + error.message);
+  }
+};
 </script>
 
 <template>
@@ -289,7 +420,7 @@ const addAddress = async () => {
     <div class="avatar" :style="{'background-image': `url(${avatarUrl})`}"></div>
     <div class="user-avatar" @click="showModal()">
       <div class="avatar-mask">更换头像</div>
-      <img :src="avatarUrl" style="margin: -183px 0 0 -45px;position: absolute" class="user-avatar"/>
+      <img :src="avatarUrl" style="margin: -183px 0 0 -45px;position: absolute" class="user-avatar" alt=""/>
     </div>
     <div>
       <a-modal width="40%" style="text-align: center;top: 20%;" title="请选择图片上传：支持JPG、PNG等格式，图片需小于1M"
@@ -310,7 +441,7 @@ const addAddress = async () => {
             </el-icon>
           </el-upload>
           <el-divider direction="vertical" style="height: 180px; margin: 0 80px;"/>
-          <img :src="imageUrl1" class="user-avatar1"/>
+          <img :src="imageUrl1" class="user-avatar1" alt=""/>
           <span style="margin: 120px 0 0 -65px">预览</span>
         </div>
       </a-modal>
@@ -324,7 +455,7 @@ const addAddress = async () => {
           <span>
             <el-icon style="color: rgb(95,212,242);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='男性'"><Male/></el-icon>
             <el-icon style="color: rgb(255,117,143);font-size: 20px;margin-left: 50px" v-if="userInfo.gender==='女性'"><Female/></el-icon>
-            <el-button style="margin: 0 0 0 80%" type="warning" :icon="Edit" />
+            <el-button style="margin: 0 0 0 80%" type="warning" :icon="Edit"/>
           </span>
         </h1>
         <span>
@@ -336,12 +467,12 @@ const addAddress = async () => {
         <span style="margin: 0 0 0 100px">
           <span style="color:#606266;">注册时间：</span>{{ formatTime(userInfo.signupTime) }}
         </span>
-        <div style="margin: 20px 0 20px 0"><span style="color:#606266;">当前默认收货地址：</span>{{ userInfo.address }}
-        </div>
-        <el-alert :closable="false" style="background-color: #e3f2fd;" title=" 已保存了1条地址，还能保存19条地址" type="info" show-icon/>
-        <el-button style="margin: 20px 0 0 0;" type="primary" size="large" @click="showModal2()">添加收货地址</el-button>
+        <el-alert :closable="false" style="background-color: #e3f2fd;margin: 20px 0 0 0"
+                  :title="'已保存了'+(number)+'条地址，还能保存'+(20-number)" type="info" show-icon/>
+        <el-button style="margin: 20px 0 0 0;" type="primary" size="large" @click="showModal2()">添加收货地址
+        </el-button>
 
-<!--        添加收货地址弹窗-->
+        <!--        添加收货地址弹窗-->
         <a-modal style="text-align: center;" title="添加收货地址"
                  v-model:open="open2" @ok="addAddress()" ok-text="添加" cancel-text="取消">
           <el-form
@@ -351,7 +482,7 @@ const addAddress = async () => {
               class="demo-ruleForm"
               status-icon
           >
-            <el-form-item label="收货人" :required="true" >
+            <el-form-item label="收货人" :required="true">
               <el-input v-model="ruleForm.consignee" placeholder="不能超过20个字符"/>
             </el-form-item>
             <el-form-item label="所在地区" :required="true">
@@ -363,7 +494,8 @@ const addAddress = async () => {
               ></el-cascader>
             </el-form-item>
             <el-form-item label="详细地址" :required="true">
-              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.fullAddress" placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.fullAddress"
+                        placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
             </el-form-item>
             <el-form-item label="手机号" :required="true">
               <div style="width: 100%">
@@ -380,20 +512,28 @@ const addAddress = async () => {
         </a-modal>
 
 
-<!--        收货地址表格-->
-        <el-table empty-text="你的包裹在问：请问去哪儿？快填写收货地址吧！" :stripe="true" :border="true" :data="tableData.value" height="400" style="width: 100%;margin: 20px 0 0 0">
+        <!--        收货地址表格-->
+        <el-table empty-text="你的包裹在问：请问去哪儿？快填写收货地址吧！" :stripe="true" :border="true"
+                  :data="tableData.value" height="400" style="width: 100%;margin: 20px 0 0 0">
           <el-table-column prop="consignee" label="收货人" width="130"/>
           <el-table-column prop="address" label="所在地区" width="175"/>
-          <el-table-column prop="fullAddress" label="详细地址" width="175"/>
-          <el-table-column prop="phoneNumber" label="手机号" width="175"/>
+          <el-table-column prop="fullAddress" label="详细地址" width="150"/>
+          <el-table-column prop="phoneNumber" label="手机号" width="150"/>
           <el-table-column label="操作">
-            <el-button size="small" type="primary" @click="showModal1()">修改</el-button>
-            <el-button size="small" type="danger" @click="">删除</el-button>
-            <el-button size="small" type="warning" @click="">设为默认</el-button>
+            <template v-slot="{row}">
+              <el-button size="small" type="primary" @click="editAddress(row)">修改</el-button>
+              <el-button size="small" type="danger" @click="schu(row)">删除</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="默认地址">
+            <template v-slot="{row}">
+              <el-button size="small" type="warning" plain v-if="row.defaultOperate === 0" @click="setDefaultAddress(row)">设为默认</el-button>
+              <button v-else class="default">已为默认</button>
+            </template>
           </el-table-column>
         </el-table>
 
-<!--        修改收货地址弹窗-->
+        <!--        修改收货地址弹窗-->
         <a-modal style="text-align: center;" title="修改收货地址"
                  v-model:open="open1" @ok="handleOk1" ok-text="修改" cancel-text="取消">
           <el-form
@@ -403,23 +543,25 @@ const addAddress = async () => {
               class="demo-ruleForm"
               status-icon
           >
-            <el-form-item label="收货人" :required="true" >
-              <el-input v-model="ruleForm.name" placeholder="不能超过20个字符"/>
+            <el-form-item label="收货人" :required="true">
+              <el-input v-model="currentAddress.consignee" placeholder="不能超过20个字符"/>
             </el-form-item>
             <el-form-item label="所在地区" :required="true">
-              <el-cascader style="width: 100%"
+              <el-cascader
+                  style="width: 100%"
                   placeholder="请选择省 / 市 / 区"
-                  v-model="selectedRegion"
+                  v-model="currentAddress.address"
                   :options="regions"
                   :props="props"
               ></el-cascader>
             </el-form-item>
             <el-form-item label="详细地址" :required="true">
-              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.region" placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+              <el-input type="textarea" :resize="'none'" autosize v-model="currentAddress.fullAddress"
+                        placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
             </el-form-item>
             <el-form-item label="手机号" :required="true">
               <div style="width: 100%">
-                <el-input placeholder="请输入手机号">
+                <el-input placeholder="请输入手机号" v-model="currentAddress.phoneNumber">
                   <template #prepend>
                     <el-select placeholder="中国大陆 +86" style="width: 130px">
                       <el-option label="抱歉，暂时只支持中国大陆手机号"/>

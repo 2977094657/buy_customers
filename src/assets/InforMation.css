@@ -61,3 +61,15 @@
     height: 178px;
     display: block;
 }
+
+.default{
+    cursor: default;
+    display: block;
+    width: 80px;
+    height: 30px;
+    text-align: center;
+    border: 1px solid rgb(179,225,157);
+    border-radius: 3px;
+    background: rgb(240,249,235);
+    color: #67c23a;
+}

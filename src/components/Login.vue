@@ -220,7 +220,6 @@ const sendSMSCode = async () => {
     }
   } catch (error) {
     isSending.value = false;
-    console.error(error);
     showMessage('验证码发送失败，请稍后再试');
   }
 };
@@ -235,12 +234,12 @@ const registerUser = async () => {
     if (response.data === '注册成功') {
       showSuccessMessage('注册成功');
       switchForm('login')
-      name.value=null
-      password.value=null
-      confirmPassword.value=null
-      phoneNumber.value=null
-      phoneCode.value=null
-      userInputVerifyCode.value=null
+      name.value = null
+      password.value = null
+      confirmPassword.value = null
+      phoneNumber.value = null
+      phoneCode.value = null
+      userInputVerifyCode.value = null
 
     } else {
       showMessage(response.data);
@@ -311,28 +310,32 @@ const registerUser = async () => {
                    class="ConfirmPassword">
           </div>
           <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
-          <div style="position: absolute;left: 29px;top: 147px;">
-            手机号
+
+
+          <div style="position: absolute;left: 3px;top: 143px;">
+            <img style="width: 90px;position: absolute" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">
+            <input placeholder="请输入图形验证码，区分大小写" class="imgCode" v-model="userInputVerifyCode">
           </div>
-          <button type="button"
-                  style="border:0;outline:none;background-color: transparent;cursor: pointer;position:absolute;left: 295px;top: 140px"
-                  @click="sendSMSCode" :disabled="isBtnDisabled">
+
+          <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
+          <div style="position:absolute;left: 29px;top: 193px;">
+            手机号
+            <input class="phone1" v-model="phoneNumber" placeholder="请输入手机号" type="number">
+            <div class="line1"></div>
+            <button type="button"
+                    style="border:0;outline:none;background-color: transparent;cursor: pointer;position:absolute;left: 280px;top: -10px;width: 80px"
+                    @click="sendSMSCode" :disabled="isBtnDisabled">
   <span :class="{ 'countdown-active': getCaptchaBtnText.countdown !== null }">
     {{ getCaptchaBtnText.countdown }}
   </span>
-            {{ getCaptchaBtnText.text }}
-          </button>
-          <input class="phone1" v-model="phoneNumber" placeholder="请输入手机号" type="number">
-          <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
-          <input class="code" v-model="phoneCode" placeholder="请输入验证码" type="number">
-          <div style="position:absolute;left: 29px;top: 193px;">
-            <div class="line1"></div>
-            验证码
+              {{ getCaptchaBtnText.text }}
+            </button>
           </div>
           <hr style="margin-top: 45px;border: none;height: 0.5px;background-color: #e3e5e7;">
-          <input placeholder="请输入图形验证码，区分大小写" class="imgCode" v-model="userInputVerifyCode">
-          <img style="left: 3px;width: 90px;top: 232px;position: absolute" :src="captchaImgUrl" alt="验证码"
-               @click="getCaptcha">
+          <div style="margin: 10px 0 0 29px">
+            验证码
+          </div>
+          <input class="code" v-model="phoneCode" placeholder="请输入验证码" type="number">
         </div>
         <button class="zc">注册</button>
       </form>

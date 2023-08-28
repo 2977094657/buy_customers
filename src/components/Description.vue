@@ -2,24 +2,30 @@
   <div v-if="product && product.imgs" class="product-detail">
     <div class="image-section">
       <div class="image-gallery">
-        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}"
-             v-show="index === currentImageIndex" class="large-image"></div>
+        <el-image v-for="(img, index) in product.imgs" :key="index"
+                  :src="img"
+                  :zoom-rate="1.2"
+                  :preview-src-list="product.img.slice(1, -1).split(', ')"
+                  :initial-index="index"
+                  fit="fill"
+             v-show="index === currentImageIndex" class="large-image" :alt="product.productName"/>
       </div>
-      <div class="small-images">
-        <div v-for="(img, index) in product.imgs" :key="index" :style="{backgroundImage: `url(${img})`}"
-             @mouseover="currentImageIndex = index" class="small-image"></div>
+      <div>
+        <img v-for="(img, index) in product.imgs" :key="index" :src="img"
+             @mouseover="currentImageIndex = index" class="small-image" :alt="product.productName">
       </div>
     </div>
 
     <div class="product-info">
-      <h1>{{ product.productName }}</h1>
+      <h2>{{ product.productName }}</h2>
       <div class="productPrice"><h1>￥{{ product.price }}</h1></div>
-      <br>
+      <br><br><br>
+      <span style="color:rgb(96, 98, 102)">商品介绍：</span>
       <h2 class="productDescription">{{ product.description }}</h2><br><br>
       <el-rate class="text" v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
       <p><br><br>收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span></p><br>
     </div>
-    <div style="position: absolute;top: 485px;right: 390px">
+    <div style="position: absolute;top: 515px;right: 390px">
       数量:
     </div>
     <el-input-number class="number" v-model="num" :min="1" :max="50" @change="handleChange"/>

@@ -103,7 +103,6 @@ const removeCartItem = async (id) => {
       }
     });
     showSuccessMessage('删除成功');
-    // After deleting item, we refresh the cart items
     await loadCartItems();
   } catch (error) {
     showMessage('删除购物车失败');

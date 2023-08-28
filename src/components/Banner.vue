@@ -95,7 +95,17 @@ const handleOk = () => {
 
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
 let Avatar = ref('http://1.14.126.98:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
+let currentMessageInstance = null
 
+const showSuccessMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例，消息类型设置为 'success'
+  currentMessageInstance = ElMessage({message, type: 'success'})
+}
 const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -116,6 +126,7 @@ const parseTokenAndUserInfo = async () => {
             userId: response.data.userId,
             land: true
           });
+          showSuccessMessage('hi！'+userName.value+'，欢迎回来')
         } else {
           console.log('获取用户信息失败');
         }
