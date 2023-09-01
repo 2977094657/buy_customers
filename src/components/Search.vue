@@ -1,7 +1,7 @@
 <script setup>
-import {ref, onMounted, computed} from 'vue';
+import {ref, computed} from 'vue';
 import axios from 'axios';
-import { watchEffect } from 'vue';
+import {watchEffect} from 'vue';
 import router from "@/router/router";
 import HighlightText from './HighlightText.vue';
 
@@ -16,12 +16,15 @@ const props = defineProps({
 const executeSearch = async (page = 1) => {
   try {
     const response = await axios.get('http://1.14.126.98:8081/product/search', {
-      params: { keyword: props.keyword, page },
+      params: {keyword: props.keyword, page},
     });
-    const data = response.data;
-    products.value = data.records;
-    currentPage.value = data.current;
-    totalPages.value = data.pages;
+    // 在每个产品对象中添加一个 loading 字段
+    products.value = response.data.records.map(product => ({
+      ...product,
+      loading: false,
+    }));
+    currentPage.value = response.data.current;
+    totalPages.value = response.data.pages;
   } catch (error) {
     console.error('Request failed', error);
   }
@@ -55,39 +58,48 @@ watchEffect(() => {
 
 const pageNumbers = computed(() => {
   let numbers = []
-  for(let i = 1; i <= Math.min(7, totalPages.value); i++) {
+  for (let i = 1; i <= Math.min(7, totalPages.value); i++) {
     numbers.push(i)
   }
   return numbers
 })
 
-onMounted(() => {
-  // 使用props中的keyword进行搜索
-  executeSearch();
-});
-
 const isEmpty = computed(() => products.value.length === 0);
 const goHome = () => {
   // 导航到首页
-  router.push({ name: 'Home' });
+  router.push({name: 'Home'});
 };
 
 const goToProduct = (productId) => {
-  const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  const url = router.resolve({name: 'Product', params: {productId}}).href;
   window.open(url, '_blank');
 }
+
+
 </script>
 
 <template>
   <div class="products">
     <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
-      <img :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" class="img">
+      <div v-if="!product.loading">
+        <el-skeleton :animated="true">
+          <template #template>
+            <el-skeleton-item variant="image" width="100" class="img" style="border-radius: 10px;"/>
+          </template>
+        </el-skeleton>
+      </div>
+      <div style="display: none">
+        <img @load="product.loading=true" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName"
+             width="100" class="img">
+      </div>
+      <img v-if="product.loading" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100"
+           class="img">
       <div class="productName">
-        <HighlightText :text="product.productName" :keyword="props.keyword" />
-        <br>
-        <el-rate v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
-        <br><br>收藏：{{product.star}}
-        <br><br><span style="color: rgb(255,80,0);"><b>￥{{ product.price }}</b></span>
+        <HighlightText :text="product.productName" :keyword="props.keyword"/>
+      </div>
+      <div style="text-align: right;margin: 120px 40px 0 0;">
+        <span class="jge">￥</span>
+        <span class="price">{{ product.price }}</span>
       </div>
     </div>
   </div>
@@ -101,9 +113,10 @@ const goToProduct = (productId) => {
     <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
     <button @click="goToPage(totalPages)">尾页</button>
   </div>
-    <el-empty v-if="isEmpty" :image-size="300" image="http://1.14.126.98:5000/state/Search-empty.png" description="哇哦，您的搜索没有结果，这绝对是平行宇宙的错，换个关键词试试吧！">
-      <el-button type="primary" @click="goHome">返回首页</el-button>
-    </el-empty>
+  <el-empty v-if="isEmpty" :image-size="300" image="http://1.14.126.98:5000/state/Search-empty.png"
+            description="哇哦，您的搜索没有结果，这绝对是平行宇宙的错，换个关键词试试吧！">
+    <el-button type="primary" @click="goHome">返回首页</el-button>
+  </el-empty>
 </template>
 
 <style scoped>

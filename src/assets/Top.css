@@ -19,7 +19,7 @@
     margin: 0 0 0 -70px;
     width: 30%;
     height: 30px;
-    border-radius: 100px 0 0 100px;
+    border-radius: 22px 0 0 22px;
     border: 2px solid #ffffff;
     border-right: none;
     padding: 6px 15px;
@@ -30,9 +30,15 @@
     border-color: #FF5000;
 }
 
+.sticky .search-button {
+    border: 2px solid #FF5000;
+    border-left: none;
+}
+
 .search:focus {
     outline: none;
     border-color: #FF5000;
+    border-bottom-left-radius: 0;
 }
 
 .search-button {
@@ -41,9 +47,8 @@
     position: absolute;
     width: 70px;
     height: 45.5px;
-    border-radius: 0 100px 100px 0;
-    background-image: linear-gradient(145deg,#ff9000,#ff5000 77%);
-    color: #fff;
+    border-radius: 0 22px 22px 0;
+    background-color: white;
     border: none;
 
 }
@@ -168,4 +173,140 @@ img{
     position: fixed;
     width: 60px;
     height: 269px;
+}
+
+/deep/.el-alert {
+    --el-alert-padding: 0 0;
+    margin: 10px 0 0 0;
+    max-width: 200px;
+}
+
+.tc{
+    height: 10px;
+    display: flex;
+    padding: 20px 20px 20px 80px;
+    transition: background-color 0.3s ease;
+}
+
+.tc:hover{
+    border-radius: 10px;
+    background-color: rgb(254,240,240);
+    cursor: pointer;
+    color: #f56c6c;
+}
+
+.dropdown {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 0 476px;
+    padding: 10px;
+    width: 531px;
+    position: absolute;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* 确保下拉框在最上层 */
+    max-height: 612px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e3e5e7;
+    border-top: none;
+    border-radius: 0 0 22px 22px;
+    -webkit-font-smoothing: antialiased;
+}
+
+.dropdown-no-scrollbar {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 0 482px;
+    padding: 10px;
+    width: 535px;
+    position: absolute;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* 确保下拉框在最上层 */
+    max-height: 612px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e3e5e7;
+    border-top: none;
+    border-radius: 0 0 22px 22px;
+    -webkit-font-smoothing: antialiased;
+}
+
+.dropdown-item {
+    position: relative;
+    box-sizing: border-box;
+    height: 30px;
+    padding: 7px 10px 8px;
+    font-size: 12px;
+    line-height: 15px;
+    background: #f6f7f8;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.clear-history {
+    width: 30px;
+    font-size: 13px;
+    color: #9499a0;
+    margin: -18px 0 0 500px;
+    text-align: right;
+    cursor: pointer;
+}
+
+.clear-history:hover {
+    color: red;
+}
+
+.dropdown-item:hover ~ .remove-button {
+    display: block;
+}
+
+.remove-button{
+    color: white;
+    border-radius: 50%;
+    background-color: rgb(204,204,204);
+    position: absolute;
+    top: -10px;
+    right: 0;
+    cursor: pointer;
+    display: none;
+}
+
+.remove-button:hover {
+    display: block;
+}
+
+.dropdown-item:hover {
+    color: #FF5000;
+    display: block;
+}
+
+.history-text{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 96px;
+}
+
+.dropdown-item-wrapper {
+    position: relative; /* 使 remove-button 可以相对于它定位 */
+}
+
+.search:focus + .search-button {
+    border-bottom-right-radius: 0;
+    border: 2px solid #FF5000;
+    border-left: none;
+}
+
+.sticky .dropdown {
+    margin: 0 0 0 481.5px;
+    width: 537px;
+}
+
+.dropdown-title {
+    font-size: 18px;
+    text-align: left;
+    margin: 0 0 20px 0;
+    width: 100%;
 }

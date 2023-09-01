@@ -223,7 +223,7 @@ const removeSelectedItems = async () => {
           </div>
           <div class="delete">
             <el-button
-                style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+                style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
                 @click.stop text
                 @click="open(item.id)"
             >
@@ -233,7 +233,7 @@ const removeSelectedItems = async () => {
         </div>
         <br>
         <div class="delete2">
-          <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+          <el-button style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
                      @click.stop text
                      @click="open1()">删除
           </el-button>

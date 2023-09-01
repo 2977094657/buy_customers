@@ -17,7 +17,7 @@
 
 .image-gallery {
     width: 100%;
-    height: 70%;
+    height: 85%;
 }
 
 .large-image {
@@ -27,7 +27,7 @@
 }
 
 .small-image {
-    width: 10%;
+    width: 70px;
     margin: 1%;
     border: 2px solid transparent;
     border-radius: 10px;
@@ -78,7 +78,7 @@ img{
     width: 288px;
     height: 48px;
     right: 450px;
-    top: 700px;
+    top: 600px;
 }
 
 .gm{
@@ -144,4 +144,10 @@ img{
     cursor: pointer;
     transition: background-color .2s;
     background: rgba(0,0,0,.06);
+}
+
+.small-image-container {
+    width: 410px;
+    display: flex;
+    flex-wrap: wrap;
 }

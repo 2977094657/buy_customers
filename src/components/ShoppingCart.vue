@@ -89,7 +89,7 @@ const updateQuantity = debounce(async (id, quantity) => {
   } catch (error) {
     showMessage('更新购物车失败')
   }
-}, 1000)
+}, 500)
 
 const handleChange = (value, id) => {
   updateQuantity(id, value)
@@ -247,7 +247,7 @@ const totalPrice = computed(() => {
         </div>
         <div class="delete">
           <el-button
-              style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+              style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
               @click.stop text
               @click="open(item.id)"
           >
@@ -257,7 +257,7 @@ const totalPrice = computed(() => {
       </div>
       <br>
       <div class="delete1">
-        <el-button style="background-color: #ff2020;border: none;border-radius: 10px;color: white;padding: 10px"
+        <el-button style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
                    @click.stop text
                    @click="open1()">删除</el-button>
       </div>

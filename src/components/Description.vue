@@ -10,7 +10,7 @@
                   fit="fill"
              v-show="index === currentImageIndex" class="large-image" :alt="product.productName"/>
       </div>
-      <div>
+      <div class="small-image-container">
         <img v-for="(img, index) in product.imgs" :key="index" :src="img"
              @mouseover="currentImageIndex = index" class="small-image" :alt="product.productName">
       </div>
@@ -20,8 +20,6 @@
       <h2>{{ product.productName }}</h2>
       <div class="productPrice"><h1>￥{{ product.price }}</h1></div>
       <br><br><br>
-      <span style="color:rgb(96, 98, 102)">商品介绍：</span>
-      <h2 class="productDescription">{{ product.description }}</h2><br><br>
       <el-rate class="text" v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
       <p><br><br>收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span></p><br>
     </div>
@@ -39,7 +37,7 @@
       </div>
     </div>
   </div>
-  <ProductComments ref="childRef"></ProductComments>
+    <ProductComments ref="childRef"></ProductComments>
 
   <div v-if="httpError">
     <el-empty :image-size="300" image="http://1.14.126.98:5000/state/Product-empty.png" description="哎呀，这个商品已经被外星人带走了！">
@@ -65,8 +63,8 @@ const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const childRef = ref();
 
-onMounted(async () => {
-  if (!isNaN(route.params.productId)){
+const star = async () => {
+  if (!isNaN(route.params.productId)) {
     try {
       const response = await fetch(`http://1.14.126.98:8081/product/selectById?productId=${route.params.productId}`);
       const data = await response.json();
@@ -78,10 +76,14 @@ onMounted(async () => {
         httpError.value = true;
       }
     }
-  }else {
+  } else {
     httpError.value = true;
     childRef.value.switchShow()
   }
+}
+
+onMounted(async () => {
+  await star()
 })
 
 const goHome = () => {
@@ -153,6 +155,7 @@ async function addToFavorites() {
       showMessage(response.data.msg)
     }else if (response.data.code===0){
       showSuccessMessage(response.data.data);
+      star()
     }
   }).catch(error => {
     console.error('添加到收藏夹时出错：', error);

@@ -1,18 +1,20 @@
 <script setup>
-import {ref, onMounted,watch,computed,onBeforeUnmount } from 'vue';
+import {ref, onMounted,watch,computed,onBeforeUnmount,watchEffect,nextTick,onUpdated  } from 'vue';
 import { useRouter,useRoute } from 'vue-router';
 import { useStore } from 'vuex'
 import Login from "@/components/Login.vue";
 import axios from "axios";
-import {ChatDotSquare, Document} from "@element-plus/icons-vue";
+import {ChatDotSquare, Close, Document, Female, Male} from "@element-plus/icons-vue";
 import {HeartOutlined} from "@ant-design/icons-vue";
 import ShoppingCart from "@/components/ShoppingCart.vue";
 import Star from "@/components/Star.vue";
 import { lock, unlock } from 'tua-body-scroll-lock'
+import { LogoutOutlined,SearchOutlined } from '@ant-design/icons-vue';
 
 const store = useStore()
 const route = useRoute();
 const land = computed(() => store.state.userInfo.land)
+const refInput =ref()
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
@@ -43,18 +45,6 @@ const handleScroll = () => {
 const inputValue = ref('');
 
 const router = useRouter();
-
-const searchProduct = () => {
-  // 检查 inputValue 是否为空或只包含空格
-  if (!inputValue.value || inputValue.value.trim() === '') {
-    // 如果是，那么导航到首页
-    router.push({ name: 'Home' });
-  } else {
-    // 否则，执行搜索
-    router.push({ name: 'Search', params: { keyword: inputValue.value } });
-  }
-};
-
 let open = ref(false)
 
 const showModal = () => {
@@ -81,6 +71,8 @@ const MouseOut = () => {
 
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
 let Avatar = ref('http://1.14.126.98:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
+let description = ref('')
+let gender = ref('')
 
 const parseTokenAndUserInfo = async () => {
   try {
@@ -97,9 +89,12 @@ const parseTokenAndUserInfo = async () => {
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;
           Avatar.value = userInfoResponse.data.data.userAvatar;
+          description.value = userInfoResponse.data.data.description;
+          gender.value = userInfoResponse.data.data.gender;
           store.commit('setUserInfo', {
             name: userName.value,
             userAvatar: Avatar.value,
+            description: description.value,
             userId: response.data.userId,
             land: true
           });
@@ -186,6 +181,109 @@ const handleClose = () => {
   // 在这里执行事件
   unlock()
 };
+
+const logout = () => {
+  // 删除本地存储的token
+  localStorage.removeItem('token');
+
+  // 刷新页面
+  location.reload();
+}
+
+const schu = () => {
+  ElMessageBox.confirm(
+      '确认退出登录吗?',
+      '退出登录',
+      {
+        confirmButtonText: '退出',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true,
+      }
+  )
+      .then(() => {
+        logout();
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消退出',
+        })
+      })
+}
+
+const searchHistory = ref([]); // 用于保存搜索历史的变量
+
+watchEffect(() => {
+  // 从本地存储中获取搜索历史
+  const history = localStorage.getItem('searchHistory');
+  if (history) {
+    searchHistory.value = JSON.parse(history);
+  }
+});
+
+const focusInput = ref(false); // 用于保存输入框是否获得焦点的状态
+const remove = ref();
+const onBlur = () => {
+  if (remove.value){
+    refInput.value.focus()
+    focusInput.value = true;
+    remove.value = false
+  }else if (!remove.value){
+    focusInput.value = false;
+  }
+};
+
+const removeHistory = (history) => {
+  remove.value=true
+  const index = searchHistory.value.indexOf(history);
+  if (index > -1) {
+    searchHistory.value.splice(index, 1);
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+  }
+};
+
+const clearHistory = () => {
+  // 清除所有的历史记录
+  searchHistory.value = [];
+  localStorage.setItem('searchHistory', JSON.stringify([]));
+};
+
+const searchProduct = () => {
+  // 检查 inputValue 是否为空或只包含空格
+  if (!inputValue.value || inputValue.value.trim() === '') {
+    // 如果是，那么导航到首页
+    router.push({ name: 'Home' });
+  } else {
+    const url = router.resolve({name: 'Search', params: { keyword: inputValue.value }}).href;
+    window.open(url, '_blank');
+
+    // 先移除旧的记录，然后添加新的记录
+    removeHistory(inputValue.value);
+    searchHistory.value.unshift(inputValue.value);
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+  }
+};
+
+
+const selectHistory = (history) => {
+  // 当用户点击历史记录时，取消事件冒泡，防止触发 @mousedown.prevent
+  event.stopPropagation();
+  inputValue.value = history;
+  searchProduct();
+  focusInput.value = false; // 隐藏下拉框
+};
+
+const hasScrollbar = ref(false);
+
+const checkScrollbar = async () => {
+  await nextTick();
+  hasScrollbar.value = document.documentElement.scrollHeight > window.innerHeight;
+};
+
+onMounted(checkScrollbar);
+onUpdated(checkScrollbar);
+
 </script>
 
 <template>
@@ -196,10 +294,57 @@ const handleClose = () => {
   <div class="search-placeholder" v-show="isPlaceholderVisible"></div>
     <div class="search-container" :class="{ 'sticky': isSticky }">
       <p class="ip" id="result"></p>
-      <input v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct"/>
-      <button @click="searchProduct" class="search-button"><b>搜索</b></button>
+      <!-- 输入框获得焦点时显示下拉栏，失去焦点时隐藏下拉栏 -->
+      <input ref="refInput" @focus="focusInput=true" @blur="onBlur" v-model="inputValue" class="search" placeholder="请输入商品名" @keyup.enter="searchProduct" />
+
+      <button @click="searchProduct" class="search-button">
+        <SearchOutlined />
+      </button>
+
+      <!-- 历史记录下拉栏 -->
+      <div v-show="focusInput" :class="hasScrollbar ? 'dropdown' : 'dropdown-no-scrollbar'" ref="dropdownRef">
+        <div class="dropdown-title">
+          搜索历史
+          <div class="clear-history" @mousedown.prevent="clearHistory">清空</div>
+        </div>
+        <div class="dropdown-item-wrapper" v-for="history in searchHistory">
+          <div class="dropdown-item" @mousedown.prevent="selectHistory(history)">
+            <div class="history-text">{{ history }}</div>
+          </div>
+          <el-icon class="remove-button" @mousedown.stop="removeHistory(history)"><Close /></el-icon>
+        </div>
+      </div>
+
       <div class="head">
-        <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
+        <img v-if="!land" class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
+<!--        悬浮到头像时的弹窗-->
+        <el-popover v-if="land" :show-arrow="false" :width="300" popper-style="border-radius: 10px; box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; padding: 20px;">
+          <template #reference>
+            <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
+          </template>
+          <template #default>
+            <div class="demo-rich-conent" style="display: flex; gap: 16px; flex-direction: column">
+              <div style="display: flex">
+                <img class="img" :src="Avatar" style="margin-bottom: 8px" alt="头像"/>
+                <div style="margin: 0 0 0 20px">
+                  <b>{{ userName }}</b>
+                  <span>
+                    <el-icon style="color: rgb(95,212,242);font-size: 15px;margin-left: 50px" v-if="gender==='男性'"><Male/></el-icon>
+                    <el-icon style="color: rgb(255,117,143);font-size: 15px;margin-left: 50px" v-if="gender==='女性'"><Female/></el-icon>
+                  </span>
+                  <el-alert :title="description" type="info" :closable="false" />
+                </div>
+              </div>
+              <el-divider style="margin: 0"/>
+              <div class="tc" @click="schu">
+                <LogoutOutlined style="margin: 0;"/>
+                <span style="margin: -3px 0 0 20px">退出登录</span>
+              </div>
+            </div>
+          </template>
+        </el-popover>
+
+
         <p class="hi">Hi!</p>
         <p class="name">
           <span @click="showModal();PersonalCenter()"
