@@ -195,6 +195,27 @@ const totalPrice = computed(() => {
   }
   return sum
 })
+
+const addHistory = async (productId) => {
+  if(land){
+    try {
+      const response = await axios.post('http://1.14.126.98:8081/user/addHistory', {}, {
+        params: {
+          userid: userid.value,
+          productId
+        }
+      });
+
+      if (response.data.code === 200) {
+        console.log('History added successfully');
+      } else {
+        console.log('Failed to add history');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+};
 </script>
 
 <template>
@@ -224,7 +245,7 @@ const totalPrice = computed(() => {
       </div>
     </div>
     <div v-for="(item, index) in cartItems" :key="item.id">
-      <div class="cart" @click="goToProduct(item.productId)" :class="{ 'selected': item.checked }">
+      <div class="cart" @click="goToProduct(item.productId);addHistory(item.productId)" :class="{ 'selected': item.checked }">
         <input style="width: 20px;height: 20px;" type="checkbox" v-model="item.checked" @click.stop>
         <img style="margin: 0 0 0 30px;width: 100px;height: 100px;" :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image" />
         <div class="productName">

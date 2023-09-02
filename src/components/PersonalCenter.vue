@@ -1,10 +1,11 @@
 <script setup>
-import {Document, User,ShoppingCart, ChatDotSquare} from '@element-plus/icons-vue'
+import {Document, User, ShoppingCart, ChatDotSquare, Clock} from '@element-plus/icons-vue'
 import {HeartOutlined} from "@ant-design/icons-vue";
 import MyCart from "@/components/ShoppingCart.vue";
 import Star from "@/components/Star.vue";
 import InforMation from "@/components/InforMation.vue";
 import {ref, onMounted} from 'vue';
+import History from "@/components/History.vue";
 
 const handleClose = (key, keyPath) => {
   console.log(key, keyPath)
@@ -41,18 +42,23 @@ onMounted(() => {
             <el-icon><HeartOutlined></HeartOutlined></el-icon>
             <template #title>宝贝收藏</template>
           </el-menu-item>
-          <el-menu-item index="3" @click="updateShowIndex(3)">
-            <el-icon><document /></el-icon>
-            <template #title>我的订单</template>
+          <el-menu-item index="3" @click.passive="updateShowIndex(3)">
+            <el-icon><ShoppingCart /></el-icon>
+            <template #title>购&nbsp&nbsp物&nbsp&nbsp车</template>
           </el-menu-item>
           <el-menu-item index="4" @click="updateShowIndex(4)">
             <el-icon><ChatDotSquare/></el-icon>
             <template #title>我的评价</template>
           </el-menu-item>
-          <el-menu-item index="5" @click.passive="updateShowIndex(5)">
-            <el-icon><ShoppingCart /></el-icon>
-            <template #title>购物车</template>
+          <el-menu-item index="5" @click="updateShowIndex(5)">
+            <el-icon><Clock /></el-icon>
+            <template #title>我的足迹</template>
           </el-menu-item>
+          <el-menu-item index="6" @click="updateShowIndex(6)">
+            <el-icon><document /></el-icon>
+            <template #title>我的订单</template>
+          </el-menu-item>
+
         </el-menu>
       </el-scrollbar>
     </el-aside>
@@ -64,7 +70,7 @@ onMounted(() => {
             <InforMation></InforMation>
           </div>
 
-          <div v-if="showIndex===5">
+          <div v-if="showIndex===3">
             <h1 style="margin: 0 0 50px 60px;">
             购物车
             </h1>
@@ -79,6 +85,15 @@ onMounted(() => {
             </h1>
             <div style="position:relative;width: 800px;left: 50px;">
               <Star></Star>
+            </div>
+          </div>
+
+          <div v-if="showIndex===5">
+            <h1 style="margin: 20px 0 50px 50px;">
+              我的足迹
+            </h1>
+            <div style="position:relative;width: 800px;left: 50px;margin: -30px 0 0 0">
+              <History></History>
             </div>
           </div>
         </el-scrollbar>

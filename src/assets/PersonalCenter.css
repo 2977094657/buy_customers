@@ -1,6 +1,6 @@
 .el-menu-vertical-demo:not(.el-menu--collapse) {
     border: none;
-    top: 100px;
+    top: 80px;
     width: 200px;
     height: 480px;
 }

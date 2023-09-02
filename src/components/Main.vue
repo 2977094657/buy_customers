@@ -1,6 +1,6 @@
 <template>
     <div class="products">
-      <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId)">
+      <div v-for="product in products" :key="product.productId" class="product" @click="goToProduct(product.productId);addHistory(product.productId)">
         <div v-if="!product.loading">
           <el-skeleton :animated="true">
             <template #template>
@@ -24,8 +24,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import {useRouter} from "vue-router";
+import axios from "axios";
+import store from "@/store";
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -62,6 +64,30 @@ const goToProduct = (productId) => {
   const url = router.resolve({ name: 'Product', params: { productId } }).href;
   window.open(url, '_blank');
 }
+
+const userid = computed(() => store.state.userInfo.userId)
+const land = computed(() => store.state.userInfo.land)
+
+const addHistory = async (productId) => {
+  if(land){
+    try {
+      const response = await axios.post('http://1.14.126.98:8081/user/addHistory', {}, {
+        params: {
+          userid: userid.value,
+          productId
+        }
+      });
+
+      if (response.data.code === 200) {
+        console.log('History added successfully');
+      } else {
+        console.log('Failed to add history');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+};
 </script>
 
 <style scoped>
