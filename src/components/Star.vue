@@ -174,7 +174,7 @@ const removeSelectedItems = async () => {
 }
 
 const addHistory = async (productId) => {
-  if(land){
+  if(land.value){
     try {
       const response = await axios.post('http://1.14.126.98:8081/user/addHistory', {}, {
         params: {

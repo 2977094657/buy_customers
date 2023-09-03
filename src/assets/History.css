@@ -1,0 +1,106 @@
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-date {
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.card-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.product-image {
+    width: 150px;
+    height: 150px;
+}
+
+.product-price {
+    margin: 0 0 0 0;
+    font-weight: 700;
+    color: #f10;
+}
+
+.product-name {
+    margin: 0 0 0 0;
+    font-size: 13px;
+    height: 22px;
+    line-height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #999;
+}
+
+.product-name:hover {
+    cursor: pointer;
+    color: rgb(253, 81, 2);
+}
+
+.card:hover {
+    border: 1px solid rgb(253, 81, 2);
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+/deep/ .el-card__body {
+    padding: 0;
+}
+
+/deep/ .el-card {
+    width: 150px;
+    height: 200px;
+}
+
+.product-count {
+    margin: 0 0 0 10px;
+    font-size: 10px;
+}
+
+/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin .ant-spin-dot-item {
+    background-color: #ff915e;
+}
+
+/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin {
+    color: #ff915e;
+}
+
+.card-content {
+    position: relative;
+}
+
+.delete-icon {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.delete-icon-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px;
+}
+
+.delete-icon-container.highlight {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.clear-all-history {
+    right: 0;
+    top: -45px;
+    position: absolute;
+}
+
+/deep/.el-empty__description p {
+    margin: 0 0 0 70px;
+}

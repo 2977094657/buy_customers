@@ -69,7 +69,7 @@ const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 
 const addHistory = async (productId) => {
-  if(land){
+  if(land.value){
     try {
       const response = await axios.post('http://1.14.126.98:8081/user/addHistory', {}, {
         params: {
