@@ -13,6 +13,8 @@
       <router-view name="productComments"></router-view>
       <router-view name="personalCenter"></router-view>
       <router-view name="shoppingCart"></router-view>
+      <router-view name="orders"></router-view>
+      <router-view name="vendor"></router-view>
     </div>
   </div>
   </div>

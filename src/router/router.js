@@ -5,6 +5,8 @@ import Banner from '@/components/Banner.vue';
 import Search from "@/components/Search.vue";
 import Description from '@/components/Description.vue';
 import PersonalCenter from "@/components/PersonalCenter.vue";
+import Orders from "@/components/Orders.vue";
+import Vendor from "@/components/Vendor.vue";
 
 const routes = [
     {
@@ -41,6 +43,24 @@ const routes = [
             top: Top,
             personalCenter: PersonalCenter,
         },
+    },
+    {
+        path: '/purchase/:productId',
+        name: 'purchase',
+        components: {
+            top: Top,
+            orders: Orders,
+        },
+        props: { description: true }
+    },
+    {
+        path: '/vendor/:name',
+        name: 'vendor',
+        components: {
+            top: Top,
+            vendor: Vendor,
+        },
+        props: { description: true }
     }
 ]
 

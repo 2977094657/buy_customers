@@ -317,11 +317,11 @@ const addHistory = async (productId) => {
 
 
 /*本地加载的css，不知道为什么打包后css悔发生变化因此本地和服务器各一份*/
-/deep/ :where(.css-dev-only-do-not-override-eq3tly).ant-spin .ant-spin-dot-item {
+/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin .ant-spin-dot-item {
   background-color: #ff915e;
 }
 
-/deep/ :where(.css-dev-only-do-not-override-eq3tly).ant-spin {
+/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin {
   color: #ff915e;
 }
 

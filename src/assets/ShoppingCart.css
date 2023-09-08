@@ -51,16 +51,6 @@ img:hover{
     margin: -100px 0 0 0;
 }
 
-.description{
-    max-height: 56px;
-    overflow: hidden;
-    width: 100px;
-    position: absolute;
-    left: 200px;
-    margin: -60px 0 0 0;
-    font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
-}
-
 .number{
     position: absolute;
     left: 470px;

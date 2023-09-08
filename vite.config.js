@@ -11,10 +11,14 @@ import Inspector from "vite-plugin-vue-inspector"
 export default defineConfig({
   plugins: [
     Inspector({
+      defaultEditor: 'webstorm',
       toggleComboKey: 'alt-x' // 设置快捷键为 alt加x
     }),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+          ElementPlusResolver(),
+        AntDesignVueResolver()
+      ],
     }),
     Components({
       resolvers: [

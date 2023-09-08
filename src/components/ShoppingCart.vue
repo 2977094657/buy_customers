@@ -251,9 +251,6 @@ const addHistory = async (productId) => {
         <div class="productName">
           {{ productResponses[index].data.productName }}
         </div>
-        <div class="description">
-          {{ productResponses[index].data.description }}
-        </div>
         <div class="price">
           ￥{{ productResponses[index].data.price }}
         </div>
