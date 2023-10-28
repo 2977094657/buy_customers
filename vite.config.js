@@ -43,6 +43,6 @@ export default defineConfig({
       scss: {
         additionalData: `@import "element-plus/lib/theme-chalk/index.scss";`
       }
-    }
+    },
   }
 })

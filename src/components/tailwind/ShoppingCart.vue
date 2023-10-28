@@ -1,5 +1,46 @@
+<template>
+  <!-- 添加固定栏位 -->
+  <div class="z-[1] fixed top-15 left-0 right-0 bg-white text-black flex justify-end p-4">
+    <div style="margin-right: 70%;position: absolute">
+      <p style="margin-top: 5px;">购物车<b style="color: rgb(255, 80, 0);margin-left: 10px">{{ totalCount }}</b></p>
+    </div>
+    <div v-if="batchManageMode">
+      <input class="button" style="margin-right: 5px" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
+      <label style="border: none" for="selectAll" class="button">全选</label>
+      <button style="margin-right: 20px" class="inline-flex justify-center rounded-md bg-red-500 px-2 py-1 text-sm font-semibold text-white shadow-sm transition duration-500 ease select-none hover:bg-red-600" @click="open1()">删除</button>
+      <button class="button" @click="batchManageMode=false">取消管理</button>
+    </div>
+    <button v-else class="button" @click="batchManageMode=true">批量管理</button>
+  </div>
+  <!-- 添加等高度的空白块 -->
+  <div style="height: 55px;"></div>
+  <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-8">
+    <div v-for="(item, index) in cartItems" :key="item.id" class="group flex product" @click="goToProduct(item.productId);addHistory(item.productId)"> <!-- 添加 flex 和 items-center -->
+      <div class="w-36 h-36 overflow-hidden rounded-lg mr-auto"> <!-- 添加 mr-auto -->
+        <img :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" class="h-full w-full"  alt=""/>
+      </div>
+      <div class="flex-grow flex flex-col justify-between">
+        <p class="text-sm text-gray700 productName">{{ productResponses[index].data.productName }}</p>
+        <div class="flex justify-between items-center">
+        <span style="font-size: 10px;margin-left: 30px">{{ formatDate(item.time) }}</span>
+<!--          购物车数量框-->
+        <el-input-number v-model="item.number" @change="(val) => handleChange(val, item.id)" style="z-index: 0; width: 100px" size="small" :min="1" :max="50" @click.stop />
+        </div>
+
+        <!-- 修改此处，使标题、价格和复选框在同一行 -->
+        <div class="flex justify-between items-center">
+          <p class="mt-l text-lg font-medium text-gray900 price"><span class="jge">￥</span>{{ productResponses[index].data.price }}</p>
+          <!-- 添加复选框，并使用 v-if 控制其显示/隐藏 -->
+          <input style="border-radius: 3px" type="checkbox" v-model="item.checked" v-if="batchManageMode" @click.stop>
+        </div>
+      </div>
+    </div>
+  </div>
+  <el-empty v-if="empty" :image-size="350" description="购物车竟然是空的，再忙，也要记得买点什么犒劳自己~" image="http://124.221.7.201:5000/state/ShoppingCart-empty.png"></el-empty>
+</template>
+
 <script setup>
-import {ref, onMounted, computed} from 'vue'
+import {ref, onMounted, computed,watch} from 'vue'
 import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
@@ -11,11 +52,13 @@ const productResponses = ref([])
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const empty = ref(false)
+const batchManageMode = ref(false)
 
 const loadCartItems = async () => {
+  console.log(land.value)
   if (land.value){
     try {
-      const response = await axios.get('http://1.14.126.98:8081/cart/list', {
+      const response = await axios.get('http://124.221.7.201:8081/cart/list', {
         params: {
           userId: userid.value
         }
@@ -25,7 +68,7 @@ const loadCartItems = async () => {
         empty.value=true
       }
       const productRequests = cartItems.value.map(item =>
-          axios.get('http://1.14.126.98:8081/product/selectById', {
+          axios.get('http://124.221.7.201:8081/product/selectById', {
             params: {
               productId: item.productId
             }
@@ -35,13 +78,19 @@ const loadCartItems = async () => {
       productResponses.value = await Promise.all(productRequests)
 
     } catch (error) {
+      console.error(error);
     }
   }else {
     empty.value=true
   }
 }
 
-onMounted(loadCartItems)
+// 当 land.value 变为 true 时加载购物车项
+watch(land, (newVal) => {
+  if (newVal === true) {
+    loadCartItems();
+  }
+}, { immediate: true });
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -81,7 +130,7 @@ const totalCount = computed(() => {
 
 const updateQuantity = debounce(async (id, quantity) => {
   try {
-    const response = await axios.put(`http://1.14.126.98:8081/cart/update?id=${id}&quantity=${quantity}`)
+    const response = await axios.put(`http://124.221.7.201:8081/cart/update?id=${id}&quantity=${quantity}`)
     showSuccessMessage(response.data.message)
     if (response.data.message==='超出购物车最大限制，请将所有商品数量控制在50以内'){
       showMessage(response.data.message)
@@ -97,7 +146,7 @@ const handleChange = (value, id) => {
 
 const removeCartItem = async (id) => {
   try {
-    await axios.delete(`http://1.14.126.98:8081/cart/delete`, {
+    await axios.delete(`http://124.221.7.201:8081/cart/delete`, {
       params: {
         id: id
       }
@@ -172,7 +221,7 @@ const removeSelectedItems = async () => {
   }
 
   try {
-    const response = await axios.delete('http://1.14.126.98:8081/cart/deleteAll', {
+    const response = await axios.delete('http://124.221.7.201:8081/cart/deleteAll', {
       params: {
         id: selectedIds.join(',')
       }
@@ -185,21 +234,10 @@ const removeSelectedItems = async () => {
   }
 }
 
-const totalPrice = computed(() => {
-  let sum = 0
-  for (const item of cartItems.value) {
-    if (item.checked) {
-      const productIndex = cartItems.value.findIndex(product => product.id === item.id)
-      sum += item.number * productResponses.value[productIndex].data.price
-    }
-  }
-  return sum
-})
-
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://1.14.126.98:8081/user/addHistory', {}, {
+      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
         params: {
           userid: userid.value,
           productId
@@ -218,86 +256,13 @@ const addHistory = async (productId) => {
 };
 </script>
 
-<template>
-  <div>
-    <div class="zj">
-      <h1>{{ totalCount }}</h1>
-    </div>
-    <div class="db">
-      <div style="position:absolute;left: 30px;background-color: white">
-        <input style="width: 20px;height: 20px;" type="checkbox" v-model="selectAll" @change="handleSelectAllChange">
-        <label for="selectAll"><b style="position:absolute;width: 32px;margin: 2px 0 0 0">全选</b></label>
-      </div>
-      <div style="margin: -60px 0 20px 215px;">
-        <b>商品信息</b>
-      </div>
-      <div style="margin: -42px 0 20px 357px;">
-        <b>单价</b>
-      </div>
-      <div style="margin: -41px 0 20px 475px;">
-        <b>数量</b>
-      </div>
-      <div style="margin: -42px 0 20px 590px;">
-        <b>总价</b>
-      </div>
-      <div  class="cz">
-        <b>操作</b>
-      </div>
-    </div>
-    <div v-for="(item, index) in cartItems" :key="item.id">
-      <div class="cart" @click="goToProduct(item.productId);addHistory(item.productId)" :class="{ 'selected': item.checked }">
-        <input style="width: 20px;height: 20px;" type="checkbox" v-model="item.checked" @click.stop>
-        <img style="margin: 0 0 0 30px;width: 100px;height: 100px;" :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" alt="Product image" />
-        <div class="productName">
-          {{ productResponses[index].data.productName }}
-        </div>
-        <div class="price">
-          ￥{{ productResponses[index].data.price }}
-        </div>
-        <div class="number">
-          <el-input-number @click.stop class="number1" v-model="item.number" :min="1" :max="50" @change="(val) => handleChange(val, item.id)" />
-        </div>
-        <div class="time">
-          {{ formatDate(item.time) }}
-        </div>
-        <div class="total">
-          ￥{{ item.number * productResponses[index].data.price }}
-        </div>
-        <div class="delete">
-          <el-button
-              style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
-              @click.stop text
-              @click="open(item.id)"
-          >
-            删除
-          </el-button>
-        </div>
-      </div>
-      <br>
-      <div class="delete1">
-        <el-button style="background-color: #ff2020;border: none;border-radius: 5px;color: white;padding: 10px"
-                   @click.stop text
-                   @click="open1()">删除</el-button>
-      </div>
-    </div><br><br><br><br><br><br>
-    <div v-if="!empty" class="checkout-bar">
-      <div style="position:absolute;right: 130px;bottom: 25px">
-        合计（不含运费）：
-        <span class="total-symbol">
-          ￥
-        </span>
-        <span class="price-sum">
-          {{ totalPrice }}
-        </span>
-      </div>
-      <div class="btn">
-        <button class="checkout-btn">去结算</button>
-      </div>
-    </div>
-  </div>
-  <el-empty v-if="empty" style="margin: -80px 0 0 0" :image-size="350" description="购物车竟然是空的，再忙，也要记得买点什么犒劳自己~" image="http://1.14.126.98:5000/state/ShoppingCart-empty.png"></el-empty>
-</template>
-
 <style scoped>
-@import '../assets/ShoppingCart.css';
+@import '../../assets/Tailwind.css';
+@import '../../assets/Main.css';
+.button{
+  margin-right: 20px;
+  border: 1px solid #dcdcdc;
+  padding: 5px;
+  border-radius: 4px
+}
 </style>

@@ -1,45 +1,10 @@
-.products {
-    display: flex;
-    flex-wrap: wrap;
-}
-
 .product {
+    margin: 20px 15px 0 0;
+    padding: 10px 10% 10px 2%;
     background-color: #f7f9fa;
     border-radius: 10px;
-    width: 20%;
-    height: 150px;
-    margin: 20px 1% 0 0;
-    padding: 10px 10% 10px 1%;
     transition: outline 0.3s ease-in-out;
     outline: 1px transparent solid;
-}
-
-.productName {
-    font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
-    font-size: 16px;
-    width: 160px;
-    max-height: 46px;
-    overflow: hidden;
-    position: absolute;
-    margin: 5px 0 0 11%;
-    color: #333333;
-    text-align: left;
-}
-
-.img {
-    position: absolute;
-    width: 10%;
-    height: 150px;
-}
-
-.img:hover{
-    filter:alpha(Opacity=80);
-    -moz-opacity:0.8;
-    opacity: 0.8;
-}
-
-.productName:hover{
-    color: rgb(253,81,2);
 }
 
 .product:hover {
@@ -49,57 +14,23 @@
     box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.1);
 }
 
-button {
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 16px;
-    margin: 0 5px;
+.productName {
+    font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
     font-size: 16px;
-    cursor: pointer;
+    max-width: 158px;
+    max-height: 46px;
+    overflow: hidden;
+    margin: 5px 0 0 11%;
+    color: #333333;
+    text-align: left;
 }
 
-button[disabled] {
-    background-color: #ddd;
-    cursor: not-allowed;
-}
-.current-page {
-    background-color: #ff9c76; /* 这是当前页的背景色 */
-    color: white; /* 这是当前页的文本色 */
-}
-
-/* 首页和尾页的颜色 */
-button:first-child, button:last-child {
-    background-color: #e15f00; /* 首页和尾页的背景色 */
-    color: white; /* 首页和尾页的文本色 */
-}
-
-/* 上一页和下一页的颜色 */
-button:nth-child(2), button:nth-last-child(2) {
-    border: 1px #dddddd solid;
-    background-color: white; /* 上一页和下一页的背景色 */
-    color: black; /* 上一页和下一页的文本色 */
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 7% 0 7% -3%; /* 上下都有 20px 的外边距，左右没有额外的外边距 */
-}
-
-img {
-    border-radius: 10px;
-    width: 100%;
-    height: 100%;
-    opacity: 1;
-    transition: opacity 0.5s;
+.productName:hover{
+    color: rgb(253,81,2);
 }
 
 .price{
-    position: absolute;
-    margin: 4px 0 0 0;
-    text-align: right;
+    margin: 0 0 0 11%;
     color: #ff5000;
     font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
     font-size: 22px;
@@ -114,5 +45,4 @@ img {
     color: #ff5000;
     font-size: 20px;
     font-family: "Microsoft Yahei", serif;
-
 }

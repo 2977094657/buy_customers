@@ -1,12 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Top from '@/components/Top.vue';
-import Main from '@/components/Main.vue';
-import Banner from '@/components/Banner.vue';
-import Search from "@/components/Search.vue";
-import Description from '@/components/Description.vue';
-import PersonalCenter from "@/components/PersonalCenter.vue";
-import Orders from "@/components/Orders.vue";
-import Vendor from "@/components/Vendor.vue";
+import Top from '@/components/tailwind/Top.vue';
+import Main from '@/components/tailwind/Main.vue';
+import Banner from '@/components/tailwind/Banner.vue';
+import Search from "@/components/tailwind/Search.vue";
+import Description from '@/components/tailwind/Description.vue';
+import PersonalCenter from "@/components/tailwind/PersonalCenter.vue";
+import Orders from "@/components/tailwind/Orders.vue";
+import Vendor from "@/components/tailwind/Vendor.vue";
+import Star1 from "@/components/tailwind/Star.vue";
+import Address from "@/components/tailwind/Address.vue";
+import PersonalInformation from "@/components/tailwind/PersonalInformation.vue";
+import ShoppingCart from "@/components/tailwind/ShoppingCart.vue";
+import History from "@/components/tailwind/History.vue";
 
 const routes = [
     {
@@ -40,9 +45,39 @@ const routes = [
         path: '/PersonalCenter',
         name: 'PersonalCenter',
         components: {
-            top: Top,
-            personalCenter: PersonalCenter,
+            personalCenter: PersonalCenter
         },
+        children:[
+            {
+                path: "InforMation",
+                name: "InforMation",
+                components: {
+                    personalInformation: PersonalInformation,
+                    address: Address
+                }
+            },
+            {
+                path: "star",
+                name: "star",
+                components: {
+                    star: Star1,
+                }
+            },
+            {
+                path: "ShoppingCart",
+                name: "ShoppingCart",
+                components: {
+                    ShoppingCart: ShoppingCart,
+                }
+            },
+            {
+                path: "History",
+                name: "History",
+                components: {
+                    History: History,
+                }
+            },
+        ],
     },
     {
         path: '/purchase/:productId',

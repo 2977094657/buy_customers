@@ -7,9 +7,13 @@ export default createStore({
             userInfo: {
                 name:'',
                 userAvatar:'',
-                userId: null,
-                land: null,
+                userId: '',
+                land: '',
+                gender: '',
+                description: ''
             },
+            // 保持随机数，只在刷新的情况下改变内容，返回不变
+            randomSeed: Math.floor(Math.random() * 10000),
         }
     },
 
@@ -17,6 +21,9 @@ export default createStore({
     mutations: {
         setUserInfo(state, userInfo) {
             state.userInfo = userInfo;
+        },
+        setRandomSeed(state, seed) {
+            state.randomSeed = seed;
         },
     },
 

@@ -2,7 +2,7 @@
 import {ref, onMounted, computed, reactive, watch,provide} from 'vue';
 import store from "@/store";
 import axios from 'axios';
-import {LocationInformation} from "@element-plus/icons-vue";
+import { RadioGroup, RadioGroupDescription, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
@@ -11,11 +11,10 @@ const imageUrl1 = ref('')
 const empty = ref(false)
 const number = ref()
 
-
 const fetchUserInfo = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://1.14.126.98:8081/user/all?userId=${userId}`);
+    const response = await fetch(`http://124.221.7.201:8081/user/all?userId=${userId}`);
     const data = await response.json();
     if (data.code === 0) {
       userInfo.value = data.data;
@@ -132,7 +131,7 @@ const showModal2 = () => {
 const fetchUserAddresses = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://1.14.126.98:8081/address/all?userId=${userId}`);
+    const response = await fetch(`http://124.221.7.201:8081/address/all?userId=${userId}`);
     const data = await response.json();
     if (data.code === 200) {
       if (data.data.length === 0) {
@@ -184,7 +183,7 @@ const addAddress = async () => {
   }
 
   try {
-    const response = await axios.post('http://1.14.126.98:8081/address/add', null, {
+    const response = await axios.post('http://124.221.7.201:8081/address/add', null, {
       params: {
         userId: userid.value,
         consignee: ruleForm.consignee,
@@ -216,6 +215,7 @@ const addAddress = async () => {
 const currentAddress = ref(null);
 const currentAddressId = ref(null);
 const editAddress = (row) => {
+  console.log(11111111)
   currentAddressId.value = row.id;
   // 拆分地址字符串为数组
   const addressArray = row.address.split('/');
@@ -248,47 +248,13 @@ const handleOk1 = async () => {
       fullAddress: currentAddress.value.fullAddress,
       phone: currentAddress.value.phoneNumber,
     };
-    const response = await axios.put('http://1.14.126.98:8081/address/update', null, {params});
+    const response = await axios.put('http://124.221.7.201:8081/address/update', null, {params});
     if (response.data.code === 200) {
       open1.value = false
       tableData.version++;
       showSuccessMessage(response.data.msg)
     } else {
       showMessage(response.data.msg)
-    }
-  } catch (error) {
-    showMessage('请求接口出错：' + error.message);
-  }
-};
-
-const setDefaultAddress = async (row) => {
-  try {
-    // 找到当前的默认地址
-    const currentDefault = tableData.value.find(item => item.defaultOperate === 1);
-    if (currentDefault) {
-      // 取消当前的默认地址
-      await axios.put('http://1.14.126.98:8081/address/updateDefault', null, {
-        params: {
-          id: currentDefault.id,
-          defaultOperate: 0,
-        },
-      });
-      // 更新本地数据
-      currentDefault.defaultOperate = 0;
-    }
-    // 设置新的默认地址
-    const response = await axios.put('http://1.14.126.98:8081/address/updateDefault', null, {
-      params: {
-        id: row.id,
-        defaultOperate: 1,
-      },
-    });
-    if (response.data.code === 200) {
-      showSuccessMessage(response.data.msg)
-      // 更新本地数据
-      row.defaultOperate = 1;
-    } else {
-      showMessage('设置默认地址失败：' + response.data.msg);
     }
   } catch (error) {
     showMessage('请求接口出错：' + error.message);
@@ -326,181 +292,122 @@ watch(selectedAddress, newId => {
 </script>
 
 <template>
-  <div class="user-info-wrapper">
-    <div v-if="userInfo" class="user-info-container">
-      <el-button style="position: absolute;z-index: 10;right: 270px;top: 288px;" type="warning" size="large" link @click="showModal2()">
+  <div class="flex justify-between">
+    <div style="font-weight: bold;margin-bottom: 5px">收货地址</div>
+    <div>
+      <el-button type="warning" size="large" link @click="showModal2()">
         使用新地址
       </el-button>
-      <div style="margin: 0 50px 20px 20px">
-        <el-alert :closable="false" style="background-color: #e3f2fd;margin: 20px 0 0 0"
-                  :title="'已保存了'+(number)+'条地址，还能保存'+(20-number)" type="info" show-icon/>
-
-        <!--        添加收货地址弹窗-->
-        <a-modal style="text-align: center;" title="添加收货地址"
-                 v-model:open="open2" @ok="addAddress()" ok-text="添加" cancel-text="取消">
-          <el-form
-              style="margin: 25px 0 0 -40px"
-              ref="ruleFormRef"
-              label-width="120px"
-              class="demo-ruleForm"
-              status-icon
-          >
-            <el-form-item label="收货人" :required="true">
-              <el-input v-model="ruleForm.consignee" placeholder="不能超过20个字符"/>
-            </el-form-item>
-            <el-form-item label="所在地区" :required="true">
-              <el-cascader style="width: 100%"
-                           placeholder="请选择省 / 市 / 区"
-                           v-model="selectedRegion"
-                           :options="regions"
-                           :props="props"
-              ></el-cascader>
-            </el-form-item>
-            <el-form-item label="详细地址" :required="true">
-              <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.fullAddress"
-                        placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
-            </el-form-item>
-            <el-form-item label="手机号" :required="true">
-              <div style="width: 100%">
-                <el-input v-model="ruleForm.phone" placeholder="请输入手机号">
-                  <template #prepend>
-                    <el-select placeholder="中国大陆 +86" style="width: 130px">
-                      <el-option label="抱歉，暂时只支持中国大陆手机号"/>
-                    </el-select>
-                  </template>
-                </el-input>
-              </div>
-            </el-form-item>
-          </el-form>
-        </a-modal>
-
-
-        <!--        收货地址列表-->
-        <div v-for="(address, index) in tableData.value" :key="index" class="address-item" :class="{ 'selected-address': selectedAddress === address.id }">
-          <div class="address-info">
-            <!-- 条件渲染 "寄送至" 字样 -->
-            <span v-if="selectedAddress === address.id" style="margin: 0 10px 0 0;color: #F40;font-weight: 700;font-size: 12px;position: relative;top: -5px;">
-            <el-icon style="font-size: 25px;top: 5px;"><LocationInformation /></el-icon>
-              寄送至
-            </span>
-            <!-- 添加单选按钮 -->
-            <el-radio v-model="selectedAddress" :label="address.id">
-              <div>
-                {{ address.address }}
-                {{ address.fullAddress }}
-                （{{ address.consignee }} 收）
-                <span style="color: rgb(128,128,128);">
-                {{ address.phoneNumber }}
-                </span>
-              </div>
-            </el-radio>
-            <div class="address-actions" :class="{ 'address-actions1': selectedAddress === address.id }">
-              <el-button size="small" type="primary" @click="editAddress(address)">修改</el-button>
-              <span style="color: #67c23a;margin: 0 0 0 20px" v-if="address.defaultOperate === 1">默认地址</span>
-              <el-button size="small" type="warning" v-if="address.defaultOperate === 0" @click="setDefaultAddress(address)">设为默认</el-button>
-            </div>
-          </div>
-        </div>
-
-
-        <!--        修改收货地址弹窗-->
-        <a-modal style="text-align: center;" title="修改收货地址"
-                 v-model:open="open1" @ok="handleOk1" ok-text="修改" cancel-text="取消">
-          <el-form
-              style="margin: 25px 0 0 -40px"
-              ref="ruleFormRef"
-              label-width="120px"
-              class="demo-ruleForm"
-              status-icon
-          >
-            <el-form-item label="收货人" :required="true">
-              <el-input v-model="currentAddress.consignee" placeholder="不能超过20个字符"/>
-            </el-form-item>
-            <el-form-item label="所在地区" :required="true">
-              <el-cascader
-                  style="width: 100%"
-                  placeholder="请选择省 / 市 / 区"
-                  v-model="currentAddress.address"
-                  :options="regions"
-                  :props="props"
-              ></el-cascader>
-            </el-form-item>
-            <el-form-item label="详细地址" :required="true">
-              <el-input type="textarea" :resize="'none'" autosize v-model="currentAddress.fullAddress"
-                        placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
-            </el-form-item>
-            <el-form-item label="手机号" :required="true">
-              <div style="width: 100%">
-                <el-input placeholder="请输入手机号" v-model="currentAddress.phoneNumber">
-                  <template #prepend>
-                    <el-select placeholder="中国大陆 +86" style="width: 130px">
-                      <el-option label="抱歉，暂时只支持中国大陆手机号"/>
-                    </el-select>
-                  </template>
-                </el-input>
-              </div>
-            </el-form-item>
-          </el-form>
-        </a-modal>
-      </div>
     </div>
   </div>
+  <RadioGroup>
+    <div class="relative -space-y-px rounded-md bg-white">
+      <RadioGroupOption as="template" v-for="(address, planIdx) in tableData.value" :key="planIdx" :value="address" v-slot="{ checked, active }">
+        <div :class="[planIdx === 0 ? 'rounded-tl-md rounded-tr-md' : '', planIdx === address.length - 1 ? 'rounded-bl-md rounded-br-md' : '', checked ? 'z-10 border-indigo-200 bg-indigo-50' : 'border-gray-200', 'relative flex cursor-pointer flex-col border p-4 focus:outline-none md:grid md:grid-cols-3 md:pl-4 md:pr-6']">
+          <span class="flex items-center text-sm">
+            <span :class="[checked ? 'bg-indigo-600 border-transparent' : 'bg-white border-gray-300', active ? 'ring-2 ring-offset-2 ring-indigo-600' : '', 'h-4 w-4 rounded-full border flex items-center justify-center']" aria-hidden="true">
+              <span class="rounded-full bg-white w-1.5 h-1.5" />
+            </span>
+            <RadioGroupLabel as="span" :class="[checked ? 'text-indigo-900' : 'text-gray-900', 'ml-3 font-medium']">
+              {{ address.consignee }}
+              {{ address.phoneNumber }}
+            </RadioGroupLabel>
+          </span>
+          <RadioGroupDescription as="span" class="ml-6 pl-1 text-sm md:ml-0 md:pl-0 md:text-center">
+            <div :class="[checked ? 'text-indigo-900' : 'text-gray-900', 'font-medium']">
+              {{ address.address }}
+              {{ address.fullAddress }}
+            </div>
+          </RadioGroupDescription>
+          <RadioGroupDescription as="span" :class="[checked ? 'text-indigo-700' : 'text-gray-500', 'ml-6 pl-1 text-sm md:ml-0 md:pl-0 md:text-right']">
+            <button style="margin-right: 10px" @click="editAddress(address)" type="button" class="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">
+              修改
+            </button>
+          </RadioGroupDescription>
+        </div>
+      </RadioGroupOption>
+    </div>
+  </RadioGroup>
+  <!--        添加收货地址弹窗-->
+  <a-modal style="text-align: center;" title="添加收货地址"
+           v-model:open="open2" @ok="addAddress()" ok-text="添加" cancel-text="取消">
+    <el-form
+        style="margin: 25px 0 0 -40px"
+        ref="ruleFormRef"
+        label-width="120px"
+        class="demo-ruleForm"
+        status-icon
+    >
+      <el-form-item label="收货人" :required="true">
+        <el-input v-model="ruleForm.consignee" placeholder="不能超过20个字符"/>
+      </el-form-item>
+      <el-form-item label="所在地区" :required="true">
+        <el-cascader style="width: 100%"
+                     placeholder="请选择省 / 市 / 区"
+                     v-model="selectedRegion"
+                     :options="regions"
+                     :props="props"
+        ></el-cascader>
+      </el-form-item>
+      <el-form-item label="详细地址" :required="true">
+        <el-input type="textarea" :resize="'none'" autosize v-model="ruleForm.fullAddress"
+                  placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+      </el-form-item>
+      <el-form-item label="手机号" :required="true">
+        <div style="width: 100%">
+          <el-input v-model="ruleForm.phone" placeholder="请输入手机号">
+            <template #prepend>
+              <el-select placeholder="中国大陆 +86" style="width: 130px">
+                <el-option label="抱歉，暂时只支持中国大陆手机号"/>
+              </el-select>
+            </template>
+          </el-input>
+        </div>
+      </el-form-item>
+    </el-form>
+  </a-modal>
+
+  <!--        修改收货地址弹窗-->
+  <a-modal style="text-align: center;" title="修改收货地址"
+           v-model:open="open1" @ok="handleOk1" ok-text="修改" cancel-text="取消">
+    <el-form
+        style="margin: 25px 0 0 -40px"
+        ref="ruleFormRef"
+        label-width="120px"
+        class="demo-ruleForm"
+        status-icon
+    >
+      <el-form-item label="收货人" :required="true">
+        <el-input v-model="currentAddress.consignee" placeholder="不能超过20个字符"/>
+      </el-form-item>
+      <el-form-item label="所在地区" :required="true">
+        <el-cascader
+            style="width: 100%"
+            placeholder="请选择省 / 市 / 区"
+            v-model="currentAddress.address"
+            :options="regions"
+            :props="props"
+        ></el-cascader>
+      </el-form-item>
+      <el-form-item label="详细地址" :required="true">
+        <el-input type="textarea" :resize="'none'" autosize v-model="currentAddress.fullAddress"
+                  placeholder="请输入详细地址信息，如乡镇、道路、门牌号、小区、楼栋号、单元等信息"/>
+      </el-form-item>
+      <el-form-item label="手机号" :required="true">
+        <div style="width: 100%">
+          <el-input placeholder="请输入手机号" v-model="currentAddress.phoneNumber">
+            <template #prepend>
+              <el-select placeholder="中国大陆 +86" style="width: 130px">
+                <el-option label="抱歉，暂时只支持中国大陆手机号"/>
+              </el-select>
+            </template>
+          </el-input>
+        </div>
+      </el-form-item>
+    </el-form>
+  </a-modal>
 </template>
 
 <style scoped>
-@import '../assets/InforMation.css';
-</style>
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
-}
-
-:where(.css-dev-only-do-not-override-eq3tly).ant-modal .ant-modal-footer {
-  text-align: center;
-  background: transparent;
-  padding: 30px 0 20px 0;
-}
-
-:where(.css-dev-only-do-not-override-eq3tly).ant-btn {
-  left: 28px;
-  font-size: 14px;
-  height: 32px;
-  padding: 4px 15px;
-  border-radius: 6px;
-  margin: 0 30px 0 0;
-}
-
-.address-item {
-  margin: 10px 10px 10px 78px;
-  padding: 5px;
-}
-
-.address-info {
-
-}
-
-.address-actions {
-  margin: -30px 0 0 700px;
-}
-
-.selected-address {
-  margin: 10px 10px 10px 0;
-  padding: 5px;
-  outline: 1px solid #f40;
-  background-color: #fff0e8;
-  box-shadow: 5px 5px 0 #f3f3f3;
-}
-
-.address-actions1{
-  margin: -30px 0 0 778px;
-}
+@import '../../assets/Tailwind.css';
 </style>

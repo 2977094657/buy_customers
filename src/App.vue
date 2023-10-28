@@ -1,40 +1,42 @@
 <template>
-  <div>
     <div v-if="isMobile" class="mobile-warning">
       <p v-html="randomSentence"></p>
     </div>
     <div v-if="!isMobile">
-    <router-view name="top"></router-view>
-    <div class="main">
-      <router-view name="banner"></router-view>
-      <router-view name="main"></router-view>
-      <router-view name="search"></router-view>
-      <router-view name="description"></router-view>
-      <router-view name="productComments"></router-view>
+      <router-view name="top"></router-view>
+      <div :class="isPersonalCenter ? '' : 'main mx-auto max-w-7xl sm:px-6 lg:px-8'">
       <router-view name="personalCenter"></router-view>
-      <router-view name="shoppingCart"></router-view>
-      <router-view name="orders"></router-view>
-      <router-view name="vendor"></router-view>
-    </div>
-  </div>
+        <router-view name="banner"></router-view>
+        <router-view name="main"></router-view>
+        <router-view name="search"></router-view>
+        <router-view name="description"></router-view>
+        <router-view name="productComments"></router-view>
+        <router-view name="shoppingCart"></router-view>
+        <router-view name="orders"></router-view>
+        <router-view name="vendor"></router-view>
+      </div>
   </div>
 </template>
 
 <script setup>
-import {useRouter} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 
+const route = useRoute();
 useRouter();
 import {ref, onMounted, computed} from 'vue'
 
 const isMobile = ref(false)
 
-onMounted(() => {
-  const str = navigator.userAgent;
-  const ipad = str.match(/(iPad).*OS\s([\d_]+)/);
-  const isIphone = !!( !ipad && str.match(/(iPhone\sOS)\s([\d_]+)/) );
-  const isAndroid = !!( str.match(/(Android)\s+([\d.]+)/) );
-  isMobile.value = isIphone || isAndroid;
-});
+const isPersonalCenter = computed(() => route.path.startsWith('/PersonalCenter'));
+
+
+// onMounted(() => {
+//   const str = navigator.userAgent;
+//   const ipad = str.match(/(iPad).*OS\s([\d_]+)/);
+//   const isIphone = !!( !ipad && str.match(/(iPhone\sOS)\s([\d_]+)/) );
+//   const isAndroid = !!( str.match(/(Android)\s+([\d.]+)/) );
+//   isMobile.value = isIphone || isAndroid || ipad;
+// });
 
 const sentences = [
   "你知道\&nbsp\&nbsp<strong>\"蒂姆·伯纳斯-李(Timothy John Berners-Lee)\"</strong>\&nbsp\&nbsp万维网的发明者，是怎么看待互联网的吗？他说，<em>'这就是关于空间'</em>你在现实世界中是如何处理空间的'。<br><b>为了在我们的网站上获得更大的'空间'，请切换到电脑端吧</b>",
@@ -73,12 +75,75 @@ const sentences = [
 const randomSentence = computed(() => {
   return sentences[Math.floor(Math.random() * sentences.length)];
 });
+
+import {useStore} from 'vuex'
+import axios from "axios";
+
+const store = useStore()
+
+const router = useRouter();
+let open = ref(false)
+let title = ref(false);
+let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
+let Avatar = ref('http://124.221.7.201:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
+let description = ref('')
+let gender = ref('')
+
+const parseTokenAndUserInfo = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const response = await axios.get('http://124.221.7.201:8081/user/token', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.data) {
+        store.commit('setUserInfo', {userId: response.data.userId})
+        const userInfoResponse = await axios.get(`http://124.221.7.201:8081/user/all?userId=${response.data.userId}`);
+        if (userInfoResponse.data != null) {
+          userName.value = userInfoResponse.data.data.name;
+          Avatar.value = userInfoResponse.data.data.userAvatar;
+          description.value = userInfoResponse.data.data.description;
+          gender.value = userInfoResponse.data.data.gender;
+          store.commit('setUserInfo', {
+            name: userName.value,
+            userAvatar: Avatar.value,
+            description: description.value,
+            userId: response.data.userId,
+            land: true
+          });
+        } else {
+          console.log('获取用户信息失败');
+        }
+      } else {
+        console.log('Token 解析失败');
+      }
+    }
+  } catch (error) {
+    console.error('请求失败：', error);
+  }
+};
+
+// 在解析 token 的函数组件中调用解析函数并获取用户信息
+onMounted(async () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    await parseTokenAndUserInfo(token);
+  } else if (!token) {
+    store.commit('setUserInfo', {
+      name: userName.value,
+      userAvatar: Avatar.value,
+      land: false
+    });
+  }
+});
 </script>
 
 <style scoped>
+@import 'assets/Tailwind.css';
 .main {
-  margin: 70px 10% 0 10%;
-  padding: 20px 0 20px 50px;
+  padding: 20px 0 20px 15px;
   border-radius: 20px;
   background-color: white;
 }

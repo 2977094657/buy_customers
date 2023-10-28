@@ -10,6 +10,7 @@
 }
 
 .card-group {
+    margin: 0 0 20px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -104,3 +105,15 @@ img {
 /deep/.el-empty__description p {
     margin: 0 0 0 70px;
 }
+
+.delete-icon-full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
