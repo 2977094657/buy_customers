@@ -1,0 +1,191 @@
+.image-previews {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.image-previews img {
+    width: 100px; /* 或者其他你想要的宽度 */
+    height: auto; /* 让高度自动以保持图片的宽高比 */
+    margin-right: 10px; /* 在图片之间添加一些间隔 */
+}
+
+.image-container {
+    width: 150px;
+    height: 150px;
+    position: relative; /* 为了让删除按钮能够在图片上方显示 */
+    overflow: hidden; /* 如果图片比容器大，隐藏多余的部分 */
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 使图片铺满整个容器 */
+}
+
+.image-container:hover .delete-button {
+    display: block;
+}
+
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 30%;
+    cursor: pointer;
+}
+
+.custom-file-upload {
+    /* 自定义样式 */
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.image-previews {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 添加间隔 */
+}
+
+/* 首页和尾页的颜色 */
+.button:first-child, .button:last-child {
+    background-color: #e15f00; /* 首页和尾页的背景色 */
+    color: white; /* 首页和尾页的文本色 */
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 7% 0 7% -3%; /* 上下都有 20px 的外边距，左右没有额外的外边距 */
+}
+
+.current-page {
+    background-color: #ff9c76; /* 这是当前页的背景色 */
+    color: white; /* 这是当前页的文本色 */
+}
+
+/* 上一页和下一页的颜色 */
+.button:nth-child(2), .button:nth-last-child(2) {
+    border: 1px #dddddd solid;
+    background-color: white; /* 上一页和下一页的背景色 */
+    color: black; /* 上一页和下一页的文本色 */
+}
+
+.button {
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.comment {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 30px;
+}
+
+.comment-content {
+    flex: 1;
+}
+
+.comment-content h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.comment-content p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.comment-content span {
+    font-size: 12px;
+    color: #999;
+}
+.sort-option {
+    cursor: pointer;
+    padding: 5px;
+    color: rgb(128, 128, 128); /* 默认颜色为灰色 */
+}
+
+.sort-option.highlight {
+    color: #ff5000; /* 高亮（选中）颜色为黑色 */
+}
+
+h2 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.comment-image {
+    width: 100px;
+    height: 100px;
+    margin: 10px 0 0 10px;
+}
+
+img{
+    width: 100%;
+    height: 100%;
+}
+
+/* 评论输入框和发布按钮的样式 */
+.comment-input-box {
+    display: flex;
+    align-items: flex-start;
+    width: 99%;
+    margin-bottom: 20px;
+}
+
+.comment-input {
+    flex: 1;
+    width: 87%;
+    margin: 0 20px 0 0;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #F1F2F3;
+    border-radius: 5px;
+    outline: none;
+    resize: none;
+}
+
+.comment-input:hover,
+.comment-input:focus {
+    background-color: white; /* 鼠标悬停或输入框获得焦点时的背景颜色 */
+    border-color: #FF5000;
+}
+
+.submit-comment1 {
+    font-size: 20px;
+    right: 12%;
+    padding: 22px 22px;
+    background-color: #ff9c76;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-comment1:hover {
+    background-color: rgb(255,80,0);
+}
+
+.comments-section{
+    margin: 100px 0 0 0;
+}

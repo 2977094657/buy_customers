@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white">
-    <div v-if="product && product.imgs" class="mx-auto py-10 max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-      <div class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+    <div v-if="product && product.imgs" class="mx-auto max-w-2xl lg:max-w-7xl">
+      <div style="margin-right: 10px" class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
         <!-- 图片库 -->
         <TabGroup as="div" class="flex flex-col">
 <!--          商品大图-->
@@ -48,14 +48,6 @@
             <div>
               <span>购买数量&nbsp&nbsp</span>
               <el-input-number style="width: 100px" class="text-sm text-gray-600" v-model="num" :min="1" :max="50"/>
-            </div>
-          </div>
-
-          <div class="mt-3" style="margin-bottom: 50px">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <el-rate class="text" v-model="product.score" disabled show-score text-color="#ff9900" score-template="{value}"/>
-              </div>
             </div>
           </div>
 

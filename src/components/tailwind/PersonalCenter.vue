@@ -20,7 +20,7 @@
               <!-- 侧边栏组件，如果您愿意，可以将此元素与另一个侧边栏交换 -->
               <div class="z-[9999] flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
                 <div class="flex h-16 shrink-0 items-center">
-                  <img @click="goHome" class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
+                  <img @click="goHome" class="h-8 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
                 </div>
                 <nav class="z-[9999] flex flex-1 flex-col" :key="forceUpdate">
                   <ul role="list" class="z-[9999] flex flex-1 flex-col gap-y-7">
@@ -52,7 +52,7 @@
       <!-- 侧边栏组件，如果您愿意，可以将此元素与另一个侧边栏交换 -->
       <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
         <div class="flex h-16 shrink-0 items-center">
-          <img @click="goHome" class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
+          <img @click="goHome" class="h-8 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">

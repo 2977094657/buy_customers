@@ -7,7 +7,7 @@
       <div class="relative flex h-16 justify-between">
         <div class="relative z-10 flex px-2 lg:px-0">
           <div @click="goHome" class="z-10 flex flex-shrink-0 items-center">
-            <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
+            <img class="h-8 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
         </div>
         <div class="relative flex flex-1 items-center justify-center px-2 sm:absolute sm:inset-0">
@@ -20,7 +20,6 @@
         </div>
         <div class="relative z-10 flex items-center lg:hidden">
           <!-- 移动菜单按钮 -->
-          <img v-if="!land" class="h-8 w-8 rounded-full img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()" />
               <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
         </div>
         <div class="hidden lg:relative lg:z-10 lg:ml-4 lg:flex lg:items-center">

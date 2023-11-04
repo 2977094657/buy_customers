@@ -22,8 +22,11 @@ const banner = async () => {
 }
 
 const goToProduct = (productId) => {
-  const url = router.resolve({name: 'Product', params: {productId}}).href;
-  window.open(url, '_blank');
+  // 本页面打开
+  router.push({ name: 'Product', params: { productId } });
+  // 新页面打开
+  // const url = router.resolve({ name: 'Product', params: { productId } }).href;
+  // window.open(url, '_blank');
 }
 
 let open = ref(false)

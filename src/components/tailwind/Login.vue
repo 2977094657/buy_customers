@@ -268,7 +268,7 @@ const registerUser = async () => {
       <form v-if="currentForm === 'login'" @submit.prevent="login" class="login">
         <div class="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
+            <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
 
           <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
@@ -342,7 +342,7 @@ const registerUser = async () => {
       <form v-else-if="currentForm === 'register'" @submit.prevent="register">
         <div class="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
+            <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
 
           <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
