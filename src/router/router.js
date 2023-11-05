@@ -12,6 +12,9 @@ import Address from "@/components/tailwind/Address.vue";
 import PersonalInformation from "@/components/tailwind/PersonalInformation.vue";
 import ShoppingCart from "@/components/tailwind/ShoppingCart.vue";
 import History from "@/components/tailwind/History.vue";
+import MyComments from "@/components/tailwind/MyComments.vue";
+import MyOrders from "@/components/tailwind/MyOrders.vue";
+import ConfirmPay from "@/components/tailwind/ConfirmPay.vue";
 
 const routes = [
     {
@@ -77,6 +80,20 @@ const routes = [
                     History: History,
                 }
             },
+            {
+                path: "MyComments",
+                name: "MyComments",
+                components: {
+                    MyComments: MyComments,
+                }
+            },
+            {
+                path: "MyOrders",
+                name: "MyOrders",
+                components: {
+                    MyOrders: MyOrders,
+                }
+            },
         ],
     },
     {
@@ -96,7 +113,16 @@ const routes = [
             vendor: Vendor,
         },
         props: { description: true }
-    }
+    },
+    {
+        path: '/ConfirmPay/:id',
+        name: 'ConfirmPay',
+        components: {
+            top: Top,
+            ConfirmPay: ConfirmPay,
+        },
+        props: { description: true }
+    },
 ]
 
 const router = createRouter({

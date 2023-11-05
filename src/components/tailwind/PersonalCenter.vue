@@ -96,6 +96,8 @@
       <main style="background-color: rgb(243,244,246);padding-bottom: 50px">
         <router-view name="personalInformation"></router-view>
         <router-view name="address"></router-view>
+        <router-view name="MyComments"></router-view>
+        <router-view name="MyOrders"></router-view>
         <div style="margin-left: 20px;">
           <router-view name="star"></router-view>
           <router-view name="ShoppingCart"></router-view>
@@ -118,9 +120,9 @@ const navigation = [
   { name: '个人信息', href: '/PersonalCenter/InforMation', icon: UserIcon, current: false },
   { name: '宝贝收藏', href: '/PersonalCenter/star', icon: HeartIcon, current: false },
   { name: '购物车', href: '/PersonalCenter/ShoppingCart', icon: ShoppingCartIcon, current: false },
-  { name: '我的评价', href: '#', icon: ChatBubbleLeftEllipsisIcon, current: false },
+  { name: '我的评价', href: '/PersonalCenter/MyComments', icon: ChatBubbleLeftEllipsisIcon, current: false },
   { name: '我的足迹', href: '/PersonalCenter/History', icon: ClockIcon, current: false },
-  { name: '我的订单', href: '#', icon: ClipboardDocumentListIcon, current: false },
+  { name: '我的订单', href: '/PersonalCenter/MyOrders', icon: ClipboardDocumentListIcon, current: false },
 ]
 
 const selectItem = (selectedItem) => {

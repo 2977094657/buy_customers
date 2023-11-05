@@ -14,6 +14,7 @@
         <router-view name="shoppingCart"></router-view>
         <router-view name="orders"></router-view>
         <router-view name="vendor"></router-view>
+        <router-view name="ConfirmPay"></router-view>
       </div>
   </div>
 </template>

@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed,watch} from 'vue'
+import {ref, computed,watch} from 'vue'
 import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
@@ -55,7 +55,6 @@ const empty = ref(false)
 const batchManageMode = ref(false)
 
 const loadCartItems = async () => {
-  console.log(land.value)
   if (land.value){
     try {
       const response = await axios.get('http://124.221.7.201:8081/cart/list', {

@@ -67,13 +67,13 @@
               <label for="terms" class="text-sm text-gray-500">我已经阅读了条款和条件，并同意将我的个人信息出售给出价最高的人</label>
             </div>
 
-            <button style="background-color: rgb(34,172,56);padding: 0;margin-top: 20px" type="button" class="flex w-full items-center justify-center rounded-md border border-transparent py-2 text-white">
+            <button @click="submitOrder('微信支付')" style="background-color: rgb(34,172,56);padding: 0;margin-top: 20px" type="button" class="flex w-full items-center justify-center rounded-md border border-transparent py-2 text-white">
               <svg style="margin-right: 20px" class="icon w-auto" viewBox="0 0 1144 1024" xmlns="http://www.w3.org/2000/svg"
                    data-immersive-translate-effect="1" data-immersive_translate_walked="b30582c9-8265-4ce0-a4ff-61d877fe3166" width="40" height="40px"><path d="M436.314353 632.771765c-68.517647 36.321882-78.667294-20.389647-78.667294-20.389647l-85.835294-190.524236c-33.039059-90.533647 28.581647-40.839529 28.581647-40.839529s52.856471 38.038588 93.003294 61.229176c40.086588 23.190588 85.835294 6.806588 85.835294 6.806589l561.212235-246.362353C936.899765 80.112941 765.891765 0 572.235294 0 256.180706 0 0 213.232941 0 476.310588c0 151.311059 84.811294 285.967059 216.937412 373.248l-23.792941 130.288941s-11.625412 38.038588 28.611764 20.389647c27.437176-12.047059 97.370353-55.115294 138.992941-81.347764 65.445647 21.684706 136.734118 33.731765 211.486118 33.731764 316.024471 0 572.235294-213.232941 572.235294-476.310588 0-76.197647-21.594353-148.178824-59.843764-212.028235-178.808471 102.309647-594.733176 340.118588-648.312471 368.489412z" fill="#ffffff"
                                                                                                                                                              data-spm-anchor-id="a313x.search_index.0.i0.59253a815x8kRp" class="selected" data-immersive-translate-effect="1" data-immersive_translate_walked="b30582c9-8265-4ce0-a4ff-61d877fe3166"></path></svg>
               <span>微信支付</span>
             </button>
-            <button style="background-color: rgb(34,107,243);padding: 0;margin-top: 20px" type="button" class="flex w-full items-center justify-center rounded-md border border-transparent py-2 text-white">
+            <button @click="submitOrder('支付宝支付')" style="background-color: rgb(34,107,243);padding: 0;margin-top: 20px" type="button" class="flex w-full items-center justify-center rounded-md border border-transparent py-2 text-white">
               <AlipayOutlined class="w-auto" fill="currentColor" style="color: white;font-size: 40px;margin-right: 20px"/>
               <span>支付宝支付</span>
             </button>
@@ -86,7 +86,7 @@
 <script setup>
 import { AlipayOutlined } from '@ant-design/icons-vue';
 
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref,watch } from 'vue'
 import {useRoute} from 'vue-router'
 import store from "@/store";
 import router from "@/router/router";
@@ -109,6 +109,12 @@ onMounted(() => {
   window.addEventListener('selected-address-changed', (event) => {
     selectedAddress.value = event.detail;
   });
+});
+
+watch(productNumber, (newVal, oldVal) => {
+  if (newVal === null || newVal === '' || newVal < 1) {
+    productNumber.value = 1;
+  }
 });
 
 const star = async () => {
@@ -170,6 +176,75 @@ const showMessage = (message) => {
   // 显示新的消息并保存该消息实例
   currentMessageInstance = ElMessage({message, type: 'error'})
 }
+
+const showSuccessMessage = (message) => {
+  // 如果当前有消息正在显示，先关闭它
+  if (currentMessageInstance) {
+    currentMessageInstance.close()
+  }
+
+  // 显示新的消息并保存该消息实例，消息类型设置为 'success'
+  currentMessageInstance = ElMessage({message, type: 'success'})
+}
+
+const submitOrder = async (paymentMethod) => {
+  if (!land.value){
+    showMessage('请先登陆')
+  }
+  if (!selectedAddress.value) {
+    showMessage('请选择地址');
+    return;
+  }
+
+  try {
+    const response = await axios.post('http://124.221.7.201:8081/order/add', {
+      vendorName: product.value.name,
+      userId: userid.value,
+      address: selectedAddress.value.address+' '+selectedAddress.value.fullAddress,
+      price: product.value.price * productNumber.value,
+      productId: product.value.productId,
+      productNumber: productNumber.value,
+      consignee: selectedAddress.value.consignee,
+      phone: selectedAddress.value.phoneNumber,
+      notes: text.value,
+      payMethod: paymentMethod
+    });
+
+    if (response.data.code === 200) {
+      // 生成一个唯一的随机数
+      const id = Math.random().toString(36).substr(2);
+      // 在这里添加支付跳转逻辑
+      sessionStorage.setItem(id, response.data.data.orderLong);
+      if (paymentMethod === '微信支付') {
+        // 微信支付跳转逻辑
+        showSuccessMessage("订单创建成功")
+        setTimeout(() => {
+          const url = router.resolve({
+            name: 'ConfirmPay',
+            params: { id }
+          }).href;
+          window.open(url, '_blank');
+        }, 500);
+      } else if (paymentMethod === '支付宝支付') {
+        // 支付宝支付跳转逻辑
+        showSuccessMessage("订单创建成功")
+        setTimeout(() => {
+          const url = router.resolve({
+            name: 'ConfirmPay',
+            params: { id }
+          }).href;
+          window.open(url, '_blank');
+        }, 500);
+      }
+    } else {
+      showSuccessMessage(response.data.msg)
+    }
+  } catch (error) {
+    console.error(error);
+    showMessage('订单提交失败');
+  }
+};
+
 </script>
 
 <style scoped>

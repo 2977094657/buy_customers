@@ -69,8 +69,8 @@
                     description="这个商品如此神秘，连评论都默默无闻。你可以给它一点关注吗？它会感激不尽的！"/>
 
           <div>
-            <div class="flex justify-end mr-7 mb-5">
-              <el-radio-group text-color="#FE9900" fill="white" v-model="radio1" size="large">
+            <div v-if="pageInfo.total!==0" class="flex justify-end mr-7 mb-5">
+              <el-radio-group text-color="#FE9900" fill="white" v-model="radio1" size="default">
                 <el-radio-button @click="sortComments('hottest')" label="最新" />
                 <el-radio-button @click="sortComments('newest')" label="最热" />
                 <el-radio-button @click="sortComments('withImage')" label="有图" />

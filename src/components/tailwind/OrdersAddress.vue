@@ -215,7 +215,6 @@ const addAddress = async () => {
 const currentAddress = ref(null);
 const currentAddressId = ref(null);
 const editAddress = (row) => {
-  console.log(11111111)
   currentAddressId.value = row.id;
   // 拆分地址字符串为数组
   const addressArray = row.address.split('/');
@@ -289,6 +288,7 @@ watch(selectedAddress, newId => {
     window.dispatchEvent(event);
   }
 });
+
 </script>
 
 <template>
@@ -300,9 +300,9 @@ watch(selectedAddress, newId => {
       </el-button>
     </div>
   </div>
-  <RadioGroup>
+  <RadioGroup v-model="selectedAddress">
     <div class="relative -space-y-px rounded-md bg-white">
-      <RadioGroupOption as="template" v-for="(address, planIdx) in tableData.value" :key="planIdx" :value="address" v-slot="{ checked, active }">
+      <RadioGroupOption as="template" v-for="(address, planIdx) in tableData.value" :key="planIdx" :value="address.id" v-slot="{ checked, active }">
         <div :class="[planIdx === 0 ? 'rounded-tl-md rounded-tr-md' : '', planIdx === address.length - 1 ? 'rounded-bl-md rounded-br-md' : '', checked ? 'z-10 border-indigo-200 bg-indigo-50' : 'border-gray-200', 'relative flex cursor-pointer flex-col border p-4 focus:outline-none md:grid md:grid-cols-3 md:pl-4 md:pr-6']">
           <span class="flex items-center text-sm">
             <span :class="[checked ? 'bg-indigo-600 border-transparent' : 'bg-white border-gray-300', active ? 'ring-2 ring-offset-2 ring-indigo-600' : '', 'h-4 w-4 rounded-full border flex items-center justify-center']" aria-hidden="true">
@@ -328,6 +328,7 @@ watch(selectedAddress, newId => {
       </RadioGroupOption>
     </div>
   </RadioGroup>
+
   <!--        添加收货地址弹窗-->
   <a-modal style="text-align: center;" title="添加收货地址"
            v-model:open="open2" @ok="addAddress()" ok-text="添加" cancel-text="取消">
