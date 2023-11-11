@@ -40,13 +40,13 @@
 
                 <div class="mt-6">
                   <dl class="space-y-3">
-                    <div v-for="count in reviews.counts" :key="count.rating" class="flex items-center text-sm">
+                    <div v-for="(count, index) in reviews.counts" :key="count.rating" class="flex items-center text-sm">
                       <dt class="flex flex-1 items-center">
                         <div aria-hidden="true" class="ml-1 flex flex-1 items-center">
+                          <span class="mr-2">{{ 5 - index }}</span>
                           <StarIcon
                               :class="[count.count > 0 ? 'text-yellow-400' : 'text-gray-300', 'h-5 w-5 flex-shrink-0']"
                               aria-hidden="true"/>
-
                           <div class="relative ml-3 flex-1">
                             <div class="h-3 rounded-full border border-gray-200 bg-gray-100"/>
                             <div v-if="count.count > 0"

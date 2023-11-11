@@ -10,7 +10,9 @@
             <li class="flex py-6">
               <div class="flex-shrink-0">
                 <!-- 您可以在这里添加产品图片 -->
-                <img v-if="product && product.img" :src="product.img.slice(1, -1).split(',')[0]" alt="your-image-description" class="h-24 w-24 rounded-md object-cover object-center sm:h-32 sm:w-32" />
+                <img v-if="product && product.img" :src="product.img.slice(1, -1).split(',')[0]"
+                     alt="your-image-description"
+                     class="h-24 w-24 rounded-md object-cover object-center sm:h-32 sm:w-32"/>
               </div>
 
               <div class="ml-4 flex flex-1 flex-col sm:ml-6">
@@ -29,7 +31,7 @@
             <li class="mt-10 space-y-6 text-sm font-medium text-gray-500">
               <div class="flex justify-between">
                 <dt>数量</dt>
-                {{order.productNumber}}
+                {{ order.productNumber }}
               </div>
               <div class="flex justify-between">
                 <dt>店铺优惠</dt>
@@ -41,11 +43,12 @@
               </div>
               <div class="flex justify-between">
                 <dt>寄送至</dt>
-                <dd class="text-gray-900">{{order.address}}</dd>
+                <dd class="text-gray-900">{{ order.address }}</dd>
               </div>
               <div class="flex justify-between">
                 <dt>收件人</dt>
-                <dd class="text-gray-900">{{order.consignee}}<span style="margin-left: 10px">{{order.phone}}</span></dd>
+                <dd class="text-gray-900">{{ order.consignee }}<span style="margin-left: 10px">{{ order.phone }}</span>
+                </dd>
               </div>
             </li>
           </ul>
@@ -58,13 +61,18 @@
             <dl class="space-y-4">
               <div class="flex items-center justify-between">
                 <dt class="text-base font-medium text-gray-900">总计</dt>
-                <dd style="font: 700 26px tahoma;font-family: Verdana,Tahoma,arial,serif;color: #f40;" class="ml-4 text-base font-medium text-gray-900">￥{{ order.price }}</dd>
+                <dd style="font: 700 26px tahoma;font-family: Verdana,Tahoma,arial,serif;color: #f40;"
+                    class="ml-4 text-base font-medium text-gray-900">￥{{ order.price }}
+                </dd>
               </div>
             </dl>
           </div>
 
           <div class="mt-10">
-            <button type="submit" class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50">确认付款</button>
+            <button @click="ConfirmPay" type="submit"
+                    class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50">
+              确认付款
+            </button>
           </div>
         </section>
       </div>
@@ -80,8 +88,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, onMounted} from 'vue';
+import {useRoute} from 'vue-router';
 import axios from 'axios';
 
 let order = ref({});
@@ -93,7 +101,7 @@ const getOrderInfo = async () => {
   const uniqueId = route.params.id;
   const orderNumber = sessionStorage.getItem(uniqueId);
   if (!orderNumber) {
-    empty.value=false
+    empty.value = false
     return;
   }
 
@@ -122,21 +130,51 @@ const getProductInfo = async (productId) => {
         productId
       }
     });
-      product.value = response.data;
+    product.value = response.data;
   } catch (error) {
     console.error(error);
   }
 };
 
 onMounted(getOrderInfo);
+
+const ConfirmPay = async () => {
+  try {
+    const response = await axios.post('http://124.221.7.201:8081/order/confirmOrder', {
+      orderLong: order.value.orderLong,
+      userId: 113
+    });
+
+    if (response.data.code === 200) {
+      ElNotification({
+        duration: 0,
+        title: '支付成功',
+        message: '订单支付成功，快去订单列表里看看吧！',
+        type: 'success',
+      });
+    } else {
+      console.error(response.data.msg);
+    }
+  } catch (error) {
+    ElNotification({
+      title: '支付失败',
+      message: '订单已经支付过了，请不要反复支付哦',
+      type: 'error',
+    });
+    // 禁用按钮
+    document.querySelector('button[type="submit"]').disabled = true;
+  }
+};
+
 </script>
-
-
 
 
 <style scoped>
 @import '../../assets/Tailwind.css';
-.price{
-  font-family: Verdana,Tahoma,arial,serif;color: #f40;font-weight: 700;
+
+.price {
+  font-family: Verdana, Tahoma, arial, serif;
+  color: #f40;
+  font-weight: 700;
 }
 </style>
