@@ -88,14 +88,17 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import {useRoute} from 'vue-router';
-import axios from 'axios';
+import store from "@/store";
+import {confirmOrder, getOrder, getProductById} from "@/api/api";
 
 let order = ref({});
 let product = ref({});
 let route = useRoute();
 const empty = ref(true)
+const userid = computed(() => store.state.userInfo.userId)
+
 
 const getOrderInfo = async () => {
   const uniqueId = route.params.id;
@@ -106,11 +109,7 @@ const getOrderInfo = async () => {
   }
 
   try {
-    const response = await axios.get('http://124.221.7.201:8081/order/getOrder', {
-      params: {
-        orderNumber
-      }
-    });
+    const response = await getOrder(orderNumber);
 
     if (response.data.code === 200) {
       order.value = response.data.data;
@@ -125,11 +124,7 @@ const getOrderInfo = async () => {
 
 const getProductInfo = async (productId) => {
   try {
-    const response = await axios.get('http://124.221.7.201:8081/product/selectById', {
-      params: {
-        productId
-      }
-    });
+    const response = await getProductById(productId);
     product.value = response.data;
   } catch (error) {
     console.error(error);
@@ -140,10 +135,7 @@ onMounted(getOrderInfo);
 
 const ConfirmPay = async () => {
   try {
-    const response = await axios.post('http://124.221.7.201:8081/order/confirmOrder', {
-      orderLong: order.value.orderLong,
-      userId: 113
-    });
+    const response = await confirmOrder(order.value.orderLong, userid.value);
 
     if (response.data.code === 200) {
       ElNotification({

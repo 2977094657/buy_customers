@@ -107,9 +107,9 @@ import {HeartIcon} from '@heroicons/vue/24/outline'
 import {computed, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import router from "@/router/router";
-import axios from 'axios'
 import store from "@/store";
 import ProductComments from "@/components/tailwind/ProductComments.vue";
+import {addToCarts, addToFavorite, getProductById} from "@/api/api";
 
 const route = useRoute()
 const product = ref()
@@ -122,8 +122,8 @@ const childRef = ref();
 const star = async () => {
   if (!isNaN(route.params.productId)) {
     try {
-      const response = await fetch(`http://124.221.7.201:8081/product/selectById?productId=${route.params.productId}`);
-      const data = await response.json();
+      const response = await getProductById(route.params.productId);
+      const data = response.data;
       data.imgs = data.img.slice(1, -1).split(',');
       product.value = data;
     } catch (error) {
@@ -166,12 +166,11 @@ const showSuccessMessage = (message) => {
 }
 const addToCart = async () => {
   if (!land.value) {
-    console.log(land.value)
     showMessage('请先登陆')
     return
   }
   try {
-    const response = await axios.post(`http://124.221.7.201:8081/cart/add?userId=${userid.value}&productId=${route.params.productId}&quantity=${num.value}`);
+    const response = await addToCarts(userid.value, route.params.productId, num.value);
     if (response.data.message === '您的购物车商品总数已满，请先清理后继续加入购物车') {
       showMessage(response.data.message)
       return
@@ -187,31 +186,19 @@ async function addToFavorites() {
     showMessage('请先登陆')
   }
 
-  axios.post('http://124.221.7.201:8081/star/staradd', {
-    userId: userid.value,
-    productId: route.params.productId
-  }, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    transformRequest: [(data) => {
-      let ret = '';
-      for (let key in data) {
-        ret += encodeURIComponent(key) + '=' + encodeURIComponent(data[key]) + '&';
-      }
-      return ret;
-    }]
-  }).then(response => {
-    if (response.data.code === -1) {
-      showMessage(response.data.msg)
-    } else if (response.data.code === 0) {
-      showSuccessMessage(response.data.data);
-      star()
-    }
-  }).catch(error => {
+  addToFavorite(userid.value,route.params.productId)
+      .then(response => {
+        if (response.data.code === -1) {
+          showMessage(response.data.msg)
+        } else if (response.data.code === 0) {
+          showSuccessMessage(response.data.data);
+          star()
+        }
+      }).catch(error => {
     console.error('添加到收藏夹时出错：', error);
   });
 }
+
 
 const goToProduct = (productId) => {
   if (land.value) {

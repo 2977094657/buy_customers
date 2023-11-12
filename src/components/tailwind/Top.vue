@@ -7,8 +7,10 @@ import {HeartOutlined} from "@ant-design/icons-vue";
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {UpCircleOutlined,DownCircleOutlined} from '@ant-design/icons-vue';
 import Navbars from "@/components/tailwind/Navbars.vue";
-import SidebarblCart from "@/components/tailwind/SidebarblCart.vue";
-import SidebarblStar from "@/components/tailwind/SidebarblStar.vue";
+import SidebarblCart from "@/components/tailwind/sidebarbl/SidebarblCart.vue";
+import SidebarblStar from "@/components/tailwind/sidebarbl/SidebarblStar.vue";
+import SidebarblMyComments from "@/components/tailwind/sidebarbl/SidebarblMyComments.vue";
+import SidebarblMyOrders from "@/components/tailwind/sidebarbl/SidebarblMyOrders.vue";
 
 const store = useStore()
 const route = useRoute();
@@ -174,6 +176,30 @@ onUpdated(checkScrollbar);
       </div>
     </el-button>
 
+    <TransitionRoot as="template" :show="dd">
+      <Dialog as="div" class="relative z-10" @close="dd = false">
+        <TransitionChild as="template" enter="ease-in-out duration-500" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-500" leave-from="opacity-100" leave-to="opacity-0">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-hidden z-[200]">
+          <div class="absolute inset-0 overflow-hidden">
+            <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+              <TransitionChild as="template" enter="transform transition ease-in-out duration-500 sm:duration-700" enter-from="translate-x-full" enter-to="translate-x-0" leave="transform transition ease-in-out duration-500 sm:duration-700" leave-from="translate-x-0" leave-to="translate-x-full">
+                <DialogPanel class="pointer-events-auto w-screen max-w-md">
+                  <div style="padding: 10px 0" class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                    <div class="relative flex-1">
+                      <SidebarblMyOrders></SidebarblMyOrders>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+
     <br>
 
     <el-button class="sticky-button4" type="primary" @click="pj = true;">
@@ -186,6 +212,30 @@ onUpdated(checkScrollbar);
         </div>
       </div>
     </el-button>
+
+    <TransitionRoot as="template" :show="pj">
+      <Dialog as="div" class="relative z-10" @close="pj = false">
+        <TransitionChild as="template" enter="ease-in-out duration-500" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-500" leave-from="opacity-100" leave-to="opacity-0">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-hidden z-[200]">
+          <div class="absolute inset-0 overflow-hidden">
+            <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+              <TransitionChild as="template" enter="transform transition ease-in-out duration-500 sm:duration-700" enter-from="translate-x-full" enter-to="translate-x-0" leave="transform transition ease-in-out duration-500 sm:duration-700" leave-from="translate-x-0" leave-to="translate-x-full">
+                <DialogPanel class="pointer-events-auto w-screen max-w-md">
+                  <div style="padding: 10px 0" class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                    <div class="relative flex-1">
+                      <SidebarblMyComments></SidebarblMyComments>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
 
     <br>
 

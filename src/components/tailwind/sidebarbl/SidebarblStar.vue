@@ -38,9 +38,9 @@
 
 <script setup>
 import {ref, computed,watch} from 'vue'
-import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
+import {addHistorys, deleteAllStars, getProductById, selectStar} from "@/api/api";
 
 
 const cartItems = ref([])
@@ -54,22 +54,14 @@ const loadCartItems = async () => {
   loading.value = true
   if (land.value) {
     try {
-      const response = await axios.get('http://124.221.7.201:8081/star/select', {
-        params: {
-          userId: userid.value
-        }
-      })
+      const response = await selectStar(userid.value);
       cartItems.value = response.data
       if (cartItems.value.length === 0) {
         empty.value = true
       }
 
       const productRequests = cartItems.value.map(item =>
-          axios.get('http://124.221.7.201:8081/product/selectById', {
-            params: {
-              productId: item.productId
-            }
-          })
+          getProductById(item.productId)
       )
       productResponses.value = await Promise.all(productRequests)
       // 数据加载完成后
@@ -158,18 +150,13 @@ const removeSelectedItems = async () => {
       .filter(item => item.checked)
       .map(item => item.id)
 
-  console.log(selectedIds.length)
   if (selectedIds.length === 0) {
     showMessage('请至少选择一个商品')
     return
   }
 
   try {
-    const response = await axios.delete('http://124.221.7.201:8081/star/deleteAll', {
-      params: {
-        id: selectedIds.join(',')
-      }
-    })
+    const response = await deleteAllStars(selectedIds);
 
     showSuccessMessage(response.data.message)
     await loadCartItems()
@@ -181,12 +168,7 @@ const removeSelectedItems = async () => {
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');
@@ -201,8 +183,8 @@ const addHistory = async (productId) => {
 </script>
 
 <style scoped>
-@import '../../assets/Tailwind.css';
-@import '../../assets/Main.css';
+@import '../../../assets/Tailwind.css';
+@import '../../../assets/Main.css';
 .button{
   margin-right: 20px;
   border: 1px solid #dcdcdc;

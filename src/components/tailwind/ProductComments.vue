@@ -95,6 +95,16 @@
                 </div>
                 <!--  评论内容-->
                 <div class="prose prose-sm mt-4 max-w-none text-gray-500 mb-4" v-html="comment.comments"/>
+                <div v-if="comment.imgId">
+                  <el-image v-for="(imgUrl, index) in comment.imgId.slice(1, -1).split(', ')" :key="index" class="comment-image"  alt=""
+                            style="width: 100px; height: 100px;border-radius: 10px"
+                            :src="imgUrl"
+                            :zoom-rate="1.2"
+                            :preview-src-list="comment.imgId.slice(1, -1).split(', ')"
+                            :initial-index="index"
+                            fit="cover"
+                  />
+                </div>
 
               </div>
 
@@ -135,6 +145,7 @@ import Incentive from "@/components/tailwind/Incentive.vue";
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {useStore} from 'vuex';
+import {getProductById, getProductComments, getProductCommentsByTime} from "@/api/api";
 
 
 const route = useRoute()
@@ -196,8 +207,8 @@ const pageSize = ref(10)
 const fetchComments = async (sortOption, page,pageSize) => {
   if (!isNaN(route.params.productId)) {
     const sortByTime = sortOption === 'newest'
-    const response = await fetch(`http://124.221.7.201:8081/product/comments?productId=${route.params.productId}&pageNum=${page}&sortByTime=${sortByTime}&pageSize=${pageSize}`)
-    const data = await response.json()
+    const response = await getProductCommentsByTime(route.params.productId, page, sortByTime, pageSize);
+    const data = response.data
 
     comments.value = data[0]  // 第一个元素是评论列表
     if (comments.value.length === 0) {
@@ -211,8 +222,6 @@ const fetchComments = async (sortOption, page,pageSize) => {
     currentSort.value = pageInfo.value.sortByTime ? 'newest' : 'hottest'
   }
 }
-
-console.log(totalPages.value)
 
 const product = ref()
 const reviews = ref({
@@ -228,8 +237,8 @@ const reviews = ref({
 const star = async () => {
   if (!isNaN(route.params.productId)) {
     try {
-      const response = await fetch(`http://124.221.7.201:8081/product/selectById?productId=${route.params.productId}`);
-      const data = await response.json();
+      const response = await getProductById(route.params.productId);
+      const data = response.data;
       data.imgs = data.img.slice(1, -1).split(',');
       product.value = data;
       reviews.value.counts[0].count = data.five;
@@ -256,7 +265,6 @@ const previousPage = () => {
 }
 
 const nextPage = async () => {
-  console.log(totalPages.value,currentPage.value)
   if (currentPage.value < totalPages.value) {
     await fetchComments(currentSort.value, currentPage.value + 1,pageSize.value)
     window.scrollTo(0, 0)
@@ -287,13 +295,15 @@ const sortComments = async (sortOption) => {
 const filterCommentsWithImage = async () => {
   // 更新 currentSort 并重新获取评论
   currentSort.value = 'withImage'
-  const response = await fetch(`http://124.221.7.201:8081/product/comments?productId=${route.params.productId}&pageNum=${currentPage.value}&pageSize=20`)
-  const data = await response.json()
+  const response = await getProductComments(route.params.productId, currentPage.value, 10000);
+  const data = response.data
 
-  // 过滤出包含图片的评论
-  // 将过滤后的评论列表赋值给 comments
+  // 过滤出 imgId 不为 null 的评论
   comments.value = data[0].filter(comment => comment.imgId !== null);
+
 }
+
+
 
 const files = ref([])
 </script>
@@ -305,5 +315,11 @@ const files = ref([])
 }
 /deep/.el-radio-button:first-child .el-radio-button__inner {
   border-left: none;
+}
+
+.comment-image {
+  width: 100px;
+  height: 100px;
+  margin: 10px 10px 0 0;
 }
 </style>

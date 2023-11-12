@@ -2,7 +2,7 @@
 import {ref, onMounted, computed } from 'vue'
 import router from "@/router/router";
 import {useStore} from 'vuex';
-import axios from "axios";
+import {getAllProducts, getUser, getUserToken} from "@/api/api";
 
 
 const store = useStore();
@@ -15,10 +15,9 @@ const currentPage = ref(1)
 const Banner = ref([])
 
 const banner = async () => {
-  const response = await fetch(`http://124.221.7.201:8081/product/all?current=${currentPage.value}&size=5&sortField=score&isAsc=false`)
-  const data = await response.json()
-  Banner.value = data.records
-  currentPage.value = data.current
+  const response = await getAllProducts(currentPage.value, 5, 'score', false);
+  Banner.value = response.data.records
+  currentPage.value = response.data.current
 }
 
 const goToProduct = (productId) => {
@@ -37,13 +36,9 @@ const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
     if (token) {
-      const response = await axios.get('http://124.221.7.201:8081/user/token', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await getUserToken(token);
       if (response.data) {
-        const userInfoResponse = await axios.get(`http://124.221.7.201:8081/user/all?userId=${response.data.userId}`);
+        const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;
           Avatar.value = userInfoResponse.data.data.userAvatar;

@@ -176,6 +176,7 @@ import store from "@/store";
 import {EditPen, Female, Male, Plus} from "@element-plus/icons-vue";
 import axios from 'axios';
 import router from "@/router/router";
+import {changePassword, changePhones, getAddress, getUser, messageUser, updateAvatar, updateUser} from "@/api/api";
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
@@ -188,8 +189,8 @@ const number = ref()
 const fetchUserInfo = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/user/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getUser(userId);
+    const data = response.data;
     if (data.code === 0) {
       userInfo.value = data.data;
       avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
@@ -339,7 +340,7 @@ const uploadAvatar = async (uploadFile) => {
     const data = new FormData()
     data.append('image', uploadFile.value)
     data.append('userid', userid.value)
-    const response = await axios.put('http://124.221.7.201:8081/user/updateAvatar', data)
+    const response = await updateAvatar(data);
     if (response.status === 200) {
       showSuccessMessage('头像修改成功')
       return true
@@ -367,8 +368,8 @@ const exceed = () => {
 const fetchUserAddresses = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/address/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getAddress(userId);
+    const data = response.data;
     if (data.code === 200) {
       if (data.data.length === 0) {
         empty.value = true
@@ -411,14 +412,7 @@ const updateUserInfo = async () => {
     return;
   }
   try {
-    const response = await axios.put('http://124.221.7.201:8081/user/updateUser', null, {
-      params: {
-        userId: userid.value,
-        name: editForm.username,
-        description: editForm.description,
-        gender: editForm.gender === 3 ? '男性' : (editForm.gender === 6 ? '女性' : '保密')
-      }
-    });
+    const response = await updateUser(userid.value, editForm.username, editForm.description, editForm.gender === 3 ? '男性' : (editForm.gender === 6 ? '女性' : '保密'));
 
     if (response.data.code === 200) {
       // 如果更新成功，关闭模态框并显示成功消息
@@ -452,7 +446,7 @@ const updatePassword = async () => {
   }
 
   try {
-    const response = await axios.post(`http://124.221.7.201:8081/user/password?userId=${userid.value}&oldPassword=${passwordForm.oldPassword.value}&newPassword=${passwordForm.newPassword.value}&confirmPassword=${passwordForm.confirmPassword.value}`)
+    const response = await changePassword(userid.value, passwordForm.oldPassword.value, passwordForm.newPassword.value, passwordForm.confirmPassword.value);
 
     if (response.data.code === 200) {
       // 如果更新成功，关闭模态框并显示成功消息
@@ -486,7 +480,7 @@ const sendSMSCode = async () => {
   }
   isSending.value = true;
   try {
-    const response = await axios.post(`http://124.221.7.201:8081/user/message?phoneNumber=${phoneNumber.value}`);
+    const response = await messageUser(phoneNumber.value);
     isSending.value = false;
     if (typeof response.data === 'object' && response.data.SendStatusSet && response.data.SendStatusSet.length > 0) {
       // 检查返回的数据中的 "Code" 属性
@@ -540,7 +534,7 @@ const changePhone = async () => {
     return;
   }
   try {
-    const response = await axios.put(`http://124.221.7.201:8081/user/changePhone?userid=${userid.value}&oldPhone=${phoneNumber.value}&code=${code.value}&phone=${newPhone.value}`);
+    const response = await changePhones(userid.value, phoneNumber.value, code.value, newPhone.value);
 
     if (response.data.code === 200) {
       // 如果更新成功，关闭模态框并显示成功消息

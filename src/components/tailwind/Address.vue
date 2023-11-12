@@ -143,6 +143,7 @@
 import {ref, onMounted, computed, reactive, watch } from 'vue';
 import store from "@/store";
 import axios from 'axios';
+import {addAddres, deleteAddress, getAddress, getUser, updateAddress, updateDefaultAddress} from "@/api/api";
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
@@ -155,8 +156,8 @@ const number = ref(0)
 const fetchUserInfo = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/user/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getUser(userId);
+    const data = response.data;
     if (data.code === 0) {
       userInfo.value = data.data;
       avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
@@ -272,8 +273,8 @@ const showModal2 = () => {
 const fetchUserAddresses = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/address/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getAddress(userId);
+    const data = response.data;
     if (data.code === 200) {
       empty.value = data.data.length === 0;
 
@@ -316,15 +317,7 @@ const addAddress = async () => {
   }
 
   try {
-    const response = await axios.post('http://124.221.7.201:8081/address/add', null, {
-      params: {
-        userId: userid.value,
-        consignee: ruleForm.consignee,
-        area: selectedRegion.value.join('/'),
-        fullAddress: ruleForm.fullAddress,
-        phone: ruleForm.phone,
-      }
-    });
+    const response = await addAddres(userid.value, ruleForm.consignee, selectedRegion.value.join('/'), ruleForm.fullAddress, ruleForm.phone);
 
     if (response.data.code === 200) {
       showSuccessMessage(response.data.msg);
@@ -380,7 +373,7 @@ const handleOk1 = async () => {
       fullAddress: currentAddress.value.fullAddress,
       phone: currentAddress.value.phoneNumber,
     };
-    const response = await axios.put('http://124.221.7.201:8081/address/update', null, {params});
+    const response = await updateAddress(params);
     if (response.data.code === 200) {
       open1.value = false
       tableData.version++;
@@ -417,11 +410,7 @@ const schu = (row) => {
 
 const removeAddress = async (id) => {
   try {
-    const response = await axios.delete(`http://124.221.7.201:8081/address/delete`, {
-      params: {
-        id: id
-      }
-    });
+    const response = await deleteAddress(id);
     if (response.data.code === 200) {
       showSuccessMessage(response.data.msg);
       // 删除成功后，重新获取一次用户地址列表
@@ -441,20 +430,10 @@ const setDefaultAddress = async (row) => {
     const currentDefault = tableData.value.find(item => item.defaultOperate === 1);
     if (currentDefault) {
       // 取消当前的默认地址
-      await axios.put('http://124.221.7.201:8081/address/updateDefault', null, {
-        params: {
-          id: currentDefault.id,
-          defaultOperate: 0,
-        },
-      });
+      await updateDefaultAddress(currentDefault.id, 0);
     }
     // 设置新的默认地址
-    const response = await axios.put('http://124.221.7.201:8081/address/updateDefault', null, {
-      params: {
-        id: row.id,
-        defaultOperate: 1,
-      },
-    });
+    let response = await updateDefaultAddress(row.id, 1);
     if (response.data.code === 200) {
       // 如果成功更新了默认地址，重新获取地址列表
       await fetchUserAddresses();

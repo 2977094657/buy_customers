@@ -2,8 +2,8 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import store from "@/store";
-import axios from "axios";
 import router from "@/router/router";
+import {addHistorys, getVendorProduct} from "@/api/api";
 
 const route = useRoute()
 const product = ref()
@@ -16,8 +16,8 @@ const products = ref([])
 const loadingMore = ref(false) // 添加 loadingMore 状态
 const fetchProducts = async () => {
   loadingMore.value = true // 开始加载数据
-  const response = await fetch(`http://124.221.7.201:8081/product/vendor?name=${route.params.name}`)
-  const data = await response.json()
+  const response = await getVendorProduct(route.params.name);
+  const data = response.data
   // 当加载更多数据时，将新数据添加到 products 数组中，而不是替换它
   products.value = [...products.value, ...data.records.map(product => ({ ...product, loading: false }))]
   currentPage.value = data.current
@@ -45,12 +45,7 @@ const goToProduct = (productId) => {
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');

@@ -106,9 +106,9 @@ import {ref, onMounted, watch, computed, onBeforeUnmount, watchEffect, nextTick,
 import {useRouter, useRoute} from 'vue-router';
 import {useStore} from 'vuex'
 import Login from "@/components/tailwind/Login.vue";
-import axios from "axios";
 import {Female, Male} from "@element-plus/icons-vue";
 import {LogoutOutlined} from '@ant-design/icons-vue';
+import {getUser, getUserToken} from "@/api/api";
 
 const store = useStore()
 const route = useRoute();
@@ -176,14 +176,10 @@ const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
     if (token) {
-      const response = await axios.get('http://124.221.7.201:8081/user/token', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await getUserToken(token);
       if (response.data) {
         store.commit('setUserInfo', {userId: response.data.userId})
-        const userInfoResponse = await axios.get(`http://124.221.7.201:8081/user/all?userId=${response.data.userId}`);
+        const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.name;
           Avatar.value = userInfoResponse.data.data.userAvatar;

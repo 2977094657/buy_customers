@@ -41,10 +41,10 @@
 
 <script setup>
 import {ref, computed,watch} from 'vue'
-import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
 import { debounce } from 'lodash'
+import {addHistorys, cartList, deleteAllCartItems, deleteCartItem, getProductById, updateCart} from "@/api/api";
 
 
 const cartItems = ref([])
@@ -57,22 +57,12 @@ const batchManageMode = ref(false)
 const loadCartItems = async () => {
   if (land.value){
     try {
-      const response = await axios.get('http://124.221.7.201:8081/cart/list', {
-        params: {
-          userId: userid.value
-        }
-      })
+      const response = await cartList(userid.value);
       cartItems.value = response.data
       if (cartItems.value.length===0){
         empty.value=true
       }
-      const productRequests = cartItems.value.map(item =>
-          axios.get('http://124.221.7.201:8081/product/selectById', {
-            params: {
-              productId: item.productId
-            }
-          })
-      )
+      const productRequests = cartItems.value.map(item => getProductById(item.productId))
 
       productResponses.value = await Promise.all(productRequests)
 
@@ -129,7 +119,7 @@ const totalCount = computed(() => {
 
 const updateQuantity = debounce(async (id, quantity) => {
   try {
-    const response = await axios.put(`http://124.221.7.201:8081/cart/update?id=${id}&quantity=${quantity}`)
+    const response = await updateCart(id, quantity);
     showSuccessMessage(response.data.message)
     if (response.data.message==='超出购物车最大限制，请将所有商品数量控制在50以内'){
       showMessage(response.data.message)
@@ -145,11 +135,7 @@ const handleChange = (value, id) => {
 
 const removeCartItem = async (id) => {
   try {
-    await axios.delete(`http://124.221.7.201:8081/cart/delete`, {
-      params: {
-        id: id
-      }
-    });
+    await deleteCartItem(id);
     showSuccessMessage('删除成功');
     await loadCartItems();
   } catch (error) {
@@ -213,18 +199,13 @@ const removeSelectedItems = async () => {
       .filter(item => item.checked)
       .map(item => item.id)
 
-  console.log(selectedIds.length)
   if (selectedIds.length === 0) {
     showMessage('请至少选择一个商品')
     return
   }
 
   try {
-    const response = await axios.delete('http://124.221.7.201:8081/cart/deleteAll', {
-      params: {
-        id: selectedIds.join(',')
-      }
-    })
+    const response = await deleteAllCartItems(selectedIds);
 
     showSuccessMessage(response.data.message)
     await loadCartItems()
@@ -236,12 +217,7 @@ const removeSelectedItems = async () => {
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');

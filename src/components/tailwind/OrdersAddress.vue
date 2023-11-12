@@ -3,6 +3,7 @@ import {ref, onMounted, computed, reactive, watch,provide} from 'vue';
 import store from "@/store";
 import axios from 'axios';
 import { RadioGroup, RadioGroupDescription, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
+import {addAddres, getAddress, getUser, updateAddress} from "@/api/api";
 
 const userInfo = ref(null);
 const userid = computed(() => store.state.userInfo.userId)
@@ -14,8 +15,8 @@ const number = ref()
 const fetchUserInfo = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/user/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getUser(userId);
+    const data = response.data;
     if (data.code === 0) {
       userInfo.value = data.data;
       avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
@@ -131,8 +132,8 @@ const showModal2 = () => {
 const fetchUserAddresses = async () => {
   const userId = userid.value;
   if (userId) {
-    const response = await fetch(`http://124.221.7.201:8081/address/all?userId=${userId}`);
-    const data = await response.json();
+    const response = await getAddress(userId);
+    const data = response.data;
     if (data.code === 200) {
       if (data.data.length === 0) {
         empty.value = true
@@ -183,15 +184,7 @@ const addAddress = async () => {
   }
 
   try {
-    const response = await axios.post('http://124.221.7.201:8081/address/add', null, {
-      params: {
-        userId: userid.value,
-        consignee: ruleForm.consignee,
-        area: selectedRegion.value.join('/'),
-        fullAddress: ruleForm.fullAddress,
-        phone: ruleForm.phone,
-      }
-    });
+    const response = await addAddres(userid.value, ruleForm.consignee, selectedRegion.value.join('/'), ruleForm.fullAddress, ruleForm.phone);
 
     if (response.data.code === 200) {
       showSuccessMessage(response.data.msg);
@@ -247,7 +240,7 @@ const handleOk1 = async () => {
       fullAddress: currentAddress.value.fullAddress,
       phone: currentAddress.value.phoneNumber,
     };
-    const response = await axios.put('http://124.221.7.201:8081/address/update', null, {params});
+    const response = await updateAddress(params);
     if (response.data.code === 200) {
       open1.value = false
       tableData.version++;

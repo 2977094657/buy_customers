@@ -1,12 +1,17 @@
 <script setup>
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import store from "@/store";
-import Obligation from "@/components/tailwind/Obligation.vue";
-import Paid from "@/components/tailwind/Paid.vue";
+import SidebarblObligation from "@/components/tailwind/sidebarbl/SidebarblObligation.vue";
+import SidebarblPaid from "@/components/tailwind/sidebarbl/SidebarblPaid.vue";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
+let unpaidOrdersLength = ref(0); // 用于存储从子组件传递过来的未付款订单数量
+
+const handleUnpaidOrdersLength = (length) => {
+  unpaidOrdersLength.value = length;
+}
 </script>
 
 <template>
@@ -16,17 +21,20 @@ const land = computed(() => store.state.userInfo.land)
         <TabList class="-mb-px flex space-x-8">
           <Tab as="template" v-slot="{ selected }">
             <button style="margin-right: 30px;margin-left: 30px" :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              待付款
+              <el-badge :hidden="unpaidOrdersLength===0" :value="unpaidOrdersLength">
+                待付款
+              </el-badge>
             </button>
           </Tab>
           <Tab as="template" v-slot="{ selected }">
-            <button style="margin-right: 30px;margin-left: 30px" :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
+            <button style="margin-right: 30px;margin-left: 30px"
+                    :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
               待发货
             </button>
           </Tab>
           <Tab as="template" v-slot="{ selected }">
             <button style="margin-right: 30px"
-                :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
+                    :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
               待收货
             </button>
           </Tab>
@@ -41,13 +49,13 @@ const land = computed(() => store.state.userInfo.land)
       <TabPanels as="template">
         <!--待付款-->
         <TabPanel>
-          <Obligation></Obligation>
+          <SidebarblObligation @update:unpaidOrdersLength="handleUnpaidOrdersLength"></SidebarblObligation>
         </TabPanel>
 
 
-        <!--已付款内容-->
+        <!--待发货-->
         <TabPanel>
-          <Paid></Paid>
+          <SidebarblPaid></SidebarblPaid>
         </TabPanel>
 
         <!--选项栏三的内容-->
@@ -63,6 +71,8 @@ const land = computed(() => store.state.userInfo.land)
 </template>
 
 <style scoped>
-@import '../../assets/Tailwind.css';
-
+@import '../../../assets/Tailwind.css';
+/deep/.el-badge__content--danger {
+  background-color: rgb(250,82,81);
+}
 </style>

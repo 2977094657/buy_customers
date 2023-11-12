@@ -1,10 +1,10 @@
 <script setup>
 import {ref, computed} from 'vue';
 import login from "@/components/tailwind/Login.vue";
-import axios from 'axios';
 import {useStore} from 'vuex';
 import {useRouter} from 'vue-router';
 import {onMounted} from 'vue';
+import {getUser, getUserToken, log, messageUser, registers} from "@/api/api";
 
 
 const router = useRouter();
@@ -78,7 +78,7 @@ const loginUser = async () => {
       showMessage('请输入手机号或密码');
       return
     }
-    const response = await axios.post(`http://124.221.7.201:8081/user/login?phone=${phoneNumber1.value}&pwd=${password1.value}`);
+    const response = await log(phoneNumber1.value, password1.value);
     if (response.data.token) {
       showSuccessMessage('登陆成功');
       // 延迟一段时间后刷新页面
@@ -112,13 +112,9 @@ const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
     if (token) {
-      const response = await axios.get('http://124.221.7.201:8081/user/token', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await getUserToken(token);
       if (response.data) {
-        const userInfoResponse = await axios.get(`http://124.221.7.201:8081/user/all?userId=${response.data.userId}`);
+        const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data && userInfoResponse.data.code === 0) {
           userName.value = userInfoResponse.data.data.name;
           userAvatar.value = userInfoResponse.data.data.userAvatar;
@@ -180,7 +176,7 @@ const sendSMSCode = async () => {
   }
   isSending.value = true;
   try {
-    const response = await axios.post(`http://124.221.7.201:8081/user/message?phoneNumber=${phoneNumber.value}`);
+    const response = await messageUser(phoneNumber.value);
     isSending.value = false;
     if (response.data === '手机号已被注册') {
       // 如果手机号已被注册，显示特定的错误信息
@@ -234,7 +230,7 @@ const registerUser = async () => {
     return;
   }
   try {
-    const response = await axios.post(`http://124.221.7.201:8081/user/register?phone=${phoneNumber.value}&name=${name.value}&pwd=${password.value}&code=${phoneCode.value}`);
+    const response = await registers(phoneNumber.value, name.value, password.value, phoneCode.value);
     if (response.data === '注册成功') {
       showSuccessMessage('注册成功');
       switchForm('login')

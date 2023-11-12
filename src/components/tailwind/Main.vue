@@ -26,8 +26,8 @@
 <script setup>
 import {ref, onMounted, computed} from 'vue'
 import {useRouter} from "vue-router";
-import axios from "axios";
 import store from "@/store";
+import {addHistorys, getAllProductsRandomly} from "@/api/api";
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -37,8 +37,8 @@ const loadingMore = ref(false) // 添加 loadingMore 状态
 
 const fetchProducts = async (page) => {
   loadingMore.value = true;
-  const response = await fetch(`http://124.221.7.201:8081/product/all?current=${page}&size=12&randomSeed=${randomSeed.value}`);
-  const data = await response.json()
+  const response = await getAllProductsRandomly(page, 12, randomSeed.value);
+  const data = response.data
   // 当加载更多数据时，将新数据添加到 products 数组中，而不是替换它
   products.value = [...products.value, ...data.records.map(product => ({ ...product, loading: false }))]
   currentPage.value = data.current
@@ -74,12 +74,7 @@ const land = computed(() => store.state.userInfo.land)
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');

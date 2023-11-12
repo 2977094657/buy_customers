@@ -1,10 +1,10 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue';
-import axios from 'axios';
 import {watchEffect} from 'vue';
 import router from "@/router/router";
 import HighlightText from '../HighlightText.vue';
 import store from "@/store";
+import {addHistorys, searchProduct} from "@/api/api";
 
 
 const products = ref([])
@@ -20,9 +20,7 @@ onMounted(() => {
 
 const executeSearch = async (page = 1) => {
   try {
-    const response = await axios.get('http://124.221.7.201:8081/product/search', {
-      params: {keyword: props.keyword, page},
-    });
+    const response = await searchProduct(props.keyword, page);
     // 在每个产品对象中添加一个 loading 字段
     products.value = response.data.records.map(product => ({
       ...product,
@@ -85,12 +83,7 @@ const land = computed(() => store.state.userInfo.land)
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');

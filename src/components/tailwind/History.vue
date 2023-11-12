@@ -56,9 +56,9 @@
 
 <script setup>
 import {ref, computed,watch} from 'vue'
-import axios from 'axios'
 import store from "@/store";
 import router from "@/router/router";
+import {addHistorys, deleteAllHistory, deleteHistorys, getHistoryByUserId, getProductById} from "@/api/api";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
@@ -72,14 +72,14 @@ const showHistory = async () => {
     // 先清空 productsGroupedByDate
     productsGroupedByDate.value = {};
     const userId = userid.value
-    const response = await axios.get(`http://124.221.7.201:8081/user/getHistoryByUserId?userId=${userId}`)
+    const response = await getHistoryByUserId(userId);
     if (response.data.data.length === 0) {
       empty.value = true
     }
     if (response.data.code === 200) {
       const history = response.data.data
       for (let item of history) {
-        const productResponse = await axios.get(`http://124.221.7.201:8081/product/selectById?productId=${item.productId}`)
+        const productResponse = await getProductById(item.productId);
         const date = new Date(item.timestamp)
         const dateString = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
         const dateStringForDeletion = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -137,12 +137,7 @@ const formatYear = (date) => {
 const addHistory = async (productId) => {
   if (land.value) {
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');
@@ -157,13 +152,7 @@ const addHistory = async (productId) => {
 
 const deleteHistory = async (item) => {
   try {
-    const response = await axios.delete('http://124.221.7.201:8081/user/deleteHistory', {
-      params: {
-        userid: userid.value,
-        productId: item.data.productId,
-        date: item.dateForDeletion
-      }
-    });
+    const response = await deleteHistorys(userid.value, item.data.productId, item.dateForDeletion);
 
     if (response.data.code === 200) {
       // 删除成功后，从 productsGroupedByDate 中删除对应的商品
@@ -213,11 +202,7 @@ const open1 = () => {
 // 添加清除全部历史记录的方法
 const clearAllHistory = async () => {
   try {
-    const response = await axios.delete('http://124.221.7.201:8081/user/deleteAllHistory', {
-      params: {
-        userid: userid.value,
-      }
-    });
+    const response = await deleteAllHistory(userid.value);
 
     if (response.data.code === 200) {
       console.log('History cleared successfully');

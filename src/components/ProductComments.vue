@@ -1,9 +1,9 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import axios from 'axios'
 import {Plus} from "@element-plus/icons-vue";
 import { useStore } from 'vuex';
+import {addComment} from "@/api/api";
 
 
 const route = useRoute()
@@ -82,7 +82,6 @@ const previousPage = () => {
 const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
     await fetchComments(currentSort.value, currentPage.value + 1)
-    console.log(currentPage.value)
     window.scrollTo(0, 0)
   }
 }
@@ -190,7 +189,7 @@ const submitComment = async () => {
   })
 
   try {
-    await axios.post('http://124.221.7.201:8081/productComments/add', formData);
+    await addComment(userId.value, commentContent.value, route.params.productId, files.value);
     // 处理响应...
   } catch (error) {
     // 处理错误...

@@ -1,19 +1,13 @@
 <template>
-  <div style="background-color: rgb(243,244,246)" class="pt-10 mx-auto max-w-7xl sm:px-2 lg:px-8">
-    <div class="mx-auto max-w-2xl space-y-8 sm:px-4 lg:max-w-4xl lg:px-0">
+  <div style="background-color: rgb(243,244,246)">
+    <div class=" space-y-8">
       <div v-for="order in unpaidOrders" :key="order.orderLong"
-           class="border-b border-t border-gray-200 bg-white shadow-sm sm:rounded-lg sm:border">
-        <div class="flex items-center border-b border-gray-200 p-4 sm:grid sm:grid-cols-5 sm:gap-x-6">
-          <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm sm:col-span-4 sm:grid-cols-3 lg:col-span-3">
-            <div class="pr-4 sm:pr-6 lg:pr-8">
+           class="border-b border-t border-gray-200 bg-white shadow-sm">
+        <div class="flex items-center border-b border-gray-200 p-4">
+          <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm">
+            <div class="pr-4">
               <dt class="font-medium text-gray-900">订单号</dt>
               <dd class="mt-1 text-gray-500">{{ order.orderLong }}</dd>
-            </div>
-            <div style="width: 200px" class="hidden sm:block pl-4 sm:pl-6 lg:pl-8">
-              <dt class="font-medium text-gray-900">创建时间</dt>
-              <dd class="mt-1 text-gray-500">
-                <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
-              </dd>
             </div>
             <div class="ml-20">
               <dt class="font-medium text-gray-900">总计</dt>
@@ -22,7 +16,7 @@
           </dl>
 
 
-          <Menu as="div" class="relative flex justify-end lg:hidden sm:col-span-1">
+          <Menu as="div" class="relative flex justify-end col-span-1">
             <div class="flex items-center">
               <MenuButton class="-m-2 flex items-center p-2 text-gray-400 hover:text-gray-500">
                 <span class="sr-only">Options for order {{ order.number }}</span>
@@ -55,39 +49,28 @@
               </MenuItems>
             </transition>
           </Menu>
-
-          <div class="hidden lg:col-span-2 lg:flex lg:items-center lg:justify-end lg:space-x-4">
-            <button @click="open(order.orderLong)" type="button"
-                    class="inline-flex justify-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition duration-500 ease select-none hover:bg-red-600">
-              <span>删除订单</span>
-            </button>
-            <button @click="ConfirmPay(order.orderLong)" type="button"
-                    class="border border-gray-200 bg-gray-200 text-gray-700 rounded-md px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-gray-300 focus:outline-none focus:shadow-outline">
-              <span>立即付款</span>
-            </button>
-          </div>
         </div>
 
         <!-- Products -->
         <h4 class="sr-only">Items</h4>
         <ul role="list" class="divide-y divide-gray-200">
-          <li class="p-4 sm:p-6">
-            <div class="flex items-center sm:items-start">
-              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 sm:h-40 sm:w-40">
+          <li class="p-4">
+            <div class="flex items-center">
+              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
                 <img :src="order.product.img.slice(1, -1).split(',')[0]" alt=""
                      class="h-full w-full object-cover object-center"/>
               </div>
               <div class="ml-6 flex-1 text-sm">
-                <div class="font-medium text-gray-900 sm:flex sm:justify-between">
+                <div class="font-medium text-gray-900">
                   <h5>{{ order.product.productName }}</h5>
-                  <p style="color: #ff5000;" class="mt-2 sm:mt-0">￥{{ order.product.price }}</p>
+                  <p style="color: #ff5000;" class="mt-2">￥{{ order.product.price }}</p>
                 </div>
                 <span class="font-medium text-sm text-gray-500">{{ order.product.name }}</span>
                 <p>
                   <span class="font-medium text-sm text-gray-500">{{ order.address }}<span
                       class="ml-2">{{ order.consignee }}</span><span class="ml-1">{{ order.phone }}</span></span>
                 </p>
-                <div class="flex flex-col sm:hidden">
+                <div class="flex flex-col">
                   <div>
                     创建时间：
                     <span class="mt-1 text-gray-500">
@@ -105,7 +88,7 @@
               </div>
             </div>
 
-            <div class="mt-6 sm:flex sm:justify-between">
+            <div class="mt-6">
               <div class="flex items-center">
                 <ClockIcon class="h-5 w-5 text-gray-400" aria-hidden="true"/>
                 <p class="ml-2 text-sm font-medium text-gray-500">
@@ -141,14 +124,15 @@
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {EllipsisVerticalIcon} from '@heroicons/vue/24/outline'
 import {ClockIcon} from '@heroicons/vue/20/solid'
-import {computed, ref, watch, onUnmounted} from "vue";
+import {computed, ref, watch, onUnmounted,onMounted,defineProps, defineEmits} from "vue";
 import store from "@/store";
 import {confirmOrder, deleteUnpaidOrder, getProductById, getUnpaidOrder} from "@/api/api";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const unpaidOrders = ref([])
-
+const props = defineProps();
+const emit = defineEmits();
 let currentMessageInstance = null
 const showMessage = (message) => {
   // 如果当前有消息正在显示，先关闭它
@@ -180,7 +164,9 @@ const showOrders = async () => {
     if (response.data.code === 200) {
       let orderData = response.data.data;
       // 请求所有商品的数据
-      const productRequests = orderData.map(order => getProductById(order.productId));
+      const productRequests = orderData.map(
+          order => getProductById(order.productId)
+      );
       const productResponses = await Promise.all(productRequests);
       // 将商品数据添加到相应的订单中
       for (let i = 0; i < productResponses.length; i++) {
@@ -204,6 +190,16 @@ const showOrders = async () => {
   }
 }
 
+const unpaidOrdersLength = () => {
+  showOrders()
+  emit('update:unpaidOrdersLength', unpaidOrders.value.length);
+}
+
+onMounted(async () => {
+  await showOrders()
+  // 在这里触发事件，只会触发一次
+  emit('update:unpaidOrdersLength', unpaidOrders.value.length);
+});
 
 const startTimer = () => {
   setInterval(() => {
@@ -279,6 +275,7 @@ const deleteOrder = async (orderLong) => {
       // 从未支付订单列表中删除该订单
       unpaidOrders.value = unpaidOrders.value.filter(order => order.orderLong !== orderLong);
       showSuccessMessage(response.data.msg)
+      unpaidOrdersLength()
     } else {
       console.log(response.data.msg)
     }
@@ -299,6 +296,7 @@ const ConfirmPay = async (orderLong) => {
       });
       // 支付成功后，重新获取订单列表
       await showOrders();
+      unpaidOrdersLength()
     } else {
       console.error(response.data.msg);
     }
@@ -313,6 +311,6 @@ const ConfirmPay = async (orderLong) => {
 </script>
 
 <style scoped>
-@import '../../assets/Tailwind.css';
+@import '../../../assets/Tailwind.css';
 
 </style>

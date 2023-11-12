@@ -1,21 +1,21 @@
 <template>
-  <div style="background-color: rgb(243,244,246)" class="pt-10 mx-auto max-w-7xl sm:px-2 lg:px-8">
-    <div class="mx-auto max-w-2xl space-y-8 sm:px-4 lg:max-w-4xl lg:px-0">
+  <div style="background-color: rgb(243,244,246)" class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-2xl space-y-8">
       <div v-for="order in unpaidOrders" :key="order.orderLong"
-           class="border-b border-t border-gray-200 bg-white shadow-sm sm:rounded-lg sm:border">
-        <div class="flex items-center border-b border-gray-200 p-4 sm:grid sm:gap-x-6">
-          <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm sm:col-span-4 sm:grid-cols-4 lg:col-span-4">
-            <div class="pr-4 sm:pr-6 lg:pr-8">
+           class="border-b border-t border-gray-200 bg-white shadow-sm">
+        <div class="flex items-center border-b border-gray-200 p-4">
+          <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm">
+            <div class="pr-4">
               <dt class="font-medium text-gray-900">订单号</dt>
               <dd class="mt-1 text-gray-500">{{ order.orderLong }}</dd>
             </div>
-            <div style="width: 200px" class="hidden sm:block sm:pl-6 lg:pl-8">
+            <div style="width: 200px" class="hidden">
               <dt class="font-medium text-gray-900">创建时间</dt>
               <dd class="mt-1 text-gray-500">
                 <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
               </dd>
             </div>
-            <div style="width: 200px" class="hidden sm:block sm:pl-6 lg:pl-8">
+            <div style="width: 200px" class="hidden">
               <dt class="font-medium text-gray-900">付款时间</dt>
               <dd class="mt-1 text-gray-500">
                 <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
@@ -31,16 +31,16 @@
         <!-- Products -->
         <h4 class="sr-only">Items</h4>
         <ul role="list" class="divide-y divide-gray-200">
-          <li class="p-4 sm:p-6">
-            <div class="flex items-center sm:items-start">
-              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 sm:h-40 sm:w-40">
+          <li class="p-4">
+            <div class="flex items-center">
+              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
                 <img :src="order.product.img.slice(1, -1).split(',')[0]" alt=""
                      class="h-full w-full object-cover object-center"/>
               </div>
               <div class="ml-6 flex-1 text-sm">
-                <div class="font-medium text-gray-900 sm:flex sm:justify-between">
+                <div class="font-medium text-gray-900">
                   <h5>{{ order.product.productName }}</h5>
-                  <p style="color: #ff5000;" class="mt-2 sm:mt-0">￥{{ order.product.price }}</p>
+                  <p style="color: #ff5000;" class="mt-2">￥{{ order.product.price }}</p>
                 </div>
 
                 <span class="font-medium text-sm text-gray-500">{{ order.product.name }}</span>
@@ -49,7 +49,7 @@
                       class="ml-2">{{ order.consignee }}</span><span class="ml-1">{{ order.phone }}</span></span>
                 </p>
                 <!-- 创建时间和付款时间 -->
-                <div class="flex flex-col sm:hidden">
+                <div class="flex flex-col">
                   <div>
                     创建时间：
                     <span class="mt-1 text-gray-500">
@@ -80,7 +80,7 @@
             </div>
 
             <div
-                class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+                class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium">
               <div class="flex flex-1 justify-end">
                 <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
               </div>
@@ -218,6 +218,6 @@ const deleteOrder = async (id) => {
 </script>
 
 <style scoped>
-@import '../../assets/Tailwind.css';
+@import '../../../assets/Tailwind.css';
 
 </style>

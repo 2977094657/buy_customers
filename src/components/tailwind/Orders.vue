@@ -90,8 +90,8 @@ import {computed, onMounted, ref,watch } from 'vue'
 import {useRoute} from 'vue-router'
 import store from "@/store";
 import router from "@/router/router";
-import axios from "axios";
 import OrdersAddress from "@/components/tailwind/OrdersAddress.vue";
+import {addHistorys, addOrder, getProductById} from "@/api/api";
 
 const route = useRoute()
 const product = ref()
@@ -111,7 +111,7 @@ onMounted(() => {
   });
 });
 
-watch(productNumber, (newVal, oldVal) => {
+watch(productNumber, (newVal) => {
   if (newVal === null || newVal === '' || newVal < 1) {
     productNumber.value = 1;
   }
@@ -120,8 +120,8 @@ watch(productNumber, (newVal, oldVal) => {
 const star = async () => {
   if (!isNaN(route.params.productId)) {
     try {
-      const response = await fetch(`http://124.221.7.201:8081/product/selectById?productId=${route.params.productId}`);
-      const data = await response.json();
+      const response = await getProductById(route.params.productId);
+      const data = response.data;
       data.imgs = data.img.slice(1, -1).split(',');
       product.value = data;
     } catch (error) {
@@ -148,12 +148,7 @@ const goToProduct = (productId) => {
 const addHistory = async (productId) => {
   if(land.value){
     try {
-      const response = await axios.post('http://124.221.7.201:8081/user/addHistory', {}, {
-        params: {
-          userid: userid.value,
-          productId
-        }
-      });
+      const response = await addHistorys(userid.value, productId);
 
       if (response.data.code === 200) {
         console.log('History added successfully');
@@ -197,18 +192,7 @@ const submitOrder = async (paymentMethod) => {
   }
 
   try {
-    const response = await axios.post('http://124.221.7.201:8081/order/add', {
-      vendorName: product.value.name,
-      userId: userid.value,
-      address: selectedAddress.value.address+' '+selectedAddress.value.fullAddress,
-      price: product.value.price * productNumber.value,
-      productId: product.value.productId,
-      productNumber: productNumber.value,
-      consignee: selectedAddress.value.consignee,
-      phone: selectedAddress.value.phoneNumber,
-      notes: text.value,
-      payMethod: paymentMethod
-    });
+    const response = await addOrder(product.value.name, userid.value, selectedAddress.value.address+' '+selectedAddress.value.fullAddress, product.value.price * productNumber.value, product.value.productId, productNumber.value, selectedAddress.value.consignee, selectedAddress.value.phoneNumber, text.value, paymentMethod);
 
     if (response.data.code === 200) {
       // 生成一个唯一的随机数
