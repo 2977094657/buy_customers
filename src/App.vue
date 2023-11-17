@@ -79,6 +79,7 @@ const randomSentence = computed(() => {
 
 import {useStore} from 'vuex'
 import axios from "axios";
+import {ElNotification} from "element-plus";
 
 const store = useStore()
 
@@ -132,6 +133,11 @@ onMounted(async () => {
   if (token) {
     await parseTokenAndUserInfo(token);
   } else if (!token) {
+    ElNotification({
+      title: '登录失效',
+      message: '登录过期，请重新登录',
+      type: 'error',
+    })
     store.commit('setUserInfo', {
       name: userName.value,
       userAvatar: Avatar.value,

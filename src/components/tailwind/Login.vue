@@ -27,6 +27,8 @@ let userAvatar = ref('');
 let isSending = ref(false);
 let confirmPassword = ref('');
 let phoneCode = ref('')
+let rememberMe = ref(false);
+
 computed(() => {
   // 当手机号和密码都不为空时，返回 false，否则返回 true
   return phoneNumber1.value === '' || password1.value === '';
@@ -78,7 +80,7 @@ const loginUser = async () => {
       showMessage('请输入手机号或密码');
       return
     }
-    const response = await log(phoneNumber1.value, password1.value);
+    const response = await log(phoneNumber1.value, password1.value, rememberMe.value ? 1 : "");
     if (response.data.token) {
       showSuccessMessage('登陆成功');
       // 延迟一段时间后刷新页面
@@ -286,8 +288,8 @@ const registerUser = async () => {
 
                 <div class="flex items-center justify-between">
                   <div class="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
-                    <label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-900">30天内不再登录</label>
+                    <input id="remember-me" name="remember-me" type="checkbox" v-model="rememberMe" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
+                    <label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-900">7天免登录</label>
                   </div>
 
                   <div class="text-sm leading-6">

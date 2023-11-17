@@ -73,6 +73,6 @@ const handleUnpaidOrdersLength = (length) => {
 <style scoped>
 @import '../../../assets/Tailwind.css';
 /deep/.el-badge__content--danger {
-  background-color: rgb(250,82,81);
+  background-color: rgb(255,112,0);
 }
 </style>

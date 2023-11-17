@@ -53,7 +53,7 @@ export const addToFavorite = (userId, productId, quantity) => instance.post(`/st
 export const getHistoryByUserId = (userId) => instance.get(`/user/getHistoryByUserId`, {params: {userId}});
 export const deleteHistorys = (userId, productId, date) => instance.delete(`/user/deleteHistory`, {params: {userId, productId, date}});
 export const deleteAllHistory = (userId) => instance.delete(`/user/deleteAllHistory`, {params: {userId}});
-export const log = (phone, pwd) => instance.post(`/user/login`, {phone, pwd});
+export const log = (phone, pwd, expirationTimeOption) => instance.post(`/user/login`, {phone, pwd, expirationTimeOption});
 export const messageUser = (phoneNumber) => instance.post(`/user/message`, {phoneNumber});
 export const registers = (phone, name, pwd, code) => instance.post(`/user/register`, {phone, name, pwd, code});
 export const getAllProductsRandomly = (page, size, randomSeed) => instance.get(`/product/all`, {params: {current: page, size, randomSeed}});
