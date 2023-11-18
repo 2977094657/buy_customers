@@ -38,7 +38,7 @@
 
 <script setup>
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
-import Paid from "@/components/tailwind/Paid.vue";
+import Paid from "@/components/tailwind/OrdersState.vue";
 import Evaluated from "@/components/tailwind/Evaluated.vue";
 </script>
 

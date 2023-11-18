@@ -3,7 +3,32 @@
     <div class="mx-auto max-w-2xl space-y-8 sm:px-4 lg:max-w-4xl lg:px-0">
       <div v-for="order in unpaidOrders" :key="order.orderLong"
            class="border-b border-t border-gray-200 bg-white shadow-sm sm:rounded-lg sm:border">
-        <div class="flex items-center border-b border-gray-200 p-4 sm:grid sm:grid-cols-5 sm:gap-x-6">
+        <div v-if="order.state!=='待付款'" class="flex items-center border-b border-gray-200 p-4 sm:grid sm:gap-x-6">
+          <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm sm:col-span-4 sm:grid-cols-4 lg:col-span-4">
+            <div class="pr-4 sm:pr-6 lg:pr-8">
+              <dt class="font-medium text-gray-900">订单号</dt>
+              <dd class="mt-1 text-gray-500">{{ order.orderLong }}</dd>
+            </div>
+            <div style="width: 200px" class="hidden sm:block sm:pl-6 lg:pl-8">
+              <dt class="font-medium text-gray-900">创建时间</dt>
+              <dd class="mt-1 text-gray-500">
+                <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
+              </dd>
+            </div>
+            <div style="width: 200px" class="hidden sm:block sm:pl-6 lg:pl-8">
+              <dt class="font-medium text-gray-900">付款时间</dt>
+              <dd class="mt-1 text-gray-500">
+                <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
+              </dd>
+            </div>
+            <div class="ml-20">
+              <dt class="font-medium text-gray-900">总计</dt>
+              <dd style="color: #ff5000;" class="mt-1 font-medium text-gray-900">￥{{ order.price }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div v-else class="flex items-center border-b border-gray-200 p-4 sm:grid sm:grid-cols-5 sm:gap-x-6">
           <dl class="grid flex-1 grid-cols-2 gap-x-6 text-sm sm:col-span-4 sm:grid-cols-3 lg:col-span-3">
             <div class="pr-4 sm:pr-6 lg:pr-8">
               <dt class="font-medium text-gray-900">订单号</dt>
@@ -82,14 +107,22 @@
                   <h5>{{ order.product.productName }}</h5>
                   <p style="color: #ff5000;" class="mt-2 sm:mt-0">￥{{ order.product.price }}</p>
                 </div>
+
                 <span class="font-medium text-sm text-gray-500">{{ order.product.name }}</span>
                 <p>
                   <span class="font-medium text-sm text-gray-500">{{ order.address }}<span
                       class="ml-2">{{ order.consignee }}</span><span class="ml-1">{{ order.phone }}</span></span>
                 </p>
+                <!-- 创建时间和付款时间 -->
                 <div class="flex flex-col sm:hidden">
                   <div>
                     创建时间：
+                    <span class="mt-1 text-gray-500">
+                      <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
+                    </span>
+                  </div>
+                  <div v-if="order.state!=='待付款'">
+                    付款时间：
                     <span class="mt-1 text-gray-500">
                       <time :datetime="formatDate(order.createDate)">{{ formatDate(order.createDate) }}</time>
                     </span>
@@ -102,10 +135,26 @@
                 <p>
                   数量：<span class="font-medium text-sm text-gray-500">{{ order.productNumber }}</span>
                 </p>
+                <p v-if="order.state!=='待付款'">
+                  付款方式：<span class="font-medium text-sm text-gray-500">{{ order.payMethod }}</span>
+                </p>
+                <p v-if="order.state!=='待付款'">
+                  物流状态：
+                  <span class="font-medium text-sm">
+                    <span v-if="order.state==='待发货'" class="text-gray-500">{{ order.state }}</span>
+                    <span v-else style="color: #67C23A">{{ order.state }}</span>
+                  </span>
+                </p>
+                <p v-if="order.state==='已发货'">
+                  发货时间：
+                  <span class="font-medium text-sm text-gray-500">
+                    <span>{{ formatDate(order.sendDate) }}</span>
+                  </span>
+                </p>
               </div>
             </div>
 
-            <div class="mt-6 sm:flex sm:justify-between">
+            <div v-if="order.state==='待付款'" class="mt-6 sm:flex sm:justify-between">
               <div class="flex items-center">
                 <ClockIcon class="h-5 w-5 text-gray-400" aria-hidden="true"/>
                 <p class="ml-2 text-sm font-medium text-gray-500">
@@ -114,6 +163,12 @@
                     {{ formatTime(order.remainingTime) }}
                   </time>
                 </p>
+              </div>
+            </div>
+
+            <div v-if="order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+              <div class="flex flex-1 justify-end">
+                <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
               </div>
             </div>
           </li>
@@ -137,16 +192,19 @@
 </template>
 
 <script setup>
-import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
-import {EllipsisVerticalIcon} from '@heroicons/vue/24/outline'
-import {ClockIcon} from '@heroicons/vue/20/solid'
-import {computed, ref, watch, onUnmounted} from "vue";
+import {computed, onUnmounted, ref, watch} from "vue";
 import store from "@/store";
-import {confirmOrder, deleteUnpaidOrder, getProductById, getUnpaidOrder} from "@/api/api";
+import {confirmOrder, deleteOrders, deleteUnpaidOrder, getOrdersByUserId, getProductById} from "@/api/api";
+import {ClockIcon} from "@heroicons/vue/20/solid";
+import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
+import {EllipsisVerticalIcon} from "@heroicons/vue/24/outline";
+import {ElNotification} from "element-plus";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const unpaidOrders = ref([])
+// 创建一个存储定时器ID的数组
+const timers = [];
 
 let currentMessageInstance = null
 const showMessage = (message) => {
@@ -169,12 +227,9 @@ const showSuccessMessage = (message) => {
   currentMessageInstance = ElMessage({message, type: 'success'})
 }
 
-// 创建一个存储定时器ID的数组
-const timers = [];
-
 const showOrders = async () => {
   try {
-    const response = await getUnpaidOrder(userid.value);
+    const response = await getOrdersByUserId(userid.value);
 
     if (response.data.code === 200) {
       let orderData = response.data.data;
@@ -249,7 +304,7 @@ const calculateRemainingTime = (createTime) => {
   return remaining > 0 ? remaining : 0;  // 如果剩余时间小于0，返回0
 }
 
-const open = (orderLong) => {
+const open = (id) => {
   ElMessageBox.confirm(
       '确认要删除此订单吗?',
       '删除订单',
@@ -261,7 +316,7 @@ const open = (orderLong) => {
       }
   )
       .then(() => {
-        deleteOrder(orderLong)
+        deleteOrder(id)
       })
       .catch(() => {
         ElMessage({
@@ -271,12 +326,13 @@ const open = (orderLong) => {
       })
 }
 
-const deleteOrder = async (orderLong) => {
+const deleteOrder = async (id) => {
   try {
-    const response = await deleteUnpaidOrder(orderLong, userid.value);
+    const response = await deleteUnpaidOrder(id,userid.value);
     if (response.data.code === 200) {
       // 从未支付订单列表中删除该订单
-      unpaidOrders.value = unpaidOrders.value.filter(order => order.orderLong !== orderLong);
+      unpaidOrders.value = unpaidOrders.value.filter(order => order.orderId !== id);
+      await showOrders()
       showSuccessMessage(response.data.msg)
     } else {
       console.log(response.data.msg)

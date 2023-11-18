@@ -1,5 +1,5 @@
 <template>
-  <div style="background-color: rgb(243,244,246)" class="pt-10 mx-auto max-w-7xl sm:px-2 lg:px-8">
+  <div style="background-color: rgb(243,244,246)" class="lg:pt-10 mx-auto max-w-7xl sm:px-2 lg:px-8">
     <div class="mx-auto max-w-2xl space-y-8 sm:px-4 lg:max-w-4xl lg:px-0">
       <div v-for="order in unpaidOrders" :key="order.orderLong"
            class="border-b border-t border-gray-200 bg-white shadow-sm sm:rounded-lg sm:border">
@@ -73,14 +73,23 @@
                 <p>
                   付款方式：<span class="font-medium text-sm text-gray-500">{{ order.payMethod }}</span>
                 </p>
-                <p>
-                  物流状态：<span class="font-medium text-sm text-gray-500">{{ order.state }}</span>
+                <p v-if="order.state!=='待付款'">
+                  物流状态：
+                  <span class="font-medium text-sm">
+                    <span v-if="order.state==='待发货'" class="text-gray-500">{{ order.state }}</span>
+                    <span v-else style="color: #67C23A">{{ order.state }}</span>
+                  </span>
+                </p>
+                <p v-if="order.state==='已发货'">
+                  发货时间：
+                  <span class="font-medium text-sm text-gray-500">
+                    <span>{{ formatDate(order.sendDate) }}</span>
+                  </span>
                 </p>
               </div>
             </div>
 
-            <div
-                class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+            <div v-if="order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
               <div class="flex flex-1 justify-end">
                 <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
               </div>
@@ -106,15 +115,18 @@
 </template>
 
 <script setup>
-import {computed, ref, watch} from "vue";
+import {computed, ref, watch,defineProps} from "vue";
 import store from "@/store";
-import {deleteOrders, getOrdersByUserId, getProductById} from "@/api/api";
+import {deleteOrders, getOrdersByUserIdAndState, getProductById} from "@/api/api";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const unpaidOrders = ref([])
 
 let currentMessageInstance = null
+const props = defineProps({
+  state: String
+});
 const showMessage = (message) => {
   // 如果当前有消息正在显示，先关闭它
   if (currentMessageInstance) {
@@ -136,7 +148,7 @@ const showSuccessMessage = (message) => {
 }
 
 const showOrders = async () => {
-  const response = await getOrdersByUserId(userid.value);
+  const response = await getOrdersByUserIdAndState(userid.value,props.state);
 
   if (response.data.code === 200) {
     let orderData = response.data.data;

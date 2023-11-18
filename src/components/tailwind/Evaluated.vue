@@ -4,9 +4,6 @@ import {ref, computed, watch, reactive} from 'vue';
 import store from "@/store";
 import {useRouter} from "vue-router";
 import {getMyComments, deleteCommentById, addHistorys, getProductById} from '@/api/api';
-import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
-import Obligation from "@/components/tailwind/Obligation.vue";
-import Paid from "@/components/tailwind/Paid.vue";
 
 const comments = ref([]);
 const userid = computed(() => store.state.userInfo.userId)

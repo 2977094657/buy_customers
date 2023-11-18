@@ -92,6 +92,7 @@ import {ref, onMounted, computed} from 'vue';
 import {useRoute} from 'vue-router';
 import store from "@/store";
 import {confirmOrder, getOrder, getProductById} from "@/api/api";
+import {ElNotification} from "element-plus";
 
 let order = ref({});
 let product = ref({});

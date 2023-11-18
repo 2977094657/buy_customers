@@ -27,6 +27,7 @@ export const deleteUnpaidOrder = (orderLong, userId) => instance.delete(`/order/
 export const confirmOrder = (orderLong, userId) => instance.post(`/order/confirmOrder`, {orderLong, userId});
 // const response = await confirmOrder(orderLong, userid.value);
 export const getOrdersByUserId = (userId) => instance.post(`/order/getOrdersByUserId`, {userId});
+export const getOrdersByUserIdAndState = (userId,state) => instance.post(`/order/getOrdersByUserIdAndState`, {userId,state});
 export const deleteOrders = (id) => instance.delete(`/order/deleteOrder`, {params: {id}});
 export const selectStar = (userId) => instance.get(`/star/select`, {params: {userId}});
 // const response = await selectStar(userid.value);

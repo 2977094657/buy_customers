@@ -4,7 +4,7 @@
       <div style="margin-right: 10px" class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
         <!-- 图片库 -->
         <TabGroup as="div" class="flex flex-col">
-          <!--          商品大图-->
+          <!-- 商品大图-->
           <TabPanels class="aspect-h-1 aspect-w-1 w-full">
             <el-image style="border-radius: 10px" v-for="(img, index) in product.imgs" :key="index"
                       :src="img"
@@ -27,16 +27,13 @@
               </Tab>
             </TabList>
           </div>
-
-
-
         </TabGroup>
 
         <!-- 产品信息 -->
         <div class="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-          <h1 style="margin-bottom: 50px" class="text-3xl font-bold tracking-tight text-gray-900">{{
-              product.productName
-            }}</h1>
+          <h1 style="margin-bottom: 50px" class="text-3xl font-bold tracking-tight text-gray-900">
+            {{product.productName }}
+          </h1>
 
           <div
               style="margin-bottom: 50px;cursor:pointer;background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"

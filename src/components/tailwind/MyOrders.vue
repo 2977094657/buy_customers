@@ -3,7 +3,8 @@ import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import {computed} from "vue";
 import store from "@/store";
 import Obligation from "@/components/tailwind/Obligation.vue";
-import Paid from "@/components/tailwind/Paid.vue";
+import Paid from "@/components/tailwind/OrdersState.vue";
+import AllOrders from "@/components/tailwind/AllOrders.vue";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
@@ -16,46 +17,43 @@ const land = computed(() => store.state.userInfo.land)
         <TabList class="-mb-px flex space-x-8">
           <Tab as="template" v-slot="{ selected }">
             <button style="margin-right: 30px;margin-left: 30px" :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              待付款
+              全部
             </button>
           </Tab>
           <Tab as="template" v-slot="{ selected }">
             <button style="margin-right: 30px;margin-left: 30px" :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              待发货
+              待付款
             </button>
           </Tab>
           <Tab as="template" v-slot="{ selected }">
             <button style="margin-right: 30px"
                 :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              待收货
+              待发货
             </button>
           </Tab>
           <Tab as="template" v-slot="{ selected }">
             <button
                 :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              全部
+              待收货
             </button>
           </Tab>
         </TabList>
       </div>
       <TabPanels as="template">
-        <!--待付款-->
+        <TabPanel>
+          <AllOrders></AllOrders>
+        </TabPanel>
+
         <TabPanel>
           <Obligation></Obligation>
         </TabPanel>
 
-
-        <!--已付款内容-->
         <TabPanel>
-          <Paid></Paid>
+          <Paid :state="'待发货'"></Paid>
         </TabPanel>
 
-        <!--选项栏三的内容-->
-        <TabPanel class="p-10">
-          3
-        </TabPanel>
-        <TabPanel class="p-10">
-          4
+        <TabPanel>
+          <Paid :state="'已发货'"></Paid>
         </TabPanel>
       </TabPanels>
     </TabGroup>
