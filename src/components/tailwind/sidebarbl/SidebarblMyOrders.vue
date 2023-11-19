@@ -61,7 +61,7 @@ const handleUnpaidOrdersLength = (length) => {
         </TabPanel>
 
         <TabPanel>
-          <SidebarblPendingReceipt :state="'已发货'"></SidebarblPendingReceipt>
+          <SidebarblPendingReceipt :state="'待收货'"></SidebarblPendingReceipt>
         </TabPanel>
       </TabPanels>
     </TabGroup>

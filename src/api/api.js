@@ -27,6 +27,8 @@ export const deleteUnpaidOrder = (orderLong, userId) => instance.delete(`/order/
 export const confirmOrder = (orderLong, userId) => instance.post(`/order/confirmOrder`, {orderLong, userId});
 // const response = await confirmOrder(orderLong, userid.value);
 export const getOrdersByUserId = (userId) => instance.post(`/order/getOrdersByUserId`, {userId});
+export const updateOrderStatus = (orderId,state) => instance.put(`/order/updateOrderStatus`, {orderId, state});
+export const receiveOrders = (orderId) => instance.post(`/order/receiveOrder`, {orderId});
 export const getOrdersByUserIdAndState = (userId,state) => instance.post(`/order/getOrdersByUserIdAndState`, {userId,state});
 export const deleteOrders = (id) => instance.delete(`/order/deleteOrder`, {params: {id}});
 export const selectStar = (userId) => instance.get(`/star/select`, {params: {userId}});
@@ -65,11 +67,12 @@ export const changePassword = (userId, oldPassword, newPassword, confirmPassword
 export const changePhones = (userId, oldPhone, code, phone) => instance.put(`/user/changePhone`, {userId, oldPhone, code, phone});
 export const searchProduct = (keyword, page) => instance.get(`/product/search`, {params: {keyword, page}});
 export const getVendorProduct = (name) => instance.get(`/product/vendor`, {params: {name}});
-export const addComment = (userId, comments, productId, files) => {
+export const addComment = (userId, comments, productId, score, files) => {
     const formData = new FormData();
     formData.append('userId', userId);
     formData.append('comments', comments.trim());
     formData.append('productId', productId);
+    formData.append('score', score);
     files.forEach((file) => { formData.append(`imgId`, file, file.name); });
     return instance.post(`/productComments/add`, formData);
 };

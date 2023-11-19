@@ -115,7 +115,7 @@
                     <span v-else style="color: #67C23A">{{ order.state }}</span>
                   </span>
                 </p>
-                <p v-if="order.state==='已发货'">
+                <p v-if="order.state==='待收货'">
                   发货时间：
                   <span class="font-medium text-sm text-gray-500">
                     <span>{{ formatDate(order.sendDate) }}</span>
@@ -136,7 +136,7 @@
               </div>
             </div>
 
-            <div v-if="order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+            <div v-if="order.state==='待评价'||order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
               <div class="flex flex-1 justify-end">
                 <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
               </div>

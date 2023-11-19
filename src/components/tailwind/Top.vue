@@ -70,7 +70,7 @@ const toggleSidebarVisibility = () => {
 
 
 onMounted(() => {
-  if (router.currentRoute.value.path === '/PersonalCenter') {
+  if (router.currentRoute.value.path.startsWith('/Reviews')) {
     isSidebarVisible.value = false;
     show.value = false;
   } else {
@@ -79,13 +79,15 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  if (router.currentRoute.value.path === '/PersonalCenter') {
+  if (router.currentRoute.value.path.startsWith('/Reviews')) {
     isSidebarVisible.value = false;
     show.value = false;
   } else {
     window.removeEventListener('scroll', checkScroll);
   }
 });
+
+
 
 const size = ref('50%')
 const PersonalCenter = () => {

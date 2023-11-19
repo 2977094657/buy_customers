@@ -12,9 +12,10 @@ import Address from "@/components/tailwind/Address.vue";
 import PersonalInformation from "@/components/tailwind/PersonalInformation.vue";
 import ShoppingCart from "@/components/tailwind/ShoppingCart.vue";
 import History from "@/components/tailwind/History.vue";
-import MyComments from "@/components/tailwind/MyComments.vue";
 import MyOrders from "@/components/tailwind/MyOrders.vue";
 import ConfirmPay from "@/components/tailwind/ConfirmPay.vue";
+import Evaluated from "@/components/tailwind/Evaluated.vue";
+import Reviews from "@/components/tailwind/Reviews.vue";
 
 const routes = [
     {
@@ -84,7 +85,7 @@ const routes = [
                 path: "MyComments",
                 name: "MyComments",
                 components: {
-                    MyComments: MyComments,
+                    MyComments: Evaluated,
                 }
             },
             {
@@ -120,6 +121,15 @@ const routes = [
         components: {
             top: Top,
             ConfirmPay: ConfirmPay,
+        },
+        props: { description: true }
+    },
+    {
+        path: '/Reviews/:id',
+        name: 'Reviews',
+        components: {
+            top: Top,
+            Reviews: Reviews,
         },
         props: { description: true }
     },

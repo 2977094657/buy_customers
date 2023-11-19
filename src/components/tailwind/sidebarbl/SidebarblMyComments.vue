@@ -35,7 +35,7 @@
             </div>
           </div>
 
-          <div class="mt-6 flex items-center text-sm lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:flex-col lg:items-start xl:col-span-3">
+          <div class="mt-6 mb-5 flex items-center text-sm lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:flex-col lg:items-start xl:col-span-3">
             <div class="flex items-center">
               <button @click="schu(comment.commentsId)" type="button" class="mr-20 inline-flex justify-center rounded-md bg-red-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm transition duration-500 ease select-none hover:bg-red-600">
                 删除

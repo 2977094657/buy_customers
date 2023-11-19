@@ -15,6 +15,7 @@
         <router-view name="orders"></router-view>
         <router-view name="vendor"></router-view>
         <router-view name="ConfirmPay"></router-view>
+        <router-view name="Reviews"></router-view>
       </div>
   </div>
 </template>
@@ -150,7 +151,7 @@ onMounted(async () => {
 <style scoped>
 @import 'assets/Tailwind.css';
 .main {
-  padding: 20px 0 20px 15px;
+  padding: 20px;
   border-radius: 20px;
   background-color: white;
 }

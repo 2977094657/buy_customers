@@ -147,9 +147,9 @@ const addHistory = async (productId) => {
 <template>
   <div class="bg-white">
     <div class="px-4  lg:max-w-7xl">
-      <div class="space-y-10 divide-y divide-gray-200 border-b border-t border-gray-200">
+      <div class="divide-y divide-gray-200 border-b border-t border-gray-200">
         <div v-for="comment in data.comments" :key="comment.commentsId"
-             class="pt-4 mb-4 lg:grid lg:grid-cols-12 lg:gap-x-8">
+             class="pt-4 lg:grid lg:grid-cols-12 lg:gap-x-8">
           <div class="lg:col-span-8 lg:col-start-5 xl:col-span-9 xl:col-start-4 xl:grid xl:grid-cols-3 xl:items-start xl:gap-x-8">
             <div class="items-center xl:col-span-1">
               <h3 class="mr-5 text-sm font-medium text-gray-900">{{ formatDate(comment.time) }}</h3>
@@ -168,7 +168,7 @@ const addHistory = async (productId) => {
               </div>
             </div>
 
-            <div @click="goToProduct(comment.product.productId);addHistory(comment.product.productId)" style="cursor: pointer; background-color: rgb(243,244,246);" class="rounded-lg p-2 mt-4 lg:mt-6 xl:col-span-2 xl:mt-0">
+            <div @click="goToProduct(comment.product.productId);addHistory(comment.product.productId)" style="cursor: pointer; background-color: rgb(243,244,246);" class="rounded-lg mb-5 p-2 mt-4 lg:mt-6 xl:col-span-2 xl:mt-0">
               <p class="font-medium text-gray-900 mb-2 mr-2">{{ comment.product.productName }}</p>
               <div class="flex justify-between items-center">
                 <p class="font-medium mb-2 mr-2 text-sm text-gray-500">{{ comment.product.name }}</p>
@@ -182,7 +182,7 @@ const addHistory = async (productId) => {
           </div>
 
           <div class="mt-6 flex items-center text-sm lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:flex-col lg:items-start xl:col-span-3">
-            <div class="flex items-center">
+            <div class="flex items-center mb-5">
               <button @click="schu(comment.commentsId)" type="button" class="mr-20 inline-flex justify-center rounded-md bg-red-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm transition duration-500 ease select-none hover:bg-red-600">
                 删除
               </button>

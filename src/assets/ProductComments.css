@@ -27,20 +27,20 @@
 }
 
 .delete-button {
+    padding: 0 5px 2px 5px;
     position: absolute;
     top: 5px;
     right: 5px;
     background: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
-    border-radius: 30%;
+    border-radius: 15%;
     cursor: pointer;
 }
 
 .custom-file-upload {
     /* 自定义样式 */
     display: inline-block;
-    padding: 6px 12px;
     cursor: pointer;
 }
 

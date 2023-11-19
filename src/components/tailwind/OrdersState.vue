@@ -80,7 +80,7 @@
                     <span v-else style="color: #67C23A">{{ order.state }}</span>
                   </span>
                 </p>
-                <p v-if="order.state==='已发货'">
+                <p v-if="order.state==='待收货'">
                   发货时间：
                   <span class="font-medium text-sm text-gray-500">
                     <span>{{ formatDate(order.sendDate) }}</span>
@@ -89,9 +89,15 @@
               </div>
             </div>
 
-            <div v-if="order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
-              <div class="flex flex-1 justify-end">
+            <div v-if="order.state==='待评价'||order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+              <div class="flex flex-1 justify-between">
+                <p v-if="order.state==='待评价'" @click="goToReview(order.productId,order.orderLong,order.orderId)" style="cursor: pointer;color: rgb(255,112,0)">去评价</p>
                 <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
+              </div>
+            </div>
+            <div v-if="order.state==='待收货'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
+              <div class="flex flex-1 justify-end">
+                <p @click="receiving(order.orderId)" style="cursor: pointer;color: rgb(255,112,0)">确认收货</p>
               </div>
             </div>
           </li>
@@ -117,7 +123,8 @@
 <script setup>
 import {computed, ref, watch,defineProps} from "vue";
 import store from "@/store";
-import {deleteOrders, getOrdersByUserIdAndState, getProductById} from "@/api/api";
+import {deleteOrders, getOrdersByUserIdAndState, getProductById, receiveOrders} from "@/api/api";
+import router from "@/router/router";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
@@ -211,6 +218,28 @@ const open = (id) => {
       })
 }
 
+const receiving = (id) => {
+  ElMessageBox.confirm(
+      '确认收货吗?',
+      '确认收货',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true,
+      }
+  )
+      .then(() => {
+        receiveOrder(id)
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消收货',
+        })
+      })
+}
+
 const deleteOrder = async (id) => {
   try {
     const response = await deleteOrders(id);
@@ -225,6 +254,37 @@ const deleteOrder = async (id) => {
     console.error("删除订单失败：", error);
   }
 }
+
+const receiveOrder = async (orderId) => {
+  const response = await receiveOrders(orderId);
+
+  if (response.data.code === 200) {
+    // 更新订单状态
+    const order = unpaidOrders.value.find(order => order.orderId === orderId);
+    if (order) {
+      order.state = '待评价';
+      order.receiveDate = Date.now();  // 设置收货时间为当前时间
+    }
+
+    // 从订单列表中移除已经收货的订单
+    unpaidOrders.value = unpaidOrders.value.filter(order => order.state !== '待评价');
+
+    showSuccessMessage(response.data.msg)
+  } else {
+    showMessage("收货失败: " + response.data.msg);
+  }
+};
+
+const goToReview = (productId,orderLong,orderId) => {
+  // 生成一个唯一的随机数
+  const id = Math.random().toString(36).substr(2);
+  // 使用sessionStorage保存随机数和订单ID
+  sessionStorage.setItem(id, JSON.stringify({ productId, orderLong, orderId }));
+
+  const url = router.resolve({name: 'Reviews', params: { id }}).href;
+  window.open(url, '_blank');
+};
+
 
 
 </script>
