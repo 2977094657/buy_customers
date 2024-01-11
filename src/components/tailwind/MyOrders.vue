@@ -1,6 +1,6 @@
 <script setup>
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
-import {computed} from "vue";
+import {computed,ref} from "vue";
 import store from "@/store";
 import Obligation from "@/components/tailwind/Obligation.vue";
 import Paid from "@/components/tailwind/OrdersState.vue";
@@ -8,6 +8,11 @@ import AllOrders from "@/components/tailwind/AllOrders.vue";
 
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
+let emptyValue = ref('');
+
+const handleEmptyUpdate = (value) => {
+  emptyValue.value = value;
+};
 </script>
 
 <template>
@@ -40,7 +45,7 @@ const land = computed(() => store.state.userInfo.land)
           <Tab as="template" v-slot="{ selected }">
             <button
                 :class="[selected ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800', 'whitespace-nowrap border-b-2 py-6 text-sm font-medium focus:outline-none']">
-              待评价
+              已收货
             </button>
           </Tab>
         </TabList>
@@ -63,7 +68,8 @@ const land = computed(() => store.state.userInfo.land)
         </TabPanel>
 
         <TabPanel>
-          <Paid :state="'待评价'"></Paid>
+          <Paid v-if="emptyValue!=='待评价'" :state="'待评价'" @update-empty="handleEmptyUpdate"></Paid>
+          <Paid :state="'已完成'" @update-empty="handleEmptyUpdate"></Paid>
         </TabPanel>
       </TabPanels>
     </TabGroup>

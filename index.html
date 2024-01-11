@@ -7,6 +7,22 @@
     <title>百客 BuyKe</title>
   </head>
   <style>
+      @media (max-width: 640px){
+          /* Chrome, Safari, Opera */
+          ::-webkit-scrollbar {
+              display: none;
+          }
+
+          /* Firefox */
+          html {
+              scrollbar-width: none;
+          }
+
+          /* Internet Explorer 10+ */
+          html {
+              -ms-overflow-style: -ms-autohiding-scrollbar;
+          }
+      }
       * {
           -webkit-tap-highlight-color: rgba(0,0,0,0);
           -webkit-touch-callout: none;

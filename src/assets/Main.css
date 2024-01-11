@@ -7,22 +7,39 @@
     outline: 1px transparent solid;
 }
 
-.product:hover {
-    outline: 1px #ff915e solid;
-    cursor: pointer;
-    background-color: white;
-    box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.1);
+@media (min-width: 1024px){
+    .product:hover {
+        outline: 1px #ff915e solid;
+        cursor: pointer;
+        background-color: white;
+        box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.1);
+    }
 }
 
-.productName {
-    font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
-    font-size: 16px;
-    max-width: 158px;
-    max-height: 46px;
-    overflow: hidden;
-    margin: 5px 0 0 11%;
-    color: #333333;
-    text-align: left;
+@media (min-width: 640px){
+    .productName {
+        font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
+        font-size: 16px;
+        max-width: 158px;
+        max-height: 46px;
+        overflow: hidden;
+        margin: 5px 0 0 11%;
+        color: #333333;
+        text-align: left;
+    }
+}
+
+@media (max-width: 650px){
+    .productName {
+        font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
+        font-size: 16px;
+        max-width: 220px;
+        max-height: 70px;
+        overflow: hidden;
+        margin: 5px 0 0 11%;
+        color: #4d4747;
+        text-align: left;
+    }
 }
 
 .productName:hover{

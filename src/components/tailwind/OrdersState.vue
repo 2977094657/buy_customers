@@ -33,7 +33,7 @@
         <ul role="list" class="divide-y divide-gray-200">
           <li class="p-4 sm:p-6">
             <div class="flex items-center sm:items-start">
-              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 sm:h-40 sm:w-40">
+              <div class="h-20 w-20 mb-5 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 sm:h-40 sm:w-40">
                 <img :src="order.product.img.slice(1, -1).split(',')[0]" alt=""
                      class="h-full w-full object-cover object-center"/>
               </div>
@@ -104,7 +104,7 @@
         </ul>
       </div>
 
-      <div v-if="unpaidOrders.length!==0" class="relative">
+      <div v-if="unpaidOrders.length!==0&&props.state!=='待评价'" class="relative">
         <div class="absolute inset-0 flex items-center" aria-hidden="true">
           <div class="w-full border-t border-gray-300"/>
         </div>
@@ -121,7 +121,7 @@
 </template>
 
 <script setup>
-import {computed, ref, watch,defineProps} from "vue";
+import {computed, ref, watch,defineProps,defineEmits,watchEffect} from "vue";
 import store from "@/store";
 import {deleteOrders, getOrdersByUserIdAndState, getProductById, receiveOrders} from "@/api/api";
 import router from "@/router/router";
@@ -134,6 +134,14 @@ let currentMessageInstance = null
 const props = defineProps({
   state: String
 });
+
+let empty = ref(''); // 传递给父组件的值
+const emit = defineEmits(['update-empty']);
+// 更新 empty 的值并将其传递给父组件时，调用这个函数
+const updateEmpty = (value) => {
+  empty.value = value;
+  emit('update-empty', empty.value);
+};
 const showMessage = (message) => {
   // 如果当前有消息正在显示，先关闭它
   if (currentMessageInstance) {
@@ -171,6 +179,7 @@ const showOrders = async () => {
     orderData.sort((a, b) => b.createDate - a.createDate);
     unpaidOrders.value = orderData;
   } else {
+    updateEmpty(props.state)
     console.log(response.data.msg)
   }
 }

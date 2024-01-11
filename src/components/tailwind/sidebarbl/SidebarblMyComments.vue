@@ -46,8 +46,9 @@
             </div>
           </div>
         </div>
-        <div v-if="loading">
-          <a-spin style="display: flex;justify-content: center;align-items: center;height: 50vh;" v-if="loading"
+
+        <div v-if="loading&&land">
+          <a-spin style="display: flex;justify-content: center;align-items: center;height: 50vh;"
                   tip="Loading..." size="large">
             <br>
           </a-spin>

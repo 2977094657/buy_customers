@@ -4,17 +4,72 @@ import {useRouter, useRoute} from 'vue-router';
 import {useStore} from 'vuex'
 import {ChatDotSquare, Document, ShoppingTrolley} from "@element-plus/icons-vue";
 import {HeartOutlined} from "@ant-design/icons-vue";
-import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import {Dialog, DialogPanel, Disclosure, TransitionChild, TransitionRoot} from '@headlessui/vue'
 import {UpCircleOutlined,DownCircleOutlined} from '@ant-design/icons-vue';
 import Navbars from "@/components/tailwind/Navbars.vue";
 import SidebarblCart from "@/components/tailwind/sidebarbl/SidebarblCart.vue";
 import SidebarblStar from "@/components/tailwind/sidebarbl/SidebarblStar.vue";
 import SidebarblMyComments from "@/components/tailwind/sidebarbl/SidebarblMyComments.vue";
 import SidebarblMyOrders from "@/components/tailwind/sidebarbl/SidebarblMyOrders.vue";
+import {getGlobalSettings} from "@/api/api";
+import Test from "@/components/tailwind/Test.vue";
 
 const store = useStore()
 const route = useRoute();
 const land = computed(() => store.state.userInfo.land)
+let deviceType = ref('');
+const sidebar = ref('') //网站是否显示侧边栏参数
+const product = computed(() => route.path.startsWith('/product'));
+
+const setDeviceType = async () => {
+  const userAgent = navigator.userAgent;
+  const isIpad = userAgent.match(/(iPad).*OS\s([\d_]+)/);
+  const isIphone = userAgent.match(/(iPhone\sOS)\s([\d_]+)/);
+  const isAndroid = userAgent.match(/(Android)\s+([\d.]+)/);
+
+  if (isIpad) {
+    deviceType.value = 'iPad';
+  } else if (isIphone) {
+    deviceType.value = 'iPhone';
+  } else if (isAndroid) {
+    deviceType.value = 'Android';
+  } else {
+    deviceType.value = 'PC';
+  }
+};
+
+onMounted(async () => {
+  await setDeviceType();
+
+  const intervalId = setInterval(() => {
+    if (deviceType.value !== undefined) {
+      setTimeout(() => {
+        store.commit('setDeviceType', deviceType.value);
+      }, 0);
+      clearInterval(intervalId);
+    }
+  }, 500);
+});
+
+
+// 定义一个新的函数，用于更新值
+async function updateValues() {
+  await setDeviceType();
+  const globalSettings = await getGlobalSettings(1);
+  if(!product.value&&deviceType.value==='PC'){
+    sidebar.value=globalSettings.data.data.sidebar
+    return
+  }else if (deviceType.value==='PC'){
+    sidebar.value=globalSettings.data.data.sidebar
+    return
+  }
+  sidebar.value=0
+}
+
+onMounted(updateValues);  // 在页面加载时调用函数
+
+// 监听路由的变化
+watch(() => route.path, updateValues);  // 在路由变化时调用函数
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
@@ -67,8 +122,6 @@ const toggleSidebarVisibility = () => {
   isSidebarVisible.value = !isSidebarVisible.value;
 };
 
-
-
 onMounted(() => {
   if (router.currentRoute.value.path.startsWith('/Reviews')) {
     isSidebarVisible.value = false;
@@ -86,8 +139,6 @@ onBeforeUnmount(() => {
     window.removeEventListener('scroll', checkScroll);
   }
 });
-
-
 
 const size = ref('50%')
 const PersonalCenter = () => {
@@ -107,23 +158,27 @@ const checkScrollbar = async () => {
 
 onMounted(checkScrollbar);
 onUpdated(checkScrollbar);
-
-
 </script>
 
 <template>
-  <div class="z-[50] search-container" :class="{ 'sticky': isSticky }">
+  <div class="z-[50] search-container lm:mt-0 lm:m-0 lm:p-0" :class="{ 'sticky': isSticky }">
     <Navbars></Navbars>
   </div>
+  <div v-if="deviceType==='Android'" class="text-center" style="margin: 0; padding: 0;">
+    <Test></Test><br>
+  </div>
 
-  <div class="cbl2" v-show="show">
+
+
+  <!--  收起侧边栏选项-->
+  <div v-if="sidebar==='1'" class="cbl2" v-show="show">
     <el-button style="margin-left: 5px;height: 0" class="sticky-button" type="primary" @click="toggleSidebarVisibility">
       <div class="sticky-button3">
-        <el-icon style="font-size: 20px;margin-left: -5px">
+        <el-icon class="text-gray-500" style="font-size: 20px;margin-left: -5px">
           <UpCircleOutlined v-if="isSidebarVisible" />
           <DownCircleOutlined v-else />
         </el-icon>
-        <div style="position:absolute;margin-top: -5px;margin-left: -10px">
+        <div class="text-gray-500" style="position:absolute;margin-top: -5px;margin-left: -10px">
           <span v-if="isSidebarVisible">&nbsp收起</span>
           <span v-else>&nbsp展开</span>
         </div>
@@ -131,13 +186,14 @@ onUpdated(checkScrollbar);
     </el-button>
   </div>
 
-  <div class="cbl" v-show="show&&isSidebarVisible">
+<!--  侧边栏选项-->
+  <div v-if="sidebar==='1'" class="cbl" v-show="show&&isSidebarVisible">
     <el-button class="sticky-button4" type="primary" @click="drawer=true">
       <div class="sticky-button2">
-        <el-icon style="font-size: 20px;margin-left: -10px">
+        <el-icon class="text-gray-500" style="font-size: 20px;margin-left: -10px">
           <ShoppingTrolley />
         </el-icon>
-        <div style="margin: 5px 0 0 0;">
+        <div class="text-gray-500" style="margin: 5px 0 0 0;">
           购物车&nbsp&nbsp
         </div>
       </div>
@@ -165,18 +221,17 @@ onUpdated(checkScrollbar);
         </div>
       </Dialog>
     </TransitionRoot>
-    <br>
 
-    <el-button class="sticky-button4" type="primary" @click="dd = true;">
-      <div class="sticky-button2">
-        <el-icon style="font-size: 20px;">
-          <Document/>
+    <div class="sticky-button4" type="primary" @click="dd = true;">
+      <div class="sticky-button2" style="margin: 30px 15px 0 0">
+        <el-icon class="text-gray-500" style="font-size: 20px;">
+          <Document />
         </el-icon>
-        <div style="margin: 5px 0 0 0;">
-          我的订单
+        <div class="text-gray-500" style="margin: 5px 0 0 0;">
+          订单
         </div>
       </div>
-    </el-button>
+    </div>
 
     <TransitionRoot as="template" :show="dd">
       <Dialog as="div" class="relative z-10" @close="dd = false">
@@ -202,18 +257,17 @@ onUpdated(checkScrollbar);
       </Dialog>
     </TransitionRoot>
 
-    <br>
 
-    <el-button class="sticky-button4" type="primary" @click="pj = true;">
-      <div class="sticky-button2">
-        <el-icon style="font-size: 20px;">
+    <div class="sticky-button4" type="primary" @click="pj = true;">
+      <div class="sticky-button2" style="margin: 40px 15px 0 0">
+        <el-icon class="text-gray-500" style="font-size: 20px;">
           <ChatDotSquare/>
         </el-icon>
-        <div style="margin: 5px 0 0 0;">
-          我的评价
+        <div class="text-gray-500" style="margin: 5px 0 0 0;">
+          评价
         </div>
       </div>
-    </el-button>
+    </div>
 
     <TransitionRoot as="template" :show="pj">
       <Dialog as="div" class="relative z-10" @close="pj = false">
@@ -239,16 +293,15 @@ onUpdated(checkScrollbar);
       </Dialog>
     </TransitionRoot>
 
-    <br>
 
-    <el-button class="sticky-button4" type="primary" @click="sc=true">
-      <div class="sticky-button2">
-        <HeartOutlined style="font-size: 20px"/>
-        <div style="margin: 5px 0 0 0;">
-          宝贝收藏
+    <div class="sticky-button4" type="primary" @click="sc=true">
+      <div class="sticky-button2" style="margin: 50px 15px 0 0">
+        <HeartOutlined class="text-gray-500" style="font-size: 20px"/>
+        <div class="text-gray-500" style="margin: 5px 0 0 0;">
+          收藏
         </div>
       </div>
-    </el-button>
+    </div>
 
     <TransitionRoot as="template" :show="sc">
       <Dialog as="div" class="relative z-10" @close="sc = false">
@@ -273,19 +326,20 @@ onUpdated(checkScrollbar);
         </div>
       </Dialog>
     </TransitionRoot>
-    <br>
+
+
     <el-backtop :bottom="100" style="
     border: 1px solid rgb(209,213,219);
     border-top: none;
     border-right: none;
     position: absolute;
     right: 0;
-    top: 266px;
-    height: 60px;
+    top: 236px;
+    height: 50px;
     width: 60px;
     box-shadow: none;
     border-radius: 0 0 0 15px;" :visibility-height="600">
-      <div class="up"><br>&nbsp&nbsp&nbsp▲<br>&nbsp&nbsp&nbsp顶部</div>
+      <div class="up text-gray-500"><br>&nbsp&nbsp&nbsp▲<br>&nbsp&nbsp&nbsp顶部</div>
     </el-backtop>
   </div>
 </template>

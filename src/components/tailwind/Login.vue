@@ -3,8 +3,8 @@ import {ref, computed} from 'vue';
 import login from "@/components/tailwind/Login.vue";
 import {useStore} from 'vuex';
 import {useRouter} from 'vue-router';
-import {onMounted} from 'vue';
-import {getUser, getUserToken, log, messageUser, registers} from "@/api/api";
+import {log, messageUser, publicKey, registers} from "@/api/api";
+import {encryptAESKey, encryptData, generateRandomAESKey} from "@/encryption/encryption";
 
 
 const router = useRouter();
@@ -17,7 +17,7 @@ let password = ref('');
 let password1 = ref('');
 let verifyCode = ref('') // 存储从 API 获取的验证码
 let userInputVerifyCode = ref('') // 存储用户输入的验证码
-let getCaptchaBtnText = ref({countdown: null, text: '点击获取验证码'})
+let getCaptchaBtnText = ref({countdown: null, text: '获取验证码'})
 let countdownTimer = null // 存储计时器
 let currentMessageInstance = null
 let isBtnDisabled = ref(false)
@@ -77,10 +77,10 @@ getCaptcha()
 const loginUser = async () => {
   try {
     if (phoneNumber1.value === '' || password1.value === ''){
-      showMessage('请输入手机号或密码');
+      showMessage('请输入内容');
       return
     }
-    const response = await log(phoneNumber1.value, password1.value, rememberMe.value ? 1 : "");
+    const response = await log(phoneNumber1.value, password1.value, rememberMe.value ? '1' : '0');
     if (response.data.token) {
       showSuccessMessage('登陆成功');
       // 延迟一段时间后刷新页面
@@ -102,53 +102,13 @@ const loginUser = async () => {
     if (error.response && error.response.status === 400) {
       // 服务器返回了一个 400 错误
       // 可以从 error.response.data 中获取服务器返回的错误信息
-      showMessage('手机号或密码错误');
+      showMessage('账号或密码错误');
     } else {
       // 其他类型的错误
       console.error(error);
     }
   }
 };
-
-const parseTokenAndUserInfo = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const response = await getUserToken(token);
-      if (response.data) {
-        const userInfoResponse = await getUser(response.data.userId);
-        if (userInfoResponse.data && userInfoResponse.data.code === 0) {
-          userName.value = userInfoResponse.data.data.name;
-          userAvatar.value = userInfoResponse.data.data.userAvatar;
-          store.commit('setUserInfo', {
-            name: userName.value,
-            userAvatar: userAvatar.value,
-            land: true
-          });
-        } else {
-          console.log('获取用户信息失败');
-        }
-      } else {
-        console.log('Token 解析失败');
-      }
-    }
-  } catch (error) {
-    console.error('请求失败：', error);
-  }
-};
-
-// 在解析 token 的函数组件中调用解析函数并获取用户信息
-onMounted(async () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    await parseTokenAndUserInfo(token);
-  } else if (!token) {
-    store.commit('setUserInfo', {
-      name: userName.value,
-      land: false
-    });
-  }
-});
 
 
 const sendSMSCode = async () => {
@@ -178,6 +138,7 @@ const sendSMSCode = async () => {
   }
   isSending.value = true;
   try {
+    console.log(phoneNumber.value)
     const response = await messageUser(phoneNumber.value);
     isSending.value = false;
     if (response.data === '手机号已被注册') {
@@ -251,6 +212,11 @@ const registerUser = async () => {
   }
 };
 
+
+const forgotPassword = () => {
+  // 本页面打开
+  router.push({ name: 'forgotPassword'});
+}
 </script>
 
 <template>
@@ -264,7 +230,7 @@ const registerUser = async () => {
       </div>
 
       <form v-if="currentForm === 'login'" @submit.prevent="login" class="login">
-        <div class="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="flex min-h-full flex-1 flex-col justify-center py-5 sm:px-6 lg:px-8">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
@@ -275,7 +241,7 @@ const registerUser = async () => {
                 <div>
                   <label for="email" class="block text-sm font-medium leading-6 text-gray-900">手机号</label>
                   <div class="mt-2">
-                    <input id="email" v-model="phoneNumber1" placeholder="请输入手机号" name="email" type="number" autocomplete="email" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                    <input id="email" v-model="phoneNumber1" placeholder="手机号/用户名" name="email" type="text" autocomplete="email" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
                   </div>
                 </div>
 
@@ -293,7 +259,7 @@ const registerUser = async () => {
                   </div>
 
                   <div class="text-sm leading-6">
-                    <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">忘记密码？</a>
+                    <a @click="forgotPassword" class="font-semibold text-indigo-600 hover:text-indigo-500">忘记密码？</a>
                   </div>
                 </div>
 
@@ -301,33 +267,6 @@ const registerUser = async () => {
                   <button @click="loginUser" style="background-image: linear-gradient(to right,#ff5000 0,#ff6000 100%);" type="button" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     登&nbsp;&nbsp;&nbsp;&nbsp;录
                   </button>
-                </div>
-              </div>
-
-              <div>
-                <div class="relative mt-10">
-                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-200" />
-                  </div>
-                  <div class="relative flex justify-center text-sm font-medium leading-6">
-                    <span class="bg-white px-6 text-gray-900">或者使用以下方式登录</span>
-                  </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-2 gap-4">
-                  <a href="#" class="flex w-full items-center justify-center gap-3 rounded-md bg-[#1D9BF0] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9BF0]">
-                    <svg class="h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                    </svg>
-                    <span class="text-sm font-semibold leading-6">Twitter</span>
-                  </a>
-
-                  <a href="#" class="flex w-full items-center justify-center gap-3 rounded-md bg-[#24292F] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]">
-                    <svg class="h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-sm font-semibold leading-6">GitHub</span>
-                  </a>
                 </div>
               </div>
             </div>
@@ -338,7 +277,7 @@ const registerUser = async () => {
 
 
       <form v-else-if="currentForm === 'register'" @submit.prevent="register">
-        <div class="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="flex min-h-full flex-1 flex-col justify-center py-5 sm:px-6 lg:px-8">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
@@ -369,22 +308,22 @@ const registerUser = async () => {
 
                 <div>
                   <label class="block text-sm font-medium leading-6 text-gray-900">请输入图形验证码，<span style="color: #e15f00">区分大小写</span></label>
-                  <div class="mt-2">
+                  <div class="flex justify-between items-center">
                     <input v-model="userInputVerifyCode" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                    <img style="width: 90px; margin-top: 10px;" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">
+                    <img style="width: 90px;margin-left: 10px" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">
                   </div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium leading-6 text-gray-900">请输入手机号</label>
-                  <div class="mt-2 flex">
-                    <input v-model="phoneNumber" required="" class="flex-grow block rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                    <button type="button" style="border:0;outline:none;background-color: transparent;cursor: pointer;margin-left: 10px" @click="sendSMSCode" :disabled="isBtnDisabled">
+                  <div class="flex justify-between items-center">
+                    <input v-model="phoneNumber" required="" class="flex-grow block rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" style="width: 170px" />
+                      <button type="button" class="sm:w-2/5" style="width: 40%;margin-left: 10px;border:0;outline:none;background-color: transparent;cursor: pointer;" @click="sendSMSCode" :disabled="isBtnDisabled">
                       <span :class="{ 'countdown-active': getCaptchaBtnText.countdown !== null }">
                         {{ getCaptchaBtnText.countdown }}
                       </span>
-                      {{ getCaptchaBtnText.text }}
-                    </button>
+                        {{ getCaptchaBtnText.text }}
+                      </button>
                   </div>
                 </div>
 

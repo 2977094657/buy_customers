@@ -1,6 +1,6 @@
 <template>
   <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-8">
-    <div v-for="product in products" :key="product.productId" class="group flex product" @click="goToProduct(product.productId);addHistory(product.productId)"> <!-- 添加 flex 和 items-center -->
+    <div v-for="product in products" :key="product.productId" class="group flex product lm:mr-0 lm:mt-1 lm:bg-white lm:rounded-md" @click="goToProduct(product.productId);addHistory(product.productId)"> <!-- 添加 flex 和 items-center -->
       <div style="display: none">
         <img @load="product.loading=true" :src="product.img.slice(1, -1).split(',')[0]" :alt="product.productName" width="100" >
       </div>
@@ -28,6 +28,7 @@ import {ref, onMounted, computed} from 'vue'
 import {useRouter} from "vue-router";
 import store from "@/store";
 import {addHistorys, getAllProductsRandomly} from "@/api/api";
+import Test from "@/components/tailwind/Test.vue";
 
 const currentPage = ref(1)
 const totalPages = ref(1)

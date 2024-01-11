@@ -192,9 +192,9 @@ const fetchUserInfo = async () => {
     const response = await getUser(userId);
     const data = response.data;
     if (data.code === 0) {
-      userInfo.value = data.data;
-      avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
-      imageUrl1.value = data.data.userAvatar;
+      userInfo.value = data.data.user;
+      avatarUrl.value = data.data.user.userAvatar; // 获取头像图片URL
+      imageUrl1.value = data.data.user.userAvatar;
     } else {
       console.error('获取用户信息失败');
     }
@@ -323,9 +323,6 @@ const beforeAvatarUpload = (rawFile) => {
     return false
   } else if (rawFile.size / 1024 / 1024 > 1) {
     showMessage('头像图片大小不能超过 1MB！')
-    return false
-  } else if (rawFile.name.length > 20) {
-    showMessage('文件名不能超过20个字符');
     return false
   }
   imageUrl.value = URL.createObjectURL(rawFile)

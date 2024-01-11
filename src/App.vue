@@ -4,7 +4,7 @@
     </div>
     <div v-if="!isMobile">
       <router-view name="top"></router-view>
-      <div :class="isPersonalCenter ? '' : 'main mx-auto max-w-7xl sm:px-6 lg:px-8'">
+      <div :class="isPersonalCenter ? '' : (home ? 'main lm:px-1 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-9 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none lm:p-0' : 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none'))">
       <router-view name="personalCenter"></router-view>
         <router-view name="banner"></router-view>
         <router-view name="main"></router-view>
@@ -16,21 +16,27 @@
         <router-view name="vendor"></router-view>
         <router-view name="ConfirmPay"></router-view>
         <router-view name="Reviews"></router-view>
+        <router-view name="forgotPassword"></router-view>
       </div>
-  </div>
+    </div>
 </template>
 
 <script setup>
 import {useRoute, useRouter} from 'vue-router';
+import {ref, onMounted, computed} from 'vue'
+import {useStore} from 'vuex'
+import axios from "axios";
+import {ElNotification} from "element-plus";
+import {getUser, getUserToken} from "@/api/api";
 
 const route = useRoute();
 useRouter();
-import {ref, onMounted, computed} from 'vue'
 
 const isMobile = ref(false)
 
 const isPersonalCenter = computed(() => route.path.startsWith('/PersonalCenter'));
-
+const product = computed(() => route.path.startsWith('/product'));
+const home = computed(() => route.path === '/'); // 检查当前路由是否是首页
 
 // onMounted(() => {
 //   const str = navigator.userAgent;
@@ -78,10 +84,6 @@ const randomSentence = computed(() => {
   return sentences[Math.floor(Math.random() * sentences.length)];
 });
 
-import {useStore} from 'vuex'
-import axios from "axios";
-import {ElNotification} from "element-plus";
-
 const store = useStore()
 
 const router = useRouter();
@@ -96,19 +98,15 @@ const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
     if (token) {
-      const response = await axios.get('http://124.221.7.201:8081/user/token', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await getUserToken(token);
       if (response.data) {
         store.commit('setUserInfo', {userId: response.data.userId})
-        const userInfoResponse = await axios.get(`http://124.221.7.201:8081/user/all?userId=${response.data.userId}`);
+        const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data != null) {
-          userName.value = userInfoResponse.data.data.name;
-          Avatar.value = userInfoResponse.data.data.userAvatar;
-          description.value = userInfoResponse.data.data.description;
-          gender.value = userInfoResponse.data.data.gender;
+          userName.value = userInfoResponse.data.data.user.name;
+          Avatar.value = userInfoResponse.data.data.user.userAvatar;
+          description.value = userInfoResponse.data.data.user.description;
+          gender.value = userInfoResponse.data.data.user.gender;
           store.commit('setUserInfo', {
             name: userName.value,
             userAvatar: Avatar.value,
@@ -128,12 +126,15 @@ const parseTokenAndUserInfo = async () => {
   }
 };
 
-// 在解析 token 的函数组件中调用解析函数并获取用户信息
 onMounted(async () => {
   const token = localStorage.getItem('token');
+  const lastShown = localStorage.getItem('lastShown');
+
+  const today = new Date().toISOString().slice(0,10); // 获取今天的日期
+
   if (token) {
     await parseTokenAndUserInfo(token);
-  } else if (!token) {
+  } else if (!token && (!lastShown || lastShown !== today)) {
     ElNotification({
       title: '登录失效',
       message: '登录过期，请重新登录',
@@ -144,8 +145,10 @@ onMounted(async () => {
       userAvatar: Avatar.value,
       land: false
     });
+    localStorage.setItem('lastShown', today); // 更新日期标记
   }
 });
+
 </script>
 
 <style scoped>

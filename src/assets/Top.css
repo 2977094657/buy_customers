@@ -162,6 +162,7 @@ img{
 }
 
 .sticky-button4 {
+    cursor: pointer;
     background-color: white;
     border: none;
     text-align: center;
@@ -184,7 +185,7 @@ img{
     right: 0;
     position: fixed;
     width: 60px;
-    height: 279px;
+    height: 259px;
 }
 
 .cbl2{

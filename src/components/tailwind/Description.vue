@@ -1,23 +1,30 @@
 <template>
   <div class="bg-white">
     <div v-if="product && product.imgs" class="mx-auto max-w-2xl lg:max-w-7xl">
-      <div style="margin-right: 10px" class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+      <div class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
         <!-- 图片库 -->
         <TabGroup as="div" class="flex flex-col">
-          <!-- 商品大图-->
-          <TabPanels class="aspect-h-1 aspect-w-1 w-full">
-            <el-image style="border-radius: 10px" v-for="(img, index) in product.imgs" :key="index"
+          <!-- 手机轮播图-->
+          <el-carousel class="sm:hidden" :arrow=state>
+            <el-carousel-item v-for="(img, index) in product.imgs" :key="index">
+              <img :src="img" class="lm:rounded-none h-full w-full sm:rounded-lg" :alt="product.productName"/>
+            </el-carousel-item>
+          </el-carousel>
+
+<!--          PC大图-->
+          <TabPanels class="lm:hidden w-full">
+            <el-image v-for="(img, index) in product.imgs" :key="index"
                       :src="img"
                       :zoom-rate="1.2"
                       :preview-src-list="product.img.slice(1, -1).split(', ')"
                       :initial-index="index"
                       fit="fill"
                       v-show="index === currentImageIndex"
-                      class="h-full w-full object-cover object-center sm:rounded-lg" :alt="product.productName"/>
+                      class="lm:rounded-none h-full w-full object-cover object-center sm:rounded-lg" :alt="product.productName"/>
           </TabPanels>
 
           <!-- 小图在手机尺寸隐藏 -->
-          <div class="mx-auto mt-6 w-full max-w-2xl lg:max-w-none hidden md:block">
+          <div class="lm:hidden mx-auto mt-6 w-full max-w-2xl lg:max-w-none hidden md:block">
             <TabList class="grid grid-cols-5 sm:grid-cols-5 gap-6">
               <Tab v-for="(img, index) in product.imgs" :key="index" class="relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase text-gray-900" v-slot="{ selected }">
       <span class="absolute inset-0 overflow-hidden rounded-md">
@@ -30,15 +37,66 @@
         </TabGroup>
 
         <!-- 产品信息 -->
-        <div class="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-          <h1 style="margin-bottom: 50px" class="text-3xl font-bold tracking-tight text-gray-900">
+        <div class="mt-1 px-4 sm:px-0 lg:mt-0">
+          <div class="sm:hidden flex justify-between items-center">
+            <p style="color: rgb(255,80,0);" class="sm:hidden text-3xl tracking-tight text-gray-900"><b class="text-sm">￥</b><span class="text-2xl font-semibold">{{ product.price }}</span>
+            </p>
+            <p class="text-gray-400">已售&nbsp&nbsp{{product.buys}}</p>
+          </div>
+
+          <div style="margin-bottom: 50px" class="sm:hidden text-2xl text-gray-800 font-semibold tracking-tight">
             {{product.productName }}
-          </h1>
+          </div>
+
+          <!--          手机端底栏-->
+          <div style="margin-left: -15px" class="sm:hidden p-2 w-full z-10 flex justify-between items-center lm:fixed lm:bottom-0 bg-slate-50 border-t-[1px]">
+            <div @click="goToVendor(product.name)" class="ml-3 text-sm text-gray-700 flex flex-col items-center">
+              <ShopOutlined style="color: #FF5000;font-size: 17px"/>
+              <span class="text-sm">店铺</span>
+            </div>
+            <!--            小屏幕显示的收藏按钮-->
+            <div class="flex flex-col items-center">
+              <button @click="addToFavorites" type="button"
+                      class="flex items-center justify-center rounded-md text-gray-400">
+                <HeartIcon class="h-5 w-5 flex-shrink-0" aria-hidden="true"/>
+              </button>
+              <span class="text-sm">收藏</span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <button @click="addToCart"
+                      style="border-left: none; background: linear-gradient(90deg, rgb(255, 203, 0), rgb(255, 148, 2))"
+                      class="text-xs -mr-1 h-9 w-32 rounded-l-3xl rounded-r-none ml-5 flex items-center justify-center rounded-md border border-transparent px-8 py-3 font-medium text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
+                      data-ripple-light="true">
+                加入购物车
+              </button>
+              <button @click="goToProduct(product.productId)"
+                      style="border-left: none; background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"
+                      class="text-xs h-9 w-32 rounded-r-3xl rounded-l-none flex items-center justify-center rounded-md border border-transparent px-8 py-3 font-medium text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
+                      data-ripple-light="true">
+                立即购买
+              </button>
+            </div>
+          </div>
+
+          <div style="line-height: 28px;
+    color: #000;
+    letter-spacing: 0;
+    font-size: 20px;
+    font-family: PingFang SC,sans-serif;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;" class="lm:hidden text-3xl font-bold tracking-tight text-gray-900">
+            {{product.productName }}
+          </div>
+          <p class="text-gray-400 mb-10 mt-1 lm:hidden">已售&nbsp&nbsp{{product.buys}}</p>
 
           <div
               style="margin-bottom: 50px;cursor:pointer;background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"
               @click="goToVendor(product.name)"
-              class="flex justify-between items-center group relative overflow-hidden focus:ring-4 focus:ring-blue-300 px-10 py-5 rounded-lg text-white">
+              class="lm:hidden flex justify-between items-center group relative overflow-hidden focus:ring-4 focus:ring-blue-300 px-10 py-5 rounded-lg text-white">
             <span style="font-size: 20px"><b>{{ product.name }}</b></span>
             <svg class="z-40 ml-2 -mr-1 w-3 h-3 transition-all duration-300 group-hover:translate-x-1"
                  fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -51,11 +109,14 @@
           </div>
 
           <div style="margin-bottom: 50px" class="flex justify-between items-center">
-            <p style="color: rgb(255,80,0);" class="text-3xl tracking-tight text-gray-900"><b>￥{{ product.price }}</b>
+            <p style="color: rgb(255,80,0);" class="lm:hidden text-3xl tracking-tight text-gray-900"><b>￥{{ product.price }}</b>
             </p>
             <div>
               <span>购买数量&nbsp&nbsp</span>
               <el-input-number style="width: 100px" class="text-sm text-gray-600" v-model="num" :min="1" :max="50"/>
+            </div>
+            <div class="sm:hidden" @click="goToVendor(product.name)">
+              <span>{{ product.name }}</span>
             </div>
           </div>
 
@@ -63,14 +124,15 @@
             <div>
               收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span>
             </div>
+
+<!--            大屏幕显示的收藏按钮-->
             <button @click="addToFavorites" type="button"
-                    class="ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
+                    class="lm:hidden ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
               <HeartIcon class="h-6 w-6 flex-shrink-0" aria-hidden="true"/>
             </button>
           </div>
 
-
-          <div class="flex justify-between items-center">
+          <div class="lm:hidden flex justify-between items-center">
             <button @click="goToProduct(product.productId)"
                     style="border-left: none; background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"
                     class="flex items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
@@ -84,10 +146,16 @@
               加入购物车
             </button>
           </div>
+
         </div>
       </div>
       <ProductComments></ProductComments>
 
+    </div>
+    <div v-else>
+      <el-empty :image-size="300"
+                image="http://124.221.7.201:5000/state/ProductDelisting-empty.png"
+                description="商品下架了，去看看其他商品吧！"/>
     </div>
   </div>
 </template>
@@ -107,6 +175,7 @@ import router from "@/router/router";
 import store from "@/store";
 import ProductComments from "@/components/tailwind/ProductComments.vue";
 import {addToCarts, addToFavorite, getProductById} from "@/api/api";
+import { ShopOutlined } from '@ant-design/icons-vue';
 
 const route = useRoute()
 const product = ref()
@@ -115,6 +184,18 @@ const currentImageIndex = ref(0)
 const userid = computed(() => store.state.userInfo.userId)
 const land = computed(() => store.state.userInfo.land)
 const childRef = ref();
+
+let deviceType = ref(null);
+const state = ref('hover')
+
+onMounted(() => {
+  setTimeout(() => {
+    deviceType.value = store.state.deviceType;
+    if (deviceType.value==='iPhone'||deviceType.value==='Android'){
+      state.value='always'
+    }
+  }, 1000); // 延迟  秒
+});
 
 const star = async () => {
   if (!isNaN(route.params.productId)) {

@@ -16,6 +16,7 @@ import MyOrders from "@/components/tailwind/MyOrders.vue";
 import ConfirmPay from "@/components/tailwind/ConfirmPay.vue";
 import Evaluated from "@/components/tailwind/Evaluated.vue";
 import Reviews from "@/components/tailwind/Reviews.vue";
+import ForgotPassword from "@/components/tailwind/ForgotPassword.vue";
 
 const routes = [
     {
@@ -132,6 +133,22 @@ const routes = [
             Reviews: Reviews,
         },
         props: { description: true }
+    },
+    {
+        path: '/Reviews/:id',
+        name: 'Reviews',
+        components: {
+            top: Top,
+            Reviews: Reviews,
+        },
+        props: { description: true }
+    },
+    {
+        path: '/forgotPassword',
+        name: 'forgotPassword',
+        components: {
+            forgotPassword:ForgotPassword
+        },
     },
 ]
 

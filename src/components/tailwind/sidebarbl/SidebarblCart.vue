@@ -33,17 +33,6 @@
       </div>
     </div>
   </div>
-  <el-affix position="bottom">
-    <div class="border-t border-gray-200 px-4 py-6 bg-white sm:px-6">
-      <div class="flex justify-between text-base font-medium text-gray-900">
-        <p>总计</p>
-        <p>$262.00</p>
-      </div>
-      <div class="mt-6">
-        <a href="#" class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700">去结算</a>
-      </div>
-    </div>
-  </el-affix>
   <el-empty v-if="empty" :image-size="350" description="购物车竟然是空的，再忙，也要记得买点什么犒劳自己~" image="http://124.221.7.201:5000/state/ShoppingCart-empty.png"></el-empty>
 </template>
 

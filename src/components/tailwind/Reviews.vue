@@ -66,12 +66,6 @@ const onFilesChange = (event) => {
       continue;
     }
 
-    // 验证文件名长度
-    if (file.name.length > 20) {
-      showMessage('文件名不能超过20个字符');
-      continue;
-    }
-
     // 验证单个文件大小
     if (file.size > 1024 * 1024) { // 1MB
       showMessage('单张图片不能超过1MB');

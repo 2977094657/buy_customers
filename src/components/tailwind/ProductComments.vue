@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white">
+  <div class="bg-white lm:mx-5">
     <TabGroup as="div">
       <div class="border-b border-gray-200">
         <TabList class="-mb-px flex space-x-8">
@@ -69,7 +69,7 @@
                     description="这个商品如此神秘，连评论都默默无闻。你可以给它一点关注吗？它会感激不尽的！"/>
 
           <div>
-            <div v-if="pageInfo.total!==0" class="flex justify-end mr-7 mb-5">
+            <div v-if="pageInfo.total!==0" class="flex justify-end mr-1 mb-5">
               <el-radio-group text-color="#FE9900" fill="white" v-model="radio1" size="default">
                 <el-radio-button @click="sortComments('hottest')" label="最新" />
                 <el-radio-button @click="sortComments('newest')" label="最热" />
@@ -77,24 +77,25 @@
               </el-radio-group>
             </div>
             <div v-for="(comment) in comments" :key="comment.id" class="w-full text-sm text-gray-500">
-              <div class=" space-x-12">
+              <div class=" space-x-12 mr-5">
                 <!-- 添加了justify-between -->
-                <div class="flex items-center mr-5">
+                <div class="flex items-center">
                   <img :src="comment.userAvatar" alt="用户头像" class="h-10 w-10 rounded-full bg-gray-100"/>
-                  <h3 style="margin-bottom: 20px; margin-left: 10px" class="font-medium text-gray-900 flex-grow">
+                  <h3 style="margin-bottom: 20px; margin-left: 10px;color: #61666d" class="font-medium text-gray-900 flex-grow">
                     {{ comment.userName }}</h3>
                   <el-rate
+                      style="margin-right: -10px"
                       v-model="comment.score"
                       disabled
                       :colors="colors"
                   />
                 </div>
 
-                <div style="margin-top: -15px">
+                <div style="margin-top: -15px;color: #9499A0">
                   <time>{{ comment.time }}</time>
                 </div>
                 <!--  评论内容-->
-                <div class="prose prose-sm mt-4 max-w-none text-gray-500 mb-4" v-html="comment.comments"/>
+                <div class="prose prose-sm my-4 max-w-none text-gray-500 " style="color: #18191C" v-html="comment.comments"/>
                 <div v-if="comment.imgId">
                   <el-image v-for="(imgUrl, index) in comment.imgId.slice(1, -1).split(', ')" :key="index" class="comment-image"  alt=""
                             style="width: 100px; height: 100px;border-radius: 10px"
@@ -110,17 +111,26 @@
 
               <hr class="mb-4">
             </div>
-            <div v-if="pageInfo.total!==0">
-              <el-pagination
-                  @next-click="nextPage"
-                  @prev-click="previousPage"
-                  :page-sizes="[10, 20, 50, 1000]"
-                  layout="sizes, prev, pager, next"
-                  :total="total"
-                  @size-change="handleSizeChange"
-                  @current-change="goToPage"
-              />
+
+            <div v-if="pageInfo.total!==0" class="relative flex justify-center mb-5">
+              <span style="background-color: white" class="z-0 px-2 text-sm text-gray-500">没有更多评论了</span>
             </div>
+
+            <div v-if="pageInfo.total!==0" style="display: flex; justify-content: center;">
+              <el-config-provider :locale="locale">
+                <el-pagination
+                    @next-click="nextPage"
+                    @prev-click="previousPage"
+                    :default-page-size="50"
+                    :page-sizes="[10, 20, 50, 1000]"
+                    layout="prev, pager, next"
+                    :total="total"
+                    @size-change="handleSizeChange"
+                    @current-change="goToPage"
+                />
+              </el-config-provider>
+            </div>
+
           </div>
         </TabPanel>
 
@@ -140,6 +150,8 @@
 import {StarIcon} from '@heroicons/vue/20/solid'
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from '@headlessui/vue'
 import Incentive from "@/components/tailwind/Incentive.vue";
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import en from 'element-plus/dist/locale/en.mjs'
 
 
 import {computed, onMounted, ref} from 'vue'
@@ -151,7 +163,10 @@ import {getProductById, getProductComments, getProductCommentsByTime} from "@/ap
 const route = useRoute()
 const httpError = ref(false)
 const show = ref(true)
+const radio1 = ref('最新')
 const colors = ref(['#99A9BF', '#F7BA2A', '#FF9900'])
+const language = ref('zh-cn')
+const locale = computed(() => (language.value === 'zh-cn' ? zhCn : en))
 
 const store = useStore();
 const userId = computed(() => store.state.userInfo.userId)
@@ -221,6 +236,7 @@ const fetchComments = async (sortOption, page,pageSize) => {
     totalPages.value = pageInfo.value.pages
     currentSort.value = pageInfo.value.sortByTime ? 'newest' : 'hottest'
   }
+  await star()
 }
 
 const product = ref()
@@ -252,10 +268,6 @@ const star = async () => {
     httpError.value = true;
   }
 }
-
-onMounted(async () => {
-  await star()
-})
 
 const previousPage = () => {
   if (currentPage.value > 1) {

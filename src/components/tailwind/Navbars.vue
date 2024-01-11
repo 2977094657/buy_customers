@@ -3,14 +3,14 @@
     <Login></Login>
   </a-modal>
   <Disclosure as="header" v-slot="{ open }">
-    <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:divide-y lg:divide-gray-200 lg:px-8">
+    <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:divide-y lg:divide-gray-200 lg:px-8 lm:bg-white">
       <div class="relative flex h-16 justify-between">
-        <div class="relative z-10 flex px-2 lg:px-0">
+        <div class="relative z-10 flex px-2 lg:px-0 ld:hidden">
           <div @click="goHome" class="z-10 flex flex-shrink-0 items-center">
             <img class="h-8 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
         </div>
-        <div class="relative flex flex-1 items-center justify-center px-2 sm:absolute sm:inset-0">
+        <div class="relative flex flex-1 items-center justify-center px-2 sm:inset-0">
           <div class="w-full sm:max-w-[600px]">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
@@ -78,6 +78,18 @@
         </div>
       </div>
     </div>
+    <el-tabs v-model="activeCategory" style="overflow-x: auto; overflow-y: hidden; height: 35px; white-space: nowrap;" class="m-0 sm:hidden bg-white text-left flex items-center pl-6">
+      <el-tab-pane
+          v-for="(category, index) in categories"
+          :label=category :name=category
+          :key="index"
+          style="cursor: pointer;"
+          class="mr-7"
+      >
+      </el-tab-pane>
+    </el-tabs>
+
+    <hr class="sm:hidden">
   </Disclosure>
 </template>
 
@@ -109,10 +121,13 @@ import Login from "@/components/tailwind/Login.vue";
 import {Female, Male} from "@element-plus/icons-vue";
 import {LogoutOutlined} from '@ant-design/icons-vue';
 import {getUser, getUserToken} from "@/api/api";
+import Test from "@/components/tailwind/Test.vue";
 
 const store = useStore()
 const route = useRoute();
 const land = computed(() => store.state.userInfo.land)
+let categories = ref(['推荐','食品','百货','手机','医药','母婴','电器','男装','女装']); // 分类列表
+let activeCategory = ref('推荐'); // 当前活动的分类
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
@@ -181,10 +196,10 @@ const parseTokenAndUserInfo = async () => {
         store.commit('setUserInfo', {userId: response.data.userId})
         const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data != null) {
-          userName.value = userInfoResponse.data.data.name;
-          Avatar.value = userInfoResponse.data.data.userAvatar;
-          description.value = userInfoResponse.data.data.description;
-          gender.value = userInfoResponse.data.data.gender;
+          userName.value = userInfoResponse.data.data.user.name;
+          Avatar.value = userInfoResponse.data.data.user.userAvatar;
+          description.value = userInfoResponse.data.data.user.description;
+          gender.value = userInfoResponse.data.data.user.gender;
           store.commit('setUserInfo', {
             name: userName.value,
             userAvatar: Avatar.value,
@@ -303,4 +318,21 @@ onUpdated(checkScrollbar);
 <style scoped>
 @import '../../assets/Tailwind.css';
 @import '../../assets/Top.css';
+::-webkit-scrollbar {
+  display: none;
+}
+/deep/ .el-tabs__item:hover {
+  color: #FF5000;
+  cursor: pointer;
+}
+/deep/ .el-tabs__item.is-active {
+  color: #FF5000;
+}
+/deep/ .el-tabs__active-bar {
+  background-color: #FF5000;
+}
+/*去掉下划线*/
+/deep/ .el-tabs__nav-wrap::after {
+  position: static !important;
+}
 </style>

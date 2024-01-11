@@ -159,9 +159,9 @@ const fetchUserInfo = async () => {
     const response = await getUser(userId);
     const data = response.data;
     if (data.code === 0) {
-      userInfo.value = data.data;
-      avatarUrl.value = data.data.userAvatar; // 获取头像图片URL
-      imageUrl1.value = data.data.userAvatar;
+      userInfo.value = data.data.user;
+      avatarUrl.value = data.data.user.userAvatar; // 获取头像图片URL
+      imageUrl1.value = data.data.user.userAvatar;
     } else {
       console.error('获取用户信息失败');
     }

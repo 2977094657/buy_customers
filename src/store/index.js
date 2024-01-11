@@ -10,10 +10,11 @@ export default createStore({
                 userId: '',
                 land: '',
                 gender: '',
-                description: ''
+                description: '',
             },
             // 保持随机数，只在刷新的情况下改变内容，返回不变
             randomSeed: Math.floor(Math.random() * 10000),
+            deviceType: ''
         }
     },
 
@@ -24,6 +25,9 @@ export default createStore({
         },
         setRandomSeed(state, seed) {
             state.randomSeed = seed;
+        },
+        setDeviceType(state, deviceType) {
+            state.deviceType = deviceType;
         },
     },
 
