@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { ref } from 'vue';
 import Top from '@/components/tailwind/Top.vue';
 import Main from '@/components/tailwind/Main.vue';
 import Banner from '@/components/tailwind/Banner.vue';
@@ -154,7 +155,31 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory("/"),
-    routes
+    routes,
+    scrollBehavior (to, from, savedPosition) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (savedPosition) {
+                    resolve(savedPosition);
+                } else {
+                    resolve({ x: 0, y: 0 });
+                }
+            }, 500); // Adjust this delay as needed
+        });
+    }
+});
+
+// 创建一个响应式属性来表示是否正在切换路由
+const isSwitchingRoute = ref(false)
+
+router.beforeEach((to, from, next) => {
+    isSwitchingRoute.value = true
+    next()
 })
 
-export default router;
+router.afterEach(() => {
+    isSwitchingRoute.value = false
+})
+
+
+export { router, isSwitchingRoute }

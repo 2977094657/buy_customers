@@ -1,13 +1,14 @@
 <script setup>
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import {computed,ref} from "vue";
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import Obligation from "@/components/tailwind/Obligation.vue";
 import Paid from "@/components/tailwind/OrdersState.vue";
 import AllOrders from "@/components/tailwind/AllOrders.vue";
 
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 let emptyValue = ref('');
 
 const handleEmptyUpdate = (value) => {

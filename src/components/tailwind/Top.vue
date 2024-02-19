@@ -1,10 +1,10 @@
 <script setup>
 import {ref, onMounted, watch, computed, onBeforeUnmount, nextTick, onUpdated} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
-import {useStore} from 'vuex'
+import { useStore } from '../../store/index'
 import {ChatDotSquare, Document, ShoppingTrolley} from "@element-plus/icons-vue";
 import {HeartOutlined} from "@ant-design/icons-vue";
-import {Dialog, DialogPanel, Disclosure, TransitionChild, TransitionRoot} from '@headlessui/vue'
+import {Dialog, DialogPanel, TransitionChild, TransitionRoot} from '@headlessui/vue'
 import {UpCircleOutlined,DownCircleOutlined} from '@ant-design/icons-vue';
 import Navbars from "@/components/tailwind/Navbars.vue";
 import SidebarblCart from "@/components/tailwind/sidebarbl/SidebarblCart.vue";
@@ -12,49 +12,16 @@ import SidebarblStar from "@/components/tailwind/sidebarbl/SidebarblStar.vue";
 import SidebarblMyComments from "@/components/tailwind/sidebarbl/SidebarblMyComments.vue";
 import SidebarblMyOrders from "@/components/tailwind/sidebarbl/SidebarblMyOrders.vue";
 import {getGlobalSettings} from "@/api/api";
-import Test from "@/components/tailwind/Test.vue";
 
 const store = useStore()
 const route = useRoute();
-const land = computed(() => store.state.userInfo.land)
-let deviceType = ref('');
+const land = computed(() => store.userInfo.land)
+let deviceType = computed(() => store.deviceType)
 const sidebar = ref('') //网站是否显示侧边栏参数
 const product = computed(() => route.path.startsWith('/product'));
 
-const setDeviceType = async () => {
-  const userAgent = navigator.userAgent;
-  const isIpad = userAgent.match(/(iPad).*OS\s([\d_]+)/);
-  const isIphone = userAgent.match(/(iPhone\sOS)\s([\d_]+)/);
-  const isAndroid = userAgent.match(/(Android)\s+([\d.]+)/);
-
-  if (isIpad) {
-    deviceType.value = 'iPad';
-  } else if (isIphone) {
-    deviceType.value = 'iPhone';
-  } else if (isAndroid) {
-    deviceType.value = 'Android';
-  } else {
-    deviceType.value = 'PC';
-  }
-};
-
-onMounted(async () => {
-  await setDeviceType();
-
-  const intervalId = setInterval(() => {
-    if (deviceType.value !== undefined) {
-      setTimeout(() => {
-        store.commit('setDeviceType', deviceType.value);
-      }, 0);
-      clearInterval(intervalId);
-    }
-  }, 500);
-});
-
-
 // 定义一个新的函数，用于更新值
 async function updateValues() {
-  await setDeviceType();
   const globalSettings = await getGlobalSettings(1);
   if(!product.value&&deviceType.value==='PC'){
     sidebar.value=globalSettings.data.data.sidebar
@@ -62,8 +29,10 @@ async function updateValues() {
   }else if (deviceType.value==='PC'){
     sidebar.value=globalSettings.data.data.sidebar
     return
+  }else if (deviceType.value!=='PC'&&product.value){
+    return
   }
-  sidebar.value=0
+  sidebar.value=globalSettings.data.data.sidebar
 }
 
 onMounted(updateValues);  // 在页面加载时调用函数
@@ -147,7 +116,6 @@ const PersonalCenter = () => {
     window.open(url, '_blank');
   }
 };
-const remove = ref()
 
 const hasScrollbar = ref(false);
 
@@ -164,14 +132,15 @@ onUpdated(checkScrollbar);
   <div class="z-[50] search-container lm:mt-0 lm:m-0 lm:p-0" :class="{ 'sticky': isSticky }">
     <Navbars></Navbars>
   </div>
-  <div v-if="deviceType==='Android'" class="text-center" style="margin: 0; padding: 0;">
-    <Test></Test><br>
-  </div>
+<!--  提示下载APP的部分-->
+<!--  <div v-if="deviceType==='Android'" class="text-center" style="margin: 0; padding: 0;">-->
+<!--    <Test></Test><br>-->
+<!--  </div>-->
 
 
 
   <!--  收起侧边栏选项-->
-  <div v-if="sidebar==='1'" class="cbl2" v-show="show">
+  <div v-if="sidebar==='1'||deviceType==='PC'" class="cbl2" v-show="show">
     <el-button style="margin-left: 5px;height: 0" class="sticky-button" type="primary" @click="toggleSidebarVisibility">
       <div class="sticky-button3">
         <el-icon class="text-gray-500" style="font-size: 20px;margin-left: -5px">
@@ -187,7 +156,7 @@ onUpdated(checkScrollbar);
   </div>
 
 <!--  侧边栏选项-->
-  <div v-if="sidebar==='1'" class="cbl" v-show="show&&isSidebarVisible">
+  <div v-if="sidebar==='1'||deviceType==='PC'" class="cbl" v-show="show&&isSidebarVisible">
     <el-button class="sticky-button4" type="primary" @click="drawer=true">
       <div class="sticky-button2">
         <el-icon class="text-gray-500" style="font-size: 20px;margin-left: -10px">

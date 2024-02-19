@@ -38,7 +38,9 @@
           <div style="z-index: 0" class="card-content">
             <el-image class="product-image" :src="item.data.img.slice(1, -1).split(',')[0]" alt="product image"></el-image>
             <div class="delete-icon-container">
-              <button style="padding: 5px;border-radius: 4px;margin-right: 0;background-color: rgb(252,235,235);color: rgb(220,48,48);border: none" v-if="batchManageMode" @click.stop="deleteHistory(item)">删除</button>
+              <button style="padding: 5px;margin-right: 0;background-color: rgb(252,235,235);color: rgb(220,48,48);border: none" v-if="batchManageMode" @click.stop="deleteHistory(item)">
+                <el-icon><Delete /></el-icon>
+              </button>
             </div>
             <div style="padding: 0 5px 0 5px">
               <p class="product-price">￥{{ item.data.price }}</p>
@@ -56,12 +58,14 @@
 
 <script setup>
 import {ref, computed,watch} from 'vue'
-import store from "@/store";
-import router from "@/router/router";
+import { useStore } from '../../store/index'
+const store = useStore()
+import {router} from "@/router/router";
 import {addHistorys, deleteAllHistory, deleteHistorys, getHistoryByUserId, getProductById} from "@/api/api";
+import {Delete} from "@element-plus/icons-vue";
 
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const empty = ref(false)
 let productsGroupedByDate = ref({})
 const loading = ref(true)

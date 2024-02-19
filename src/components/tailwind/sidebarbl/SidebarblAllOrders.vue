@@ -163,15 +163,16 @@
 
 <script setup>
 import {computed, onUnmounted, ref, watch} from "vue";
-import store from "@/store";
+import { useStore } from '../../../store/index'
+const store = useStore()
 import {confirmOrder, deleteOrders, deleteUnpaidOrder, getOrdersByUserId, getProductById} from "@/api/api";
 import {ClockIcon} from "@heroicons/vue/20/solid";
 import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
 import {EllipsisVerticalIcon} from "@heroicons/vue/24/outline";
 import {ElNotification} from "element-plus";
 
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const unpaidOrders = ref([])
 // 创建一个存储定时器ID的数组
 const timers = [];

@@ -1,38 +1,29 @@
-import { createStore } from 'vuex'
+import { defineStore } from 'pinia'
 
-export default createStore({
-    // 状态
-    state () {
-        return {
-            userInfo: {
-                name:'',
-                userAvatar:'',
-                userId: '',
-                land: '',
-                gender: '',
-                description: '',
-            },
-            // 保持随机数，只在刷新的情况下改变内容，返回不变
-            randomSeed: Math.floor(Math.random() * 10000),
-            deviceType: ''
-        }
-    },
-
-    // 变更
-    mutations: {
-        setUserInfo(state, userInfo) {
-            state.userInfo = userInfo;
+export const useStore = defineStore({
+    id: 'mainStore',
+    state: () => ({
+        userInfo: {
+            name:'',
+            userAvatar:'',
+            userId: '',
+            land: '',
+            gender: '',
+            description: '',
+            ip: ''
         },
-        setRandomSeed(state, seed) {
-            state.randomSeed = seed;
-        },
-        setDeviceType(state, deviceType) {
-            state.deviceType = deviceType;
-        },
-    },
-
+        randomSeed: Math.floor(Math.random() * 10000),
+        deviceType: ''
+    }),
     actions: {
-
-    },
-    modules: {}
+        setUserInfo(userInfo) {
+            this.userInfo = userInfo;
+        },
+        setRandomSeed(seed) {
+            this.randomSeed = seed;
+        },
+        setDeviceType(deviceType) {
+            this.deviceType = deviceType;
+        },
+    }
 })

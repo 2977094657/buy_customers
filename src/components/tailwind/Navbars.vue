@@ -116,16 +116,15 @@ const userNavigation = [
 
 import {ref, onMounted, watch, computed, onBeforeUnmount, watchEffect, nextTick, onUpdated} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
-import {useStore} from 'vuex'
+import { useStore } from '../../store/index'
 import Login from "@/components/tailwind/Login.vue";
 import {Female, Male} from "@element-plus/icons-vue";
 import {LogoutOutlined} from '@ant-design/icons-vue';
 import {getUser, getUserToken} from "@/api/api";
-import Test from "@/components/tailwind/Test.vue";
 
 const store = useStore()
 const route = useRoute();
-const land = computed(() => store.state.userInfo.land)
+const land = computed(() => store.userInfo.land)
 let categories = ref(['推荐','食品','百货','手机','医药','母婴','电器','男装','女装']); // 分类列表
 let activeCategory = ref('推荐'); // 当前活动的分类
 
@@ -193,14 +192,14 @@ const parseTokenAndUserInfo = async () => {
     if (token) {
       const response = await getUserToken(token);
       if (response.data) {
-        store.commit('setUserInfo', {userId: response.data.userId})
+        store.setUserInfo( {userId: response.data.userId})
         const userInfoResponse = await getUser(response.data.userId);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.user.name;
           Avatar.value = userInfoResponse.data.data.user.userAvatar;
           description.value = userInfoResponse.data.data.user.description;
           gender.value = userInfoResponse.data.data.user.gender;
-          store.commit('setUserInfo', {
+          store.setUserInfo( {
             name: userName.value,
             userAvatar: Avatar.value,
             description: description.value,
@@ -225,7 +224,7 @@ onMounted(async () => {
   if (token) {
     await parseTokenAndUserInfo(token);
   } else if (!token) {
-    store.commit('setUserInfo', {
+    store.setUserInfo( {
       name: userName.value,
       userAvatar: Avatar.value,
       land: false

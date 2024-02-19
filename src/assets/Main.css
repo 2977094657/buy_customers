@@ -24,7 +24,6 @@
         max-height: 46px;
         overflow: hidden;
         margin: 5px 0 0 11%;
-        color: #333333;
         text-align: left;
     }
 }
@@ -34,10 +33,9 @@
         font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
         font-size: 16px;
         max-width: 220px;
-        max-height: 70px;
+        max-height: 50px;
         overflow: hidden;
         margin: 5px 0 0 11%;
-        color: #4d4747;
         text-align: left;
     }
 }
@@ -49,9 +47,8 @@
 .price{
     margin: 0 0 0 11%;
     color: #ff5000;
-    font: 12px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
-    font-size: 22px;
-    line-height: 22px;
+    font-size: 20px;
+    line-height: 20px;
 }
 
 .jge{

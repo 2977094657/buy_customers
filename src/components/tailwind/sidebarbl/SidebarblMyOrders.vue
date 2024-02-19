@@ -1,13 +1,14 @@
 <script setup>
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import {computed, ref} from "vue";
-import store from "@/store";
+import { useStore } from '../../../store/index'
+const store = useStore()
 import SidebarblObligation from "@/components/tailwind/sidebarbl/SidebarblObligation.vue";
 import SidebarblPendingReceipt from "@/components/tailwind/sidebarbl/SidebarblOrderState.vue";
 import SidebarblAllOrders from "@/components/tailwind/sidebarbl/SidebarblAllOrders.vue";
 
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 let unpaidOrdersLength = ref(0); // 用于存储从子组件传递过来的未付款订单数量
 
 const handleUnpaidOrdersLength = (length) => {

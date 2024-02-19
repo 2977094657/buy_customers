@@ -172,14 +172,15 @@ const profile = {
 }
 
 import {ref, onMounted, computed, reactive, watch} from 'vue';
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import {EditPen, Female, Male, Plus} from "@element-plus/icons-vue";
 import axios from 'axios';
-import router from "@/router/router";
+import {router} from "@/router/router";
 import {changePassword, changePhones, getAddress, getUser, messageUser, updateAvatar, updateUser} from "@/api/api";
 
 const userInfo = ref(null);
-const userid = computed(() => store.state.userInfo.userId)
+const userid = computed(() => store.userInfo.userId)
 const avatarUrl = ref('');
 const imageUrl1 = ref('')
 const empty = ref(false)
@@ -259,7 +260,6 @@ const tableData = reactive({
 
 let open = ref(false)
 let open3 = ref(false)
-const land = computed(() => store.state.userInfo.land)
 
 let currentMessageInstance = null
 const showMessage = (message) => {
@@ -284,11 +284,7 @@ const showSuccessMessage = (message) => {
 
 
 const showModal = () => {
-  if (land.value) {
-    open.value = true
-  } else {
-    showMessage('请先登录')
-  }
+  open.value = true
 }
 const handleOk = async () => {
   const result = await uploadAvatar(file);
@@ -303,15 +299,11 @@ const handleOk = async () => {
   }
 }
 const showModal3 = () => {
-  if (land.value) {
-    // 将用户的信息复制到 editForm 对象中
-    editForm.username = userInfo.value.name;
-    editForm.gender = userInfo.value.gender === '男性' ? 3 : (userInfo.value.gender === '女性' ? 6 : 9);
-    editForm.description = userInfo.value.description;
-    open3.value = true;
-  } else {
-    showMessage('请先登录');
-  }
+  // 将用户的信息复制到 editForm 对象中
+  editForm.username = userInfo.value.name;
+  editForm.gender = userInfo.value.gender === '男性' ? 3 : (userInfo.value.gender === '女性' ? 6 : 9);
+  editForm.description = userInfo.value.description;
+  open3.value = true;
 };
 
 const imageUrl = ref('')

@@ -1,22 +1,11 @@
 <script setup>
 import {ref, onMounted, computed } from 'vue'
-import router from "@/router/router";
-import {useStore} from 'vuex';
+import {router} from "@/router/router";
+import { useStore } from '../../store/index'
 import {getAllProducts} from "@/api/api";
 
 const store = useStore();
-const land = computed(() => store.state.userInfo.land)
-let deviceType = ref(null);
-const state = ref('hover')
-
-onMounted(() => {
-  setTimeout(() => {
-    deviceType.value = store.state.deviceType;
-    if (deviceType.value==='iPhone'||deviceType.value==='Android'){
-      state.value='always'
-    }
-  }, 1000); // 延迟 1 秒
-});
+const land = computed(() => store.userInfo.land)
 
 let title = ref(false);
 
@@ -47,6 +36,25 @@ const PersonalCenter = () => {
   }
 };
 onMounted(banner)
+
+let startX = ref(0); // 记录触摸开始的位置
+let carousel = ref(null); // 添加一个 ref 来引用 el-carousel 组件
+
+const touchStart = (e) => {
+  startX.value = e.touches[0].clientX;
+};
+
+const touchEnd = (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const diffX = endX - startX.value;
+  if (diffX > 0) {
+    // 用户向右滑动，切换到上一张图片
+    carousel.value.prev();
+  } else if (diffX < 0) {
+    // 用户向左滑动，切换到下一张图片
+    carousel.value.next();
+  }
+};
 </script>
 
 <template>
@@ -61,10 +69,10 @@ onMounted(banner)
         <!-- 轮播图 -->
         <article class="flex flex-col items-start justify-between">
           <div class="relative w-full">
-            <el-carousel class="lm:rounded-md rounded-2xl" :arrow=state style="overflow: hidden;">
+            <el-carousel ref="carousel" class="lm:h-60 lm:rounded-md rounded-2xl" style="overflow: hidden;" @touchstart="touchStart" @touchend="touchEnd">
               <el-carousel-item v-for="Banner in Banner" :key="Banner.productId">
-                <img style="max-width: 100%;height: 100%;" @click="goToProduct(Banner.productId)" :src="Banner.img.slice(1, -1).split(',')[0]" alt=""
-                     class="aspect-[16/9] w-full sm:aspect-[2/1] lg:aspect-[3/2]"/>
+                <img style="max-width: 100%;" @click="goToProduct(Banner.productId)" :src="Banner.img.slice(1, -1).split(',')[0]" alt=""
+                     class="w-full h-full lm:h-60 aspect-[16/9] sm:aspect-[2/1] lg:aspect-[3/2]"/>
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -83,7 +91,19 @@ onMounted(banner)
 
 <style scoped>
 @import '../../assets/Tailwind.css';
-/deep/.el-carousel__indicators--horizontal {
-  left: 47%;
+/deep/.el-carousel__indicator--horizontal .el-carousel__button {
+  width: 5px;
+  height: 5px;
+  background: gray;
+  border-radius: 50%;
+  opacity: 0.3;
 }
+/deep/.el-carousel__indicator--horizontal.is-active .el-carousel__button{
+  width: 5px;
+  height: 5px;
+  background: #ff5000;
+  border-radius: 50%;
+  opacity: 1;
+}
+
 </style>

@@ -1,6 +1,6 @@
 <script setup>
 import {ref, computed} from 'vue';
-import {useStore} from 'vuex';
+import { useStore } from '../../store/index'
 import {useRouter} from 'vue-router';
 import {forgotPassword, messageUser} from "@/api/api";
 
@@ -134,56 +134,66 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
-      <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">忘记密码</h2>
+  <div class="flex min-h-full flex-1">
+    <div class="relative hidden w-0 flex-1 lg:block">
+      <img class="absolute inset-0 h-full w-full object-cover" src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80" alt="" />
     </div>
 
-    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <div class="space-y-6">
+    <div class="flex flex-1 flex-col justify-center px-4 py-24 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div class="mx-auto w-full max-w-sm lg:w-96">
         <div>
-          <label class="block text-sm font-medium leading-6 text-gray-900">输入绑定的手机号</label>
-          <div class="mt-2 flex justify-between items-center">
-            <input v-model="phoneNumber" type="number" autocomplete="email" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-            <button type="button" style="width: 40%;margin-left: 10px;border:0;outline:none;background-color: transparent;cursor: pointer;" @click="sendSMSCode" :disabled="isBtnDisabled">
+          <img class="h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
+          <h2 class="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">忘记密码</h2>
+        </div>
+
+        <div class="mt-5">
+          <div>
+            <div class="space-y-6">
+              <div>
+                <label class="block text-sm font-medium leading-6 text-gray-900">输入绑定的手机号</label>
+                <div class="mt-2 flex justify-between items-center">
+                  <input v-model="phoneNumber" type="number" autocomplete="email" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                  <button type="button" style="width: 40%;margin-left: 10px;border:0;outline:none;background-color: transparent;cursor: pointer;" @click="sendSMSCode" :disabled="isBtnDisabled">
                       <span :class="{ 'countdown-active': getCaptchaBtnText.countdown !== null }">
                         {{ getCaptchaBtnText.countdown }}
                       </span>
-              {{ getCaptchaBtnText.text }}
-            </button>
-          </div>
-        </div>
+                    {{ getCaptchaBtnText.text }}
+                  </button>
+                </div>
+              </div>
 
-        <div>
-          <div class="flex items-center justify-between">
-            <label class="block text-sm font-medium leading-6 text-gray-900">请输入短信验证码</label>
-          </div>
-          <div class="mt-2">
-            <input v-model="phoneCode" type="number" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-          </div>
-        </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium leading-6 text-gray-900">请输入短信验证码</label>
+                </div>
+                <div class="mt-2">
+                  <input v-model="phoneCode" type="number" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                </div>
+              </div>
 
-        <div>
-          <div class="flex items-center justify-between">
-            <label class="block text-sm font-medium leading-6 text-gray-900">新密码</label>
-          </div>
-          <div class="mt-2">
-            <input v-model="password" type="password" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-          </div>
-        </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium leading-6 text-gray-900">新密码</label>
+                </div>
+                <div class="mt-2">
+                  <input v-model="password" type="password" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                </div>
+              </div>
 
-        <div>
-          <div class="flex items-center justify-between">
-            <label class="block text-sm font-medium leading-6 text-gray-900">确认密码</label>
-          </div>
-          <div class="mt-2">
-            <input v-model="confirmPassword" type="password" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-          </div>
-        </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium leading-6 text-gray-900">确认密码</label>
+                </div>
+                <div class="mt-2">
+                  <input v-model="confirmPassword" type="password" autocomplete="current-password" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                </div>
+              </div>
 
-        <div>
-          <button @click="handleSubmit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">确认修改</button>
+              <div>
+                <button @click="handleSubmit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">确认修改</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

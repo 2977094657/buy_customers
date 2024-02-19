@@ -1,13 +1,14 @@
 <script setup>
 import {StarIcon} from '@heroicons/vue/20/solid'
 import {ref, computed, watch, reactive} from 'vue';
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import {useRouter} from "vue-router";
 import {getMyComments, deleteCommentById, addHistorys, getProductById} from '@/api/api';
 
 const comments = ref([]);
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const loading = ref(true)
 const empty = ref(false)
 const router = useRouter()
@@ -145,7 +146,7 @@ const addHistory = async (productId) => {
 </script>
 
 <template>
-  <div class="bg-white">
+  <div style="color: rgb(242,244,251)">
     <div class="px-4  lg:max-w-7xl">
       <div class="divide-y divide-gray-200 border-b border-t border-gray-200">
         <div v-for="comment in data.comments" :key="comment.commentsId"

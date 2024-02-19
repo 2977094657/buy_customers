@@ -90,7 +90,8 @@
 <script setup>
 import {ref, onMounted, computed} from 'vue';
 import {useRoute} from 'vue-router';
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import {confirmOrder, getOrder, getProductById} from "@/api/api";
 import {ElNotification} from "element-plus";
 
@@ -98,7 +99,7 @@ let order = ref({});
 let product = ref({});
 let route = useRoute();
 const empty = ref(true)
-const userid = computed(() => store.state.userInfo.userId)
+const userid = computed(() => store.userInfo.userId)
 
 
 const getOrderInfo = async () => {

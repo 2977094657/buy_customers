@@ -141,12 +141,13 @@
 
 <script setup>
 import {ref, onMounted, computed, reactive, watch } from 'vue';
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import axios from 'axios';
 import {addAddres, deleteAddress, getAddress, getUser, updateAddress, updateDefaultAddress} from "@/api/api";
 
 const userInfo = ref(null);
-const userid = computed(() => store.state.userInfo.userId)
+const userid = computed(() => store.userInfo.userId)
 const avatarUrl = ref('');
 const imageUrl1 = ref('')
 const empty = ref(false)
@@ -230,7 +231,7 @@ const tableData = reactive({
 let open = ref(false)
 let open1 = ref(false)
 let open2 = ref(false)
-const land = computed(() => store.state.userInfo.land)
+const land = computed(() => store.userInfo.land)
 
 let currentMessageInstance = null
 const showMessage = (message) => {
@@ -255,19 +256,11 @@ const showSuccessMessage = (message) => {
 
 
 const showModal1 = () => {
-  if (land.value) {
-    open1.value = true
-  } else {
-    showMessage('请先登录')
-  }
+  open1.value = true
 }
 
 const showModal2 = () => {
-  if (land.value) {
-    open2.value = true
-  } else {
-    showMessage('请先登录')
-  }
+  open2.value = true
 }
 
 const fetchUserAddresses = async () => {

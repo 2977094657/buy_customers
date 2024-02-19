@@ -141,12 +141,13 @@ import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {EllipsisVerticalIcon} from '@heroicons/vue/24/outline'
 import {ClockIcon} from '@heroicons/vue/20/solid'
 import {computed, ref, watch, onUnmounted} from "vue";
-import store from "@/store";
+import { useStore } from '../../store/index'
+const store = useStore()
 import {confirmOrder, deleteUnpaidOrder, getProductById, getUnpaidOrder} from "@/api/api";
 import {ElNotification} from "element-plus";
 
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const unpaidOrders = ref([])
 
 let currentMessageInstance = null

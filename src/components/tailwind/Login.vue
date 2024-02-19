@@ -1,10 +1,9 @@
 <script setup>
 import {ref, computed} from 'vue';
 import login from "@/components/tailwind/Login.vue";
-import {useStore} from 'vuex';
+import { useStore } from '../../store/index'
 import {useRouter} from 'vue-router';
-import {log, messageUser, publicKey, registers} from "@/api/api";
-import {encryptAESKey, encryptData, generateRandomAESKey} from "@/encryption/encryption";
+import {log, messageUser, registers} from "@/api/api";
 
 
 const router = useRouter();
@@ -89,7 +88,7 @@ const loginUser = async () => {
       }, 500); // 1秒延迟
       localStorage.setItem('token', response.data.token);
       // 更新 userInfo 的值，触发 name.value 的变化
-      store.commit('setUserInfo', {
+      store.setUserInfo( {
         name: userName.value,
         userAvatar: userAvatar.value,
         land: true

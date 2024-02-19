@@ -85,7 +85,18 @@ async function decryptJsonValues(json, aesKeyBytes, ivBytes) {
                         mode: CryptoJS.mode.CTR,
                         padding: CryptoJS.pad.NoPadding
                     });
-                    json[key] = CryptoJS.enc.Utf8.stringify(decryptedValue);
+                    // 将解密后的数据转换为UTF-8字符串
+                    let decryptedString = CryptoJS.enc.Utf8.stringify(decryptedValue);
+
+                    // 尝试将解密后的字符串转换为一个数字
+                    let maybeNumber = Number(decryptedString);
+                    if (!isNaN(maybeNumber)) {
+                        // 如果解密后的字符串可以被解析为一个数字，那么就使用这个数字
+                        json[key] = maybeNumber;
+                    } else {
+                        // 否则，就使用解密后的字符串
+                        json[key] = decryptedString;
+                    }
                 } catch (e) {
                     console.log(`解密键${key}的值失败：`+e); // 输出解密失败的错误信息
                 }
@@ -131,7 +142,7 @@ export const getOrder = (orderNumber) => instance.get(`/order/getOrder`, {params
 export const addToCarts = (userId, productId, quantity) => instance.post(`/cart/add`, null, {params: {userId, productId, quantity}});
 export const addToFavorite = (userId, productId, quantity) => instance.post(`/star/staradd`, {userId, productId, quantity});
 export const getHistoryByUserId = (userId) => instance.get(`/user/getHistoryByUserId`, {params: {userId}});
-export const deleteHistorys = (userId, productId, date) => instance.delete(`/user/deleteHistory`, {params: {userId, productId, date}});
+export const deleteHistorys = (userid, productId, date) => instance.delete(`/user/deleteHistory`, {params: {userid, productId, date}});
 export const deleteAllHistory = (userId) => instance.delete(`/user/deleteAllHistory`, {params: {userId}});
 export const log = (usernameOrPhone, pwd, expirationTimeOption) => instance.post(`/user/login`, { usernameOrPhone, pwd, expirationTimeOption}, { headers: { 'X-Needs-Decryption': 'true' } });
 export const forgotPassword = (phoneNumber, newPassword, code) => instance.post(`/user/forgotPassword`, {phoneNumber, newPassword, code});
@@ -145,16 +156,20 @@ export const changePassword = (userId, oldPassword, newPassword, confirmPassword
 export const changePhones = (userId, oldPhone, code, phone) => instance.put(`/user/changePhone`, {userId, oldPhone, code, phone});
 export const searchProduct = (keyword, page) => instance.get(`/product/search`, {params: {keyword, page}});
 export const getVendorProduct = (name) => instance.get(`/product/vendor`, {params: {name}});
-export const addComment = (userId, comments, productId, score, files) => {
+export const addComment = (userId, comments, productId, score,ip,files) => {
     const formData = new FormData();
     formData.append('userId', userId);
     formData.append('comments', comments.trim());
     formData.append('productId', productId);
     formData.append('score', score);
+    formData.append('ip',ip)
     files.forEach((file) => { formData.append(`imgId`, file, file.name); });
     return instance.post(`/productComments/add`, formData);
 };
-export const getProductCommentsByTime = (productId, pageNum, sortByTime, pageSize) => instance.get(`/product/comments`, {params: {productId, pageNum, sortByTime, pageSize}});
+export const getProductCommentsByTime = (productId, pageNum, sortByTime, pageSize,sortByLikes) => instance.get(`/product/comments`, {params: {productId, pageNum, sortByTime, pageSize,sortByLikes}});
 export const getProductComments = (productId, currentPage, pageSize) => instance.get(`/product/comments`, {params: {productId, pageNum: currentPage, pageSize}});
 export const publicKey = () => instance.get(`/admin/publicKey`);
 export const privateKey = (publicKey) => instance.post(`/admin/privateKey`, {publicKey});
+export const likes = (newLikes) => instance.post(`/likes/likes`, newLikes);
+export const getUserLikes = (userId) => instance.get(`/likes/userLikes`, {params: {userId: userId}});
+

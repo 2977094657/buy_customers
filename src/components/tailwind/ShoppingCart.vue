@@ -41,16 +41,17 @@
 
 <script setup>
 import {ref, computed,watch} from 'vue'
-import store from "@/store";
-import router from "@/router/router";
+import { useStore } from '../../store/index'
+const store = useStore()
+import {router} from "@/router/router";
 import { debounce } from 'lodash'
 import {addHistorys, cartList, deleteAllCartItems, deleteCartItem, getProductById, updateCart} from "@/api/api";
 
 
 const cartItems = ref([])
 const productResponses = ref([])
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const empty = ref(false)
 const batchManageMode = ref(false)
 

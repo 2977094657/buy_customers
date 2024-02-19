@@ -1,7 +1,7 @@
 <script setup>
 import {useRoute} from 'vue-router';
 import {computed, onMounted, ref} from 'vue'
-import {useStore} from 'vuex';
+import { useStore } from '../../store/index'
 import {addComment, getOrder, updateOrderStatus} from "@/api/api";
 import {Plus} from "@element-plus/icons-vue";
 import {getProductById} from "@/api/api";
@@ -15,10 +15,12 @@ const orderId = data.orderId;
 const commentContent = ref('');
 const show = ref(true)
 const store = useStore();
-const userid = computed(() => store.state.userInfo.userId)
+const userid = computed(() => store.userInfo.userId)
 const textarea = ref('')
 const colors = ref(['#99A9BF', '#F7BA2A', '#FF9900'])
 const star = ref(null)
+const ip = computed(() => store.userInfo.ip)
+
 let currentMessageInstance = null
 
 const switchShow = () => {
@@ -113,6 +115,9 @@ const submitComment = async () => {
     // 禁用按钮
     document.querySelector('button[type="submit"]').disabled = true;
     return;
+  }else if(star.value===0){
+    showMessage('评分请至少选择一星')
+    return
   }
   if (commentContent.value.trim() === '' || route.params.productId === '') {
     showMessage('所有字段都不能为空');
@@ -127,7 +132,8 @@ const submitComment = async () => {
   })
 
   try {
-    await addComment(userid.value, commentContent.value, productId, star.value, files.value);
+    console.log(ip.value)
+    await addComment(userid.value, commentContent.value, productId, star.value, ip.value, files.value);
     await updateOrderStatus(orderId,'已完成');
     ElNotification({
       duration: 0,

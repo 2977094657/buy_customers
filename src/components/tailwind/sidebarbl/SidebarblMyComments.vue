@@ -6,7 +6,7 @@
              class="pt-10">
           <div class="mb-3">
             <div class="items-center col-span-1">
-              <h3 class="mr-5 text-sm font-medium text-gray-900">{{ formatDate(comment.time) }}</h3>
+              <h3 class="mr-5 text-sm font-medium text-gray-900 mt-2">{{ formatDate(comment.time) }}</h3>
               <div class="mt-3 text-sm text-gray-500">
                 {{comment.comments}}
               </div>
@@ -63,13 +63,14 @@
 <script setup>
 import {StarIcon} from '@heroicons/vue/20/solid'
 import {ref, computed, watch, reactive} from 'vue';
-import store from "@/store";
+import { useStore } from '../../../store/index'
+const store = useStore()
 import {useRouter} from "vue-router";
 import {addHistorys, deleteCommentById, getMyComments, getProductById} from "@/api/api";
 
 const comments = ref([]);
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const loading = ref(true)
 const empty = ref(false)
 const router = useRouter()

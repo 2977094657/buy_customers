@@ -51,12 +51,12 @@ const onBlur = () => {
 
 import { onMounted,watch,watchEffect  } from 'vue';
 import { useRouter,useRoute } from 'vue-router';
-import { useStore } from 'vuex'
+import { useStore } from '../../store/index'
 import {Close} from "@element-plus/icons-vue";
 
 const store = useStore()
 const route = useRoute();
-const land = computed(() => store.state.userInfo.land)
+const land = computed(() => store.userInfo.land)
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);

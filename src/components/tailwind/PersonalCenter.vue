@@ -1,4 +1,7 @@
 <template>
+  <div style="display: none">
+    <Top></Top>
+  </div>
   <div>
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog as="div" class="relative lg:hidden" @close="sidebarOpen = false">
@@ -76,24 +79,15 @@
     </div>
 
     <div class="lg:pl-72">
-      <div class="sticky z-50  top-0 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      <div class="sticky z-50 lg:hidden top-0 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
         <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden" @click="sidebarOpen = true">
           <span class="sr-only">Open sidebar</span>
           <Bars3Icon class="h-6 w-6" aria-hidden="true" />
         </button>
-
-        <!-- 分隔符 -->
-        <div class="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
-
-        <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-          <form class="relative flex flex-1" action="#" method="GET">
-            <Input id="search-field" class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search" />
-          </form>
-        </div>
       </div>
 
 <!--      显示内容-->
-      <main style="background-color: rgb(243,244,246);padding-bottom: 50px">
+      <main style="background-color: rgb(243,244,246);padding-bottom: 50px;min-height: 100vh;">
         <router-view name="personalInformation"></router-view>
         <router-view name="address"></router-view>
         <router-view name="MyComments"></router-view>
@@ -112,9 +106,10 @@
 import { ref } from 'vue'
 import {Dialog, DialogPanel, TransitionChild, TransitionRoot,} from '@headlessui/vue'
 import {Bars3Icon, XMarkIcon,} from '@heroicons/vue/24/outline'
-import router from "@/router/router";
+import {router} from "@/router/router";
 import Input from "@/components/tailwind/Input.vue";
 import {HeartIcon, ShoppingCartIcon, UserIcon,ChatBubbleLeftEllipsisIcon,ClockIcon,ClipboardDocumentListIcon} from "@heroicons/vue/24/outline";
+import Top from "@/components/tailwind/Top.vue";
 
 const navigation = [
   { name: '个人信息', href: '/PersonalCenter/InforMation', icon: UserIcon, current: false },

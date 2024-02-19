@@ -1,4 +1,7 @@
 <template>
+  <a-modal :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
+    <Login></Login>
+  </a-modal>
   <div class="bg-white">
     <div v-if="product && product.imgs" class="mx-auto max-w-2xl lg:max-w-7xl">
       <div class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
@@ -39,40 +42,44 @@
         <!-- 产品信息 -->
         <div class="mt-1 px-4 sm:px-0 lg:mt-0">
           <div class="sm:hidden flex justify-between items-center">
-            <p style="color: rgb(255,80,0);" class="sm:hidden text-3xl tracking-tight text-gray-900"><b class="text-sm">￥</b><span class="text-2xl font-semibold">{{ product.price }}</span>
+            <p style="color: rgb(255,80,0);" class="sm:hidden text-3xl tracking-tight text-gray-900">
+              <b class="text-sm">￥</b>
+              <span class="font-semibold">{{ integerPart(product.price) }}</span>
+              <span class="text-2xl">{{ decimalPart(product.price) }}</span>
             </p>
             <p class="text-gray-400">已售&nbsp&nbsp{{product.buys}}</p>
           </div>
 
-          <div style="margin-bottom: 50px" class="sm:hidden text-2xl text-gray-800 font-semibold tracking-tight">
+          <div style="margin-bottom: 50px" class="sm:hidden text-lg text-gray-800 font-semibold tracking-tight">
             {{product.productName }}
           </div>
 
           <!--          手机端底栏-->
-          <div style="margin-left: -15px" class="sm:hidden p-2 w-full z-10 flex justify-between items-center lm:fixed lm:bottom-0 bg-slate-50 border-t-[1px]">
+          <div style="margin-left: -15px" class="sm:hidden p-2 w-full z-10 flex justify-between items-center lm:fixed lm:bottom-0 bg-white border-t-[1px]">
             <div @click="goToVendor(product.name)" class="ml-3 text-sm text-gray-700 flex flex-col items-center">
               <ShopOutlined style="color: #FF5000;font-size: 17px"/>
-              <span class="text-sm">店铺</span>
+              <span style="color: rgb(102,102,102)" class="text-sm">店铺</span>
             </div>
             <!--            小屏幕显示的收藏按钮-->
-            <div class="flex flex-col items-center">
-              <button @click="addToFavorites" type="button"
-                      class="flex items-center justify-center rounded-md text-gray-400">
-                <HeartIcon class="h-5 w-5 flex-shrink-0" aria-hidden="true"/>
+            <div style="color: rgb(102,102,102)" class="flex flex-col items-center">
+              <button @click="addToFavorites()" type="button"
+                      class="flex items-center justify-center rounded-md">
+                <HeartIcon v-if="!isFavorite" class="h-5 w-5 flex-shrink-0" aria-hidden="true"/>
+                <HeartIconSolid v-else class="h-5 w-5 flex-shrink-0" aria-hidden="true" style="color: #fe9900"/>
               </button>
               <span class="text-sm">收藏</span>
             </div>
 
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center mr-2">
               <button @click="addToCart"
                       style="border-left: none; background: linear-gradient(90deg, rgb(255, 203, 0), rgb(255, 148, 2))"
-                      class="text-xs -mr-1 h-9 w-32 rounded-l-3xl rounded-r-none ml-5 flex items-center justify-center rounded-md border border-transparent px-8 py-3 font-medium text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
+                      class="text-sm -mr-1 h-9 w-32 rounded-l-3xl rounded-r-none ml-5 flex items-center justify-center rounded-md border border-transparent px-5 py-3 text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
                       data-ripple-light="true">
                 加入购物车
               </button>
-              <button @click="goToProduct(product.productId)"
+              <button @click="goToProduct(product.productId);showModal();"
                       style="border-left: none; background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"
-                      class="text-xs h-9 w-32 rounded-r-3xl rounded-l-none flex items-center justify-center rounded-md border border-transparent px-8 py-3 font-medium text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
+                      class="text-sm h-9 w-32 rounded-r-3xl rounded-l-none flex items-center justify-center rounded-md border border-transparent px-5 py-3 text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
                       data-ripple-light="true">
                 立即购买
               </button>
@@ -109,27 +116,19 @@
           </div>
 
           <div style="margin-bottom: 50px" class="flex justify-between items-center">
-            <p style="color: rgb(255,80,0);" class="lm:hidden text-3xl tracking-tight text-gray-900"><b>￥{{ product.price }}</b>
+            <p style="color: rgb(255,80,0);" class="lm:hidden text-3xl tracking-tight text-gray-900">
+              <b>￥<span>{{ integerPart(product.price) }}</span><span class="text-2xl">{{ decimalPart(product.price) }}</span></b>
             </p>
             <div>
-              <span>购买数量&nbsp&nbsp</span>
-              <el-input-number style="width: 100px" class="text-sm text-gray-600" v-model="num" :min="1" :max="50"/>
+              <button @click="addToFavorites()" type="button"
+                      class="lm:hidden ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
+                <HeartIcon v-if="!isFavorite" class="h-6 w-6 flex-shrink-0" aria-hidden="true"/>
+                <HeartIconSolid v-else class="h-6 w-6 flex-shrink-0" aria-hidden="true" style="color: #fe9900"/>
+              </button>
             </div>
             <div class="sm:hidden" @click="goToVendor(product.name)">
               <span>{{ product.name }}</span>
             </div>
-          </div>
-
-          <div style="margin-bottom: 50px" class="flex justify-between items-center">
-            <div>
-              收藏：<span style="color: #ff5000"><b>{{ product.star }}</b></span>
-            </div>
-
-<!--            大屏幕显示的收藏按钮-->
-            <button @click="addToFavorites" type="button"
-                    class="lm:hidden ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-              <HeartIcon class="h-6 w-6 flex-shrink-0" aria-hidden="true"/>
-            </button>
           </div>
 
           <div class="lm:hidden flex justify-between items-center">
@@ -162,35 +161,45 @@
 
 <script setup>
 import {ref} from 'vue'
-import {
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanels,
-} from '@headlessui/vue'
+import {Tab, TabGroup, TabList, TabPanels,} from '@headlessui/vue'
 import {HeartIcon} from '@heroicons/vue/24/outline'
+import {HeartIcon as HeartIconSolid} from '@heroicons/vue/20/solid'
 import {computed, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
-import router from "@/router/router";
-import store from "@/store";
+import {router} from "@/router/router";
+import { useStore } from '../../store/index'
+const store = useStore()
 import ProductComments from "@/components/tailwind/ProductComments.vue";
-import {addToCarts, addToFavorite, getProductById} from "@/api/api";
+import {addToCarts, addToFavorite, getProductById, selectStar} from "@/api/api";
 import { ShopOutlined } from '@ant-design/icons-vue';
+import Login from "@/components/tailwind/Login.vue";
 
 const route = useRoute()
 const product = ref()
 const httpError = ref(false)
 const currentImageIndex = ref(0)
-const userid = computed(() => store.state.userInfo.userId)
-const land = computed(() => store.state.userInfo.land)
+const userid = computed(() => store.userInfo.userId)
+const land = computed(() => store.userInfo.land)
 const childRef = ref();
+let open = ref(false)
+
+const handleOk = () => {
+  open.value = false
+}
+
+const showModal = () => {
+  if (land.value) {
+    return
+  }
+  open.value = true
+}
 
 let deviceType = ref(null);
 const state = ref('hover')
 
 onMounted(() => {
   setTimeout(() => {
-    deviceType.value = store.state.deviceType;
+    deviceType.value = store.deviceType;
     if (deviceType.value==='iPhone'||deviceType.value==='Android'){
       state.value='always'
     }
@@ -215,6 +224,15 @@ const star = async () => {
     childRef.value.switchShow()
   }
 }
+
+const integerPart = (price) => {
+  return String(price).split('.')[0];
+};
+
+const decimalPart = (price) => {
+  const parts = String(price).split('.');
+  return parts.length > 1 ? '.' + parts[1] : '';
+};
 
 onMounted(async () => {
   await star()
@@ -248,7 +266,7 @@ const addToCart = async () => {
     return
   }
   try {
-    const response = await addToCarts(userid.value, route.params.productId, num.value);
+    const response = await addToCarts(userid.value, route.params.productId, 1);
     if (response.data.message === '您的购物车商品总数已满，请先清理后继续加入购物车') {
       showMessage(response.data.message)
       return
@@ -260,17 +278,20 @@ const addToCart = async () => {
 }
 
 async function addToFavorites() {
-  if (userid.value == null) {
+  if (userid.value == null||userid.value==='') {
     showMessage('请先登陆')
+    return
   }
 
   addToFavorite(userid.value,route.params.productId)
-      .then(response => {
+      .then(async response => {
         if (response.data.code === -1) {
           showMessage(response.data.msg)
         } else if (response.data.code === 0) {
           showSuccessMessage(response.data.data);
-          star()
+          // 直接更新 isFavorite 的值，而不是再次调用 selectStar API
+          isFavorite.value = !isFavorite.value;
+          await star()
         }
       }).catch(error => {
     console.error('添加到收藏夹时出错：', error);
@@ -291,6 +312,16 @@ const goToVendor = (name) => {
   const url = router.resolve({name: 'vendor', params: {name}}).href;
   window.open(url, '_blank');
 }
+
+let isFavorite = ref(false) // 创建一个响应式变量来存储当前商品是否被收藏
+
+onMounted(async () => {
+  await star()
+  const response = await selectStar(userid.value)
+
+  // 检查返回的数据中是否包含当前页面的商品 ID
+  isFavorite.value = response.data.some(item => item.productId === Number(route.params.productId))
+})
 </script>
 
 <style scoped>
