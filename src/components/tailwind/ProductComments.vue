@@ -98,7 +98,7 @@
                 </div>
 
                 <!--  评论内容-->
-                <div class="prose prose-sm max-w-none text-gray-500 mt-3 mb-1" style="color: #18191C;margin-left: 42px">{{comment.comments}}</div>
+                <div class="prose prose-sm max-w-none text-gray-500 mt-3 mb-1" style="color: #18191C;margin-left: 42px; white-space: pre-wrap;">{{comment.comments}}</div>
                 <div v-if="comment.imgId">
                   <el-image v-for="(imgUrl, index) in comment.imgId.slice(1, -1).split(', ')" :key="index" class="comment-image"  alt=""
                             style="width: 90px; height: 90px;border-radius: 5px"

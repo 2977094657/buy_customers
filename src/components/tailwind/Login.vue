@@ -1,10 +1,9 @@
 <script setup>
 import {ref, computed} from 'vue';
 import login from "@/components/tailwind/Login.vue";
-import { useStore } from '../../store/index'
 import {useRouter} from 'vue-router';
 import {log, messageUser, registers} from "@/api/api";
-
+import {useStore} from "@/store";
 
 const router = useRouter();
 const store = useStore()
@@ -27,6 +26,8 @@ let isSending = ref(false);
 let confirmPassword = ref('');
 let phoneCode = ref('')
 let rememberMe = ref(false);
+let check = ref(false);
+let captcha = ref(false);
 
 computed(() => {
   // 当手机号和密码都不为空时，返回 false，否则返回 true
@@ -111,18 +112,18 @@ const loginUser = async () => {
 
 
 const sendSMSCode = async () => {
-  if (userInputVerifyCode.value === '') {
-    // 提示用户输入验证码
-    showMessage('请输入图形验证码')
-    return;
-  } else if (userInputVerifyCode.value !== verifyCode.value) {
-    // 验证码输入错误，提供错误提示
-    showMessage('图形验证码输入错误')
-    return;
-  }
-  // 清除验证码输入框的值并获取新的验证码
-  userInputVerifyCode.value = '';
-  await getCaptcha();
+  // if (userInputVerifyCode.value === '') {
+  //   // 提示用户输入验证码
+  //   showMessage('请输入图形验证码')
+  //   return;
+  // } else if (userInputVerifyCode.value !== verifyCode.value) {
+  //   // 验证码输入错误，提供错误提示
+  //   showMessage('图形验证码输入错误')
+  //   return;
+  // }
+  // // 清除验证码输入框的值并获取新的验证码
+  // userInputVerifyCode.value = '';
+  // await getCaptcha();
   // 如果正在发送或倒计时未结束，直接返回
   if (isSending.value || getCaptchaBtnText.value.countdown !== null) {
     return;
@@ -191,6 +192,11 @@ const registerUser = async () => {
     );
     return;
   }
+  if (!captcha.value) {
+    check.value = true;
+    isShow.value = true;
+    return;
+  }
   try {
     const response = await registers(phoneNumber.value, name.value, password.value, phoneCode.value);
     if (response.data === '注册成功') {
@@ -216,6 +222,20 @@ const forgotPassword = () => {
   // 本页面打开
   router.push({ name: 'forgotPassword'});
 }
+
+import Vcode from "vue3-puzzle-vcode";
+
+const isShow = ref(false);
+
+const onClose = () => {
+  isShow.value = false;
+};
+
+const onSuccess = () => {
+  onClose(); // 验证成功，需要手动关闭模态框
+  check.value = false;
+  captcha.value = true;
+};
 </script>
 
 <template>
@@ -305,13 +325,14 @@ const forgotPassword = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium leading-6 text-gray-900">请输入图形验证码，<span style="color: #e15f00">区分大小写</span></label>
-                  <div class="flex justify-between items-center">
-                    <input v-model="userInputVerifyCode" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                    <img style="width: 90px;margin-left: 10px" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">
-                  </div>
-                </div>
+<!--                图形验证码-->
+<!--                <div>-->
+<!--                  <label class="block text-sm font-medium leading-6 text-gray-900">请输入图形验证码，<span style="color: #e15f00">区分大小写</span></label>-->
+<!--                  <div class="flex justify-between items-center">-->
+<!--                    <input v-model="userInputVerifyCode" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />-->
+<!--                    <img style="width: 90px;margin-left: 10px" :src="captchaImgUrl" alt="验证码" @click="getCaptcha">-->
+<!--                  </div>-->
+<!--                </div>-->
 
                 <div>
                   <label class="block text-sm font-medium leading-6 text-gray-900">请输入手机号</label>
@@ -333,6 +354,8 @@ const forgotPassword = () => {
                   </div>
                 </div>
 
+                <!--  滑块验证码-->
+                <Vcode v-if="check" type="inside" :show="isShow" @success="onSuccess" @close="onClose" />
 
                 <div>
                   <button @click="registerUser" style="background-image: linear-gradient(to right,#ff9000 0,#ff7000 100%);" type="button" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">

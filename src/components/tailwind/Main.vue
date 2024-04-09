@@ -33,11 +33,11 @@
   </div>
 
 <!--  手机端瀑布流布局组件-->
-  <Waterfall class="smd:hidden" :list="list">
+  <Waterfall :has-around-gutter="false" class="smd:hidden mt-2 pr-1" :list="list">
     <template #item="{ item }">
-      <div class="rounded-lg overflow-hidden transition-all duration-300 ease-linear group">
+      <div style="margin-bottom: -4px;margin-right: -4px;" class="rounded-lg overflow-hidden transition-all duration-300 ease-linear group">
         <div class="overflow-hidden" @click="goToProduct(item.productId);addHistory(item.productId)">
-          <img v-if="item.img" :src="item.img.slice(1, -1).split(',')[0]"   alt=""/>
+          <img v-if="item.img" :src="item.img.slice(1, -1).split(',')[0]" alt=""/>
           <div class="flex-grow flex flex-col smd:justify-between bg-white pb-2"> <!-- 将标题和价格包裹在一个 div 中 -->
             <div style="color: rgb(51,51,51);" class="lm:mx-3 text-sm productName ">{{ item.productName }}</div>
             <p class="lm:ml-3 text-lg font-medium text-gray900 price">

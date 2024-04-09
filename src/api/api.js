@@ -147,7 +147,7 @@ export const deleteAllHistory = (userId) => instance.delete(`/user/deleteAllHist
 export const log = (usernameOrPhone, pwd, expirationTimeOption) => instance.post(`/user/login`, { usernameOrPhone, pwd, expirationTimeOption}, { headers: { 'X-Needs-Decryption': 'true' } });
 export const forgotPassword = (phoneNumber, newPassword, code) => instance.post(`/user/forgotPassword`, {phoneNumber, newPassword, code});
 export const messageUser = (phoneNumber) => instance.post(`/user/message?phoneNumber=${phoneNumber}`);
-export const registers = (phone, name, pwd, code) => instance.post(`/user/register`, {phone, name, pwd, code});
+export const registers = (phone, name, pwd, code) => instance.post(`/user/register?phone=${phone}&name=${name}&pwd=${pwd}&code=${code}`);
 export const getAllProductsRandomly = (page, size, randomSeed) => instance.get(`/product/all`, {params: {current: page, size, randomSeed}});
 export const addOrder = (vendorName, userId, address, price, productId, productNumber, consignee, phone, notes, payMethod) => instance.post(`/order/add`, {vendorName, userId, address, price, productId, productNumber, consignee, phone, notes, payMethod});
 export const updateAvatar = (data) => instance.put(`/user/updateAvatar`, data);
