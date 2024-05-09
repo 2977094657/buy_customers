@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="ld:mb-[50px]">
       <router-view v-if="!product||deviceType==='PC'" name="top"></router-view>
-      <div :class="isPersonalCenter ? '' : (home ? 'main lm:p-1 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none lm:p-0' : (forgotPassword ? 'bg-white':'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none')))">
+      <div :class="isPersonalCenter ? '' : (home ? 'main lm:p-1 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-5 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none lm:p-0' : (forgotPassword ? 'bg-white':'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none')))">
         <router-view name="personalCenter"></router-view>
         <router-view name="banner"></router-view>
         <router-view name="main"></router-view>
@@ -16,15 +16,21 @@
         <router-view name="forgotPassword"></router-view>
       </div>
     </div>
+
+  <nut-tabbar class="md:hidden" v-model="active" bottom safe-area-inset-bottom active-color="#FF5000" @tab-switch="PersonalCenter">
+    <nut-tabbar-item v-for="(item, index) in List" :key="index" :tab-title="item.title" :icon="item.icon">
+    </nut-tabbar-item>
+  </nut-tabbar>
+
 </template>
 
 <script setup>
-import {useRoute, useRouter} from 'vue-router';
+import {useRoute} from 'vue-router';
 import {ref, onMounted, computed} from 'vue'
 import { useStore } from '@/store'
-import {ElNotification} from "element-plus";
 import {getUser, getUserToken} from "@/api/api";
 import axios from "axios";
+import {showToast} from "vant";
 
 const route = useRoute();
 const store = useStore();
@@ -34,9 +40,6 @@ const product = computed(() => route.path.startsWith('/product'));
 const forgotPassword = computed(() => route.path.startsWith('/forgotPassword'));
 const home = computed(() => route.path === '/'); // 检查当前路由是否是首页
 
-const router = useRouter();
-let open = ref(false)
-let title = ref(false);
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
 let Avatar = ref('http://124.221.7.201:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
 let description = ref('')
@@ -48,8 +51,8 @@ const parseTokenAndUserInfo = async () => {
     if (token) {
       const response = await getUserToken(token);
       if (response.data) {
-        store.setUserInfo( {userId: response.data.userId})
-        const userInfoResponse = await getUser(response.data.userId);
+        store.setUserInfo( {userId: response.data})
+        const userInfoResponse = await getUser(response.data);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.user.name;
           Avatar.value = userInfoResponse.data.data.user.userAvatar;
@@ -62,7 +65,7 @@ const parseTokenAndUserInfo = async () => {
               name: userName.value,
               userAvatar: Avatar.value,
               description: description.value,
-              userId: response.data.userId,
+              userId: response.data,
               land: true,
               ip: ipResponse.data.data.province // 将省份信息存储到 Vuex 的 ip 属性中
             });
@@ -90,11 +93,8 @@ onMounted(async () => {
   if (token) {
     await parseTokenAndUserInfo(token);
   } else if (!token && (!lastShown || lastShown !== today)) {
-    ElNotification({
-      title: '登录失效',
-      message: '登录过期，请重新登录',
-      type: 'error',
-    })
+    showToast("登录过期，请重新登录");
+
     store.setUserInfo( {
       name: userName.value,
       userAvatar: Avatar.value,
@@ -133,6 +133,39 @@ onMounted(async () => {
     }
   }, 500);
 });
+
+import { h } from 'vue'
+import { Home, Cart, My } from '@nutui/icons-vue'
+import {router} from "@/router/router";
+
+const List = [
+  {
+    title: '首页',
+    icon: h(Home),
+    name: 0
+  },
+  {
+    title: '购物车',
+    icon: h(Cart),
+    name: 1
+  },
+  {
+    title: '我的',
+    icon: h(My),
+    name: 2
+  }
+]
+const active = ref(0)
+const land = computed(() => store.userInfo.land)
+const PersonalCenter = (item, index) => {
+  if (land.value && index === 2) {
+    router.push({name: 'InforMation'})
+  }
+  if (index === 0){
+    router.push({name: 'Home'})
+  }
+};
+
 </script>
 
 <style scoped>

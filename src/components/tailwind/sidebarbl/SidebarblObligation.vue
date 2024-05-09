@@ -124,7 +124,7 @@
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {EllipsisVerticalIcon} from '@heroicons/vue/24/outline'
 import {ClockIcon} from '@heroicons/vue/20/solid'
-import {computed, ref, watch, onUnmounted,onMounted,defineProps, defineEmits} from "vue";
+import {computed, ref, watch, onUnmounted,onMounted} from "vue";
 import { useStore } from '../../../store/index'
 const store = useStore()
 import {confirmOrder, deleteUnpaidOrder, getProductById, getUnpaidOrder} from "@/api/api";

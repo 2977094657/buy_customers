@@ -81,13 +81,13 @@ const loginUser = async () => {
       return
     }
     const response = await log(phoneNumber1.value, password1.value, rememberMe.value ? '1' : '0');
-    if (response.data.token) {
-      showSuccessMessage('登陆成功');
+    if (response.data.data) {
+      showToast("登录成功");
       // 延迟一段时间后刷新页面
       setTimeout(() => {
         location.reload();
       }, 500); // 1秒延迟
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('token', response.data.data);
       // 更新 userInfo 的值，触发 name.value 的变化
       store.setUserInfo( {
         name: userName.value,
@@ -208,7 +208,6 @@ const registerUser = async () => {
       phoneNumber.value = null
       phoneCode.value = null
       userInputVerifyCode.value = null
-
     } else {
       showMessage(response.data);
     }
@@ -224,6 +223,7 @@ const forgotPassword = () => {
 }
 
 import Vcode from "vue3-puzzle-vcode";
+import {showToast} from "vant";
 
 const isShow = ref(false);
 
@@ -240,25 +240,17 @@ const onSuccess = () => {
 
 <template>
     <div>
-      <div class="wz">
-        <span @click="switchForm('login')" :class="{ active: currentForm === 'login' }"
-              class="form-switcher">登录</span>
-        <div class="line"></div>
-        <span @click="switchForm('register')" :class="{ active: currentForm === 'register' }"
-              class="form-switcher">注册</span>
-      </div>
-
       <form v-if="currentForm === 'login'" @submit.prevent="login" class="login">
-        <div class="flex min-h-full flex-1 flex-col justify-center py-5 sm:px-6 lg:px-8">
+        <div class="flex min-h-full flex-1 flex-col justify-center ">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
 
-          <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-            <div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+          <div class=" sm:mx-auto sm:w-full sm:max-w-[480px]">
+            <div class="bg-white px-6 py-5 sm:rounded-lg sm:px-12">
               <div class="space-y-6">
                 <div>
-                  <label for="email" class="block text-sm font-medium leading-6 text-gray-900">手机号</label>
+                  <label for="email" class="block text-sm font-medium leading-6 text-gray-900">手机号/用户名</label>
                   <div class="mt-2">
                     <input id="email" v-model="phoneNumber1" placeholder="手机号/用户名" name="email" type="text" autocomplete="email" required="" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
                   </div>
@@ -288,6 +280,12 @@ const onSuccess = () => {
                   </button>
                 </div>
               </div>
+
+              <p class="mt-10 text-center text-sm text-gray-500">
+                没有账号?
+                {{ ' ' }}
+                <a @click="switchForm('register')" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">去注册</a>
+              </p>
             </div>
           </div>
         </div>
@@ -296,14 +294,14 @@ const onSuccess = () => {
 
 
       <form v-else-if="currentForm === 'register'" @submit.prevent="register">
-        <div class="flex min-h-full flex-1 flex-col justify-center py-5 sm:px-6 lg:px-8">
+        <div class="flex min-h-full flex-1 flex-col justify-center">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <img class="mx-auto h-10 w-auto" src="http://124.221.7.201:5000/logo.png" alt="Your Company" />
           </div>
 
-          <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-            <div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-              <div class="space-y-6">
+          <div class=" sm:mx-auto sm:w-full sm:max-w-[480px]">
+            <div class="bg-white sm:rounded-lg sm:px-12">
+              <div class="space-y-2">
                 <div>
                   <label for="email" class="block text-sm font-medium leading-6 text-gray-900">用户名</label>
                   <div class="mt-2">
@@ -358,12 +356,18 @@ const onSuccess = () => {
                 <Vcode v-if="check" type="inside" :show="isShow" @success="onSuccess" @close="onClose" />
 
                 <div>
-                  <button @click="registerUser" style="background-image: linear-gradient(to right,#ff9000 0,#ff7000 100%);" type="button" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  <button @click="registerUser" style="background-image: linear-gradient(to right,#ff9000 0,#ff7000 100%);" type="button" class="mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     注&nbsp;&nbsp;&nbsp;&nbsp;册
                   </button>
                 </div>
               </div>
             </div>
+
+            <p class="mt-10 text-center text-sm text-gray-500">
+              已有账号?
+              {{ ' ' }}
+              <a @click="switchForm('login')" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">去登录</a>
+            </p>
           </div>
         </div>
       </form>
@@ -372,29 +376,6 @@ const onSuccess = () => {
 
 <style scoped>
 @import '../../assets/Tailwind.css';
-.form-switcher {
-  cursor: pointer;
-}
-
-.form-switcher.active {
-  color: #ff915e;
-}
-
-.line{
-  width: 1px;
-  height: 20px;
-  background: #e3e5e7;
-  border-radius: 8px;
-  margin: 0 21px; /* 增加左右间距以分离文字 */
-}
-
-.wz{
-  display: flex;
-  justify-content: center;
-  color: #505050;
-  font-size: 18px;
-}
-
 .countdown-active {
   color: #ff915e;
 }

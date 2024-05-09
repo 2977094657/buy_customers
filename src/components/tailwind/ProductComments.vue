@@ -407,10 +407,10 @@ const isLiked = (commentsId, likeType) => {
 
 <style scoped>
 @import '../../assets/Tailwind.css';
-/deep/.el-radio-button__inner {
+:deep(.el-radio-button__inner ){
   border: none;
 }
-/deep/.el-radio-button:first-child .el-radio-button__inner {
+:deep(.el-radio-button:first-child .el-radio-button__inner ){
   border-left: none;
 }
 
@@ -429,7 +429,7 @@ const isLiked = (commentsId, likeType) => {
 }
 
 /* 去掉el-radio-button的hover效果 */
-/deep/.el-radio-button__inner:hover {
+:deep(.el-radio-button__inner:hover) {
   color: var(--el-button-text-color,var(--el-text-color-regular));
 }
 </style>

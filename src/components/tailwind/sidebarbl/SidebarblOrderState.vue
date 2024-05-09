@@ -116,7 +116,7 @@
 </template>
 
 <script setup>
-import {computed, ref, watch, defineProps} from "vue";
+import {computed, ref, watch} from "vue";
 import { useStore } from '../../../store/index'
 const store = useStore()
 import {deleteOrders, getOrdersByUserIdAndState, getProductById} from "@/api/api";

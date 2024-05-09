@@ -4,8 +4,10 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import {AntDesignVueResolver, ElementPlusResolver} from 'unplugin-vue-components/resolvers'
+import NutUIResolver from '@nutui/auto-import-resolver'
+import { VantResolver } from "@vant/auto-import-resolver";
 import Inspector from "vite-plugin-vue-inspector"
+import {AntDesignVueResolver, ElementPlusResolver} from "unplugin-vue-components/resolvers";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -16,13 +18,16 @@ export default defineConfig({
     }),
     AutoImport({
       resolvers: [
-          ElementPlusResolver(),
+        VantResolver(),
+        ElementPlusResolver(),
         AntDesignVueResolver()
       ],
     }),
     Components({
       resolvers: [
-          ElementPlusResolver(),
+        VantResolver(),
+        ElementPlusResolver(),
+        NutUIResolver(),
         AntDesignVueResolver({
         importStyle: false, // css in js
       })

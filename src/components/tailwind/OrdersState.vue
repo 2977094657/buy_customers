@@ -121,7 +121,7 @@
 </template>
 
 <script setup>
-import {computed, ref, watch,defineProps,defineEmits,watchEffect} from "vue";
+import {computed, ref, watch} from "vue";
 import { useStore } from '../../store/index'
 const store = useStore()
 import {deleteOrders, getOrdersByUserIdAndState, getProductById, receiveOrders} from "@/api/api";

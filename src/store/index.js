@@ -10,6 +10,7 @@ export const useStore = defineStore({
             land: '',
             gender: '',
             description: '',
+            vertical: true,
             ip: ''
         },
         randomSeed: Math.floor(Math.random() * 10000),

@@ -137,7 +137,7 @@ export const updateAddress = (params) => instance.put(`/address/update`, null, {
 export const deleteAddress = (id) => instance.delete(`/address/delete`, {params: {id}});
 export const updateDefaultAddress = (id, defaultOperate) => instance.put(`/address/updateDefault`, null, {params: {id, defaultOperate}});
 export const getAllProducts = (current, size, sortField, isAsc) => instance.get(`/product/all`, {params: {current, size, sortField, isAsc}});
-export const getUserToken = (token) => instance.get(`/user/token`, {headers: {Authorization: `Bearer ${token}`}});
+export const getUserToken = (tokenValue) => instance.post(`/user/getLoginIdByToken`, {tokenValue});
 export const getOrder = (orderNumber) => instance.get(`/order/getOrder`, {params: {orderNumber}});
 export const addToCarts = (userId, productId, quantity) => instance.post(`/cart/add`, null, {params: {userId, productId, quantity}});
 export const addToFavorite = (userId, productId, quantity) => instance.post(`/star/staradd`, {userId, productId, quantity});

@@ -252,14 +252,16 @@ onMounted(getProductInfo);
                        multiple/>
               </div>
 
-              <div class="file-names">{{ fileNames.join(', ') }}</div>
+              <!-- 文件名展示 -->
+<!--              <div class="file-names">{{ fileNames.join(', ') }}</div>-->
             </dl>
           </div>
 
           <div class="mt-5">
             <button @click="submitComment" type="submit"
-                    class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50">
-              发布
+                    style="background-color: #FF5000"
+                    class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700">
+              提交评价
             </button>
           </div>
         </section>

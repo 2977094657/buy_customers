@@ -52,11 +52,11 @@ img {
     height: 100%;
 }
 
-/deep/ .el-card__body {
+:deep( .el-card__body ){
     padding: 0;
 }
 
-/deep/ .el-card {
+:deep( .el-card) {
     width: 150px;
     height: 200px;
 }
@@ -66,11 +66,11 @@ img {
     font-size: 10px;
 }
 
-/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin .ant-spin-dot-item {
+:deep( :where(.css-dev-only-do-not-override-hkh161).ant-spin .ant-spin-dot-item) {
     background-color: #ff915e;
 }
 
-/deep/ :where(.css-dev-only-do-not-override-hkh161).ant-spin {
+:deep( :where(.css-dev-only-do-not-override-hkh161).ant-spin) {
     color: #ff915e;
 }
 
@@ -102,7 +102,7 @@ img {
     position: absolute;
 }
 
-/deep/.el-empty__description p {
+:deep(.el-empty__description p ){
     margin: 0 0 0 70px;
 }
 

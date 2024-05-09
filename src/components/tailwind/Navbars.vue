@@ -2,6 +2,7 @@
   <a-modal :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
     <Login></Login>
   </a-modal>
+
   <Disclosure as="header" v-slot="{ open }">
     <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:divide-y lg:divide-gray-200 lg:px-8 lm:bg-white">
       <div class="relative flex h-16 justify-between">
@@ -18,7 +19,7 @@
             </div>
           </div>
         </div>
-        <div class="relative z-10 flex items-center lg:hidden">
+        <div class="relative z-10 flex items-center lg:hidden ld:hidden">
           <!-- 移动菜单按钮 -->
               <img class="img" :src="Avatar" alt="头像" @click="showModal();PersonalCenter()">
         </div>
@@ -192,8 +193,8 @@ const parseTokenAndUserInfo = async () => {
     if (token) {
       const response = await getUserToken(token);
       if (response.data) {
-        store.setUserInfo( {userId: response.data.userId})
-        const userInfoResponse = await getUser(response.data.userId);
+        store.setUserInfo( {userId: response.data})
+        const userInfoResponse = await getUser(response.data);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.user.name;
           Avatar.value = userInfoResponse.data.data.user.userAvatar;
@@ -203,7 +204,7 @@ const parseTokenAndUserInfo = async () => {
             name: userName.value,
             userAvatar: Avatar.value,
             description: description.value,
-            userId: response.data.userId,
+            userId: response.data,
             land: true
           });
         } else {
@@ -320,18 +321,18 @@ onUpdated(checkScrollbar);
 ::-webkit-scrollbar {
   display: none;
 }
-/deep/ .el-tabs__item:hover {
+:deep( .el-tabs__item:hover) {
   color: #FF5000;
   cursor: pointer;
 }
-/deep/ .el-tabs__item.is-active {
+:deep( .el-tabs__item.is-active) {
   color: #FF5000;
 }
-/deep/ .el-tabs__active-bar {
+:deep( .el-tabs__active-bar) {
   background-color: #FF5000;
 }
 /*去掉下划线*/
-/deep/ .el-tabs__nav-wrap::after {
+:deep( .el-tabs__nav-wrap::after) {
   position: static !important;
 }
 </style>
