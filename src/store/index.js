@@ -13,6 +13,8 @@ export const useStore = defineStore({
             vertical: true,
             ip: ''
         },
+        maskDialog: false,
+        maskDialogMode: 'dark',
         randomSeed: Math.floor(Math.random() * 10000),
         deviceType: ''
     }),
@@ -25,6 +27,12 @@ export const useStore = defineStore({
         },
         setDeviceType(deviceType) {
             this.deviceType = deviceType;
+        },
+        setMaskDialog(val) {
+            this.maskDialog = val.state
+            if (val.mode) {
+                this.maskDialogMode = val.mode
+            }
         },
     }
 })

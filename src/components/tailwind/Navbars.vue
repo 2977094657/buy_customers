@@ -79,16 +79,6 @@
         </div>
       </div>
     </div>
-    <el-tabs v-model="activeCategory" style="overflow-x: auto; overflow-y: hidden; height: 35px; white-space: nowrap;" class="m-0 sm:hidden bg-white text-left flex items-center pl-6">
-      <el-tab-pane
-          v-for="(category, index) in categories"
-          :label=category :name=category
-          :key="index"
-          style="cursor: pointer;"
-          class="mr-7"
-      >
-      </el-tab-pane>
-    </el-tabs>
 
     <hr class="sm:hidden">
   </Disclosure>
@@ -103,12 +93,6 @@ const goHome = () => {
   router.push({name: 'Home'});
 };
 
-const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com',
-  imageUrl:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
@@ -126,8 +110,6 @@ import {getUser, getUserToken} from "@/api/api";
 const store = useStore()
 const route = useRoute();
 const land = computed(() => store.userInfo.land)
-let categories = ref(['推荐','食品','百货','手机','医药','母婴','电器','男装','女装']); // 分类列表
-let activeCategory = ref('推荐'); // 当前活动的分类
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
@@ -318,21 +300,4 @@ onUpdated(checkScrollbar);
 <style scoped>
 @import '../../assets/Tailwind.css';
 @import '../../assets/Top.css';
-::-webkit-scrollbar {
-  display: none;
-}
-:deep( .el-tabs__item:hover) {
-  color: #FF5000;
-  cursor: pointer;
-}
-:deep( .el-tabs__item.is-active) {
-  color: #FF5000;
-}
-:deep( .el-tabs__active-bar) {
-  background-color: #FF5000;
-}
-/*去掉下划线*/
-:deep( .el-tabs__nav-wrap::after) {
-  position: static !important;
-}
 </style>

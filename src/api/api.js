@@ -31,6 +31,34 @@ instance.interceptors.request.use(
                 aesKey: encryptedAESKey
             };
         }
+
+        if (config.headers['X-Request-Type'] !== 'setNonce') {
+            // 获取当前时间戳
+            const timestamp = new Date().getTime();
+            // 生成随机字符串
+            const nonce = Math.random().toString(36).slice(2, 17);
+
+            // 将 nonce 存入 Redis
+            await setNonce(nonce);
+
+            // 将所有请求参数排序并拼接成字符串
+            let paramsString = '';
+            const sortedParams = Object.keys(config.params || {}).sort();
+            sortedParams.forEach(key => {
+                paramsString += key + '=' + config.params[key] + '&';
+            });
+            paramsString = paramsString.slice(0, -1); // 移除最后一个'&'
+
+            // 生成签名
+            const secretKey = 'skfjnANJjmvkAFSVBNvn'; // 请替换为你的实际密钥
+            const signString = `${paramsString}&timestamp=${timestamp}&nonce=${nonce}&secret=${secretKey}`;
+            // 使用 CryptoJS 生成签名
+            // 将签名信息添加到请求头中
+            config.headers['x-sign'] = CryptoJS.SHA256(signString).toString(CryptoJS.enc.Hex);
+            config.headers['x-timestamp'] = timestamp;
+            config.headers['x-nonce'] = nonce;
+        }
+
         return config;
     },
     error => {
@@ -43,6 +71,22 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
     async response => {
+        // 检查请求头是否为 setNonce 请求
+        const requestTypeHeader = response.config.headers['X-Request-Type'];
+        if (requestTypeHeader && requestTypeHeader === 'setNonce') {
+            return response; // 直接放行
+        }
+
+        // 验证响应数据签名
+        const responseData = JSON.stringify(response.data);
+        const responseSign = response.headers['x-response-sign'];
+
+        if (!verifyResponseSign(responseData, responseSign)) {
+            console.log('响应数据被篡改');
+            // 你可以在这里抛出一个错误或者根据你的需求进行其他处理
+            return Promise.reject(new Error('响应数据被篡改'));
+        }
+
         // 检查响应头
         if (response.headers['x-encrypted'] === 'true') {
 
@@ -71,6 +115,15 @@ instance.interceptors.response.use(
     }
 );
 
+function verifyResponseSign(responseData, responseSign) {
+    // 计算响应数据的签名
+    const hash = CryptoJS.SHA256(responseData);
+    const calculatedSign = hash.toString(CryptoJS.enc.Hex);
+
+    // 比较计算出的签名和响应头中的签名
+    return calculatedSign === responseSign;
+}
+
 async function decryptJsonValues(json, aesKeyBytes, ivBytes) {
     // 遍历json对象并解密每个值
     for (let key in json) {
@@ -98,7 +151,7 @@ async function decryptJsonValues(json, aesKeyBytes, ivBytes) {
                         json[key] = decryptedString;
                     }
                 } catch (e) {
-                    console.log(`解密键${key}的值失败：`+e); // 输出解密失败的错误信息
+                    console.log(`解密键${key}的值失败：` + e); // 输出解密失败的错误信息
                 }
             } else if (typeof value === 'object') {
                 // 递归地对子对象或数组进行解密
@@ -115,61 +168,168 @@ export const getGlobalSettings = (id) => instance.get(`/globalSettings/selectOne
 export const getMyComments = (userId) => instance.get(`/productComments/myComments`, {params: {userId}});
 export const getProductById = (productId) => instance.get(`/product/selectById`, {params: {productId}});
 export const deleteCommentById = (id) => instance.delete(`/productComments/delete`, {params: {id}});
-export const addHistorys = (userId, productId) => instance.post(`/user/addHistory`, {}, {params: {userid: userId, productId}});
-export const deleteAllCartItems = (ids) => instance.delete(`/cart/deleteAll`, {params: {id: ids.join(',') }});
+export const addHistorys = (userId, productId) => instance.post(`/user/addHistory`, {}, {
+    params: {
+        userid: userId,
+        productId
+    }
+});
+export const deleteAllCartItems = (ids) => instance.delete(`/cart/deleteAll`, {params: {id: ids.join(',')}});
 export const deleteCartItem = (id) => instance.delete(`/cart/delete`, {params: {id}});
 export const updateCart = (id, quantity) => instance.put(`/cart/update?id=${id}&quantity=${quantity}`);
 export const cartList = (userId) => instance.get(`/cart/list`, {params: {userId}});
 export const getUnpaidOrder = (userId) => instance.get(`/order/getUnpaidOrder`, {params: {userId}});
-export const deleteUnpaidOrder = (orderLong, userId) => instance.delete(`/order/deleteUnpaidOrder`, {params: {orderLong, userId}});
+export const deleteUnpaidOrder = (orderLong, userId) => instance.delete(`/order/deleteUnpaidOrder`, {
+    params: {
+        orderLong,
+        userId
+    }
+});
 export const confirmOrder = (orderLong, userId) => instance.post(`/order/confirmOrder`, {orderLong, userId});
 export const getOrdersByUserId = (userId) => instance.post(`/order/getOrdersByUserId`, {userId});
-export const updateOrderStatus = (orderId,state) => instance.put(`/order/updateOrderStatus`, {orderId, state});
+export const updateOrderStatus = (orderId, state) => instance.put(`/order/updateOrderStatus`, {orderId, state});
 export const receiveOrders = (orderId) => instance.post(`/order/receiveOrder`, {orderId});
-export const getOrdersByUserIdAndState = (userId,state) => instance.post(`/order/getOrdersByUserIdAndState`, {userId,state});
+export const getOrdersByUserIdAndState = (userId, state) => instance.post(`/order/getOrdersByUserIdAndState`, {
+    userId,
+    state
+});
 export const deleteOrders = (id) => instance.delete(`/order/deleteOrder`, {params: {id}});
 export const selectStar = (userId) => instance.get(`/star/select`, {params: {userId}});
-export const deleteAllStars = (ids) => instance.delete(`/star/deleteAll`, {params: {id: ids.join(',') }});
+export const deleteAllStars = (ids) => instance.delete(`/star/deleteAll`, {params: {id: ids.join(',')}});
 export const getUser = (userId) => instance.get(`/user/all`, {params: {userId}});
 export const getAddress = (userId) => instance.get(`/address/all`, {params: {userId}});
-export const addAddres = (userId, consignee, area, fullAddress, phone) => instance.post(`/address/add`, null, {params: {userId, consignee, area, fullAddress, phone}});
+export const addAddres = (userId, consignee, area, fullAddress, phone) => instance.post(`/address/add`, null, {
+    params: {
+        userId,
+        consignee,
+        area,
+        fullAddress,
+        phone
+    }
+});
 export const updateAddress = (params) => instance.put(`/address/update`, null, {params});
 export const deleteAddress = (id) => instance.delete(`/address/delete`, {params: {id}});
-export const updateDefaultAddress = (id, defaultOperate) => instance.put(`/address/updateDefault`, null, {params: {id, defaultOperate}});
-export const getAllProducts = (current, size, sortField, isAsc) => instance.get(`/product/all`, {params: {current, size, sortField, isAsc}});
+export const updateDefaultAddress = (id, defaultOperate) => instance.put(`/address/updateDefault`, null, {
+    params: {
+        id,
+        defaultOperate
+    }
+});
+export const getAllProducts = (current, size, sortField, isAsc) => instance.get(`/product/all`, {
+    params: {
+        current,
+        size,
+        sortField,
+        isAsc
+    }
+});
 export const getUserToken = (tokenValue) => instance.post(`/user/getLoginIdByToken`, {tokenValue});
 export const getOrder = (orderNumber) => instance.get(`/order/getOrder`, {params: {orderNumber}});
-export const addToCarts = (userId, productId, quantity) => instance.post(`/cart/add`, null, {params: {userId, productId, quantity}});
-export const addToFavorite = (userId, productId, quantity) => instance.post(`/star/staradd`, {userId, productId, quantity});
+export const addToCarts = (userId, productId, quantity) => instance.post(`/cart/add`, null, {
+    params: {
+        userId,
+        productId,
+        quantity
+    }
+});
+export const addToFavorite = (userId, productId, quantity) => instance.post(`/star/staradd`, {
+    userId,
+    productId,
+    quantity
+});
 export const getHistoryByUserId = (userId) => instance.get(`/user/getHistoryByUserId`, {params: {userId}});
-export const deleteHistorys = (userid, productId, date) => instance.delete(`/user/deleteHistory`, {params: {userid, productId, date}});
+export const deleteHistorys = (userid, productId, date) => instance.delete(`/user/deleteHistory`, {
+    params: {
+        userid,
+        productId,
+        date
+    }
+});
 export const deleteAllHistory = (userId) => instance.delete(`/user/deleteAllHistory`, {params: {userId}});
-export const log = (usernameOrPhone, pwd, expirationTimeOption) => instance.post(`/user/login`, { usernameOrPhone, pwd, expirationTimeOption}, { headers: { 'X-Needs-Decryption': 'true' } });
-export const forgotPassword = (phoneNumber, newPassword, code) => instance.post(`/user/forgotPassword`, {phoneNumber, newPassword, code});
+export const log = (usernameOrPhone, pwd, expirationTimeOption) => instance.post(`/user/login`, {
+    usernameOrPhone,
+    pwd,
+    expirationTimeOption
+}, {headers: {'X-Needs-Decryption': 'true'}});
+export const forgotPassword = (phoneNumber, newPassword, code) => instance.post(`/user/forgotPassword`, {
+    phoneNumber,
+    newPassword,
+    code
+});
 export const messageUser = (phoneNumber) => instance.post(`/user/message?phoneNumber=${phoneNumber}`);
 export const registers = (phone, name, pwd, code) => instance.post(`/user/register?phone=${phone}&name=${name}&pwd=${pwd}&code=${code}`);
-export const getAllProductsRandomly = (page, size, randomSeed) => instance.get(`/product/all`, {params: {current: page, size, randomSeed}});
-export const addOrder = (vendorName, userId, address, price, productId, productNumber, consignee, phone, notes, payMethod) => instance.post(`/order/add`, {vendorName, userId, address, price, productId, productNumber, consignee, phone, notes, payMethod});
+export const getAllProductsRandomly = (page, size, randomSeed) => instance.get(`/product/all`, {
+    params: {
+        current: page,
+        size,
+        randomSeed
+    }
+});
+export const addOrder = (vendorName, userId, address, price, productId, productNumber, consignee, phone, notes, payMethod) => instance.post(`/order/add`, {
+    vendorName,
+    userId,
+    address,
+    price,
+    productId,
+    productNumber,
+    consignee,
+    phone,
+    notes,
+    payMethod
+});
 export const updateAvatar = (data) => instance.put(`/user/updateAvatar`, data);
-export const updateUser = (userId, name, description, gender) => instance.put(`/user/updateUser`, null, {params: {userId, name, description, gender}});
-export const changePassword = (userId, oldPassword, newPassword, confirmPassword) => instance.post(`/user/password`, {userId, oldPassword, newPassword, confirmPassword});
-export const changePhones = (userId, oldPhone, code, phone) => instance.put(`/user/changePhone`, {userId, oldPhone, code, phone});
+export const updateUser = (userId, name, description, gender) => instance.put(`/user/updateUser`, null, {
+    params: {
+        userId,
+        name,
+        description,
+        gender
+    }
+});
+export const changePassword = (userId, oldPassword, newPassword, confirmPassword) => instance.post(`/user/password`, {
+    userId,
+    oldPassword,
+    newPassword,
+    confirmPassword
+});
+export const changePhones = (userId, oldPhone, code, phone) => instance.put(`/user/changePhone`, {
+    userId,
+    oldPhone,
+    code,
+    phone
+});
 export const searchProduct = (keyword, page) => instance.get(`/product/search`, {params: {keyword, page}});
 export const getVendorProduct = (name) => instance.get(`/product/vendor`, {params: {name}});
-export const addComment = (userId, comments, productId, score,ip,files) => {
+export const addComment = (userId, comments, productId, score, ip, files) => {
     const formData = new FormData();
     formData.append('userId', userId);
     formData.append('comments', comments.trim());
     formData.append('productId', productId);
     formData.append('score', score);
-    formData.append('ip',ip)
-    files.forEach((file) => { formData.append(`imgId`, file, file.name); });
+    formData.append('ip', ip)
+    files.forEach((file) => {
+        formData.append(`imgId`, file, file.name);
+    });
     return instance.post(`/productComments/add`, formData);
 };
-export const getProductCommentsByTime = (productId, pageNum, sortByTime, pageSize,sortByLikes) => instance.get(`/product/comments`, {params: {productId, pageNum, sortByTime, pageSize,sortByLikes}});
-export const getProductComments = (productId, currentPage, pageSize) => instance.get(`/product/comments`, {params: {productId, pageNum: currentPage, pageSize}});
+export const getProductCommentsByTime = (productId, pageNum, sortByTime, pageSize, sortByLikes) => instance.get(`/product/comments`, {
+    params: {
+        productId,
+        pageNum,
+        sortByTime,
+        pageSize,
+        sortByLikes
+    }
+});
+export const getProductComments = (productId, currentPage, pageSize) => instance.get(`/product/comments`, {
+    params: {
+        productId,
+        pageNum: currentPage,
+        pageSize
+    }
+});
 export const publicKey = () => instance.get(`/admin/publicKey`);
 export const privateKey = (publicKey) => instance.post(`/admin/privateKey`, {publicKey});
 export const likes = (newLikes) => instance.post(`/likes/likes`, newLikes);
 export const getUserLikes = (userId) => instance.get(`/likes/userLikes`, {params: {userId: userId}});
-
+export const setNonce = (nonce) => instance.post('/admin/setNonce', {nonce}, {headers: {'X-Request-Type': 'setNonce'}});

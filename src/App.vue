@@ -1,23 +1,22 @@
 <template>
-    <div class="ld:mb-[50px]">
-      <router-view v-if="!product||deviceType==='PC'" name="top"></router-view>
-      <div :class="isPersonalCenter ? '' : (home ? 'main lm:p-1 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-5 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none lm:p-0' : (forgotPassword ? 'bg-white':'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none')))">
-        <router-view name="personalCenter"></router-view>
-        <router-view name="banner"></router-view>
-        <router-view name="main"></router-view>
-        <router-view name="description"></router-view>
-        <router-view name="search"></router-view>
-        <router-view name="productComments"></router-view>
-        <router-view name="shoppingCart"></router-view>
-        <router-view name="orders"></router-view>
-        <router-view name="vendor"></router-view>
-        <router-view name="ConfirmPay"></router-view>
-        <router-view name="Reviews"></router-view>
-        <router-view name="forgotPassword"></router-view>
-      </div>
-    </div>
+  <a-modal :footer="null" :maskClosable="false" v-model:open="open" @ok="handleOk">
+    <Login></Login>
+  </a-modal>
 
-  <nut-tabbar class="md:hidden" v-model="active" bottom safe-area-inset-bottom active-color="#FF5000" @tab-switch="PersonalCenter">
+  <div class="ld:mb-[50px]">
+    <Top v-if="deviceType==='PC'&& !isPersonalCenter"></Top>
+    <div style="min-height: 100vh"
+        :class="isPersonalCenter ? '' : (home ? 'main lm:px-2 lm:pt-0 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-5 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none lm:p-0' : (forgotPassword ? 'bg-white':'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none')))">
+      <router-view v-slot="{ Component }">
+        <transition :name="transitionName">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </div>
+  </div>
+
+  <nut-tabbar v-if="!product" class="md:hidden" v-model="active" bottom safe-area-inset-bottom active-color="#FF5000"
+              @tab-switch="PersonalCenter">
     <nut-tabbar-item v-for="(item, index) in List" :key="index" :tab-title="item.title" :icon="item.icon">
     </nut-tabbar-item>
   </nut-tabbar>
@@ -25,25 +24,44 @@
 </template>
 
 <script setup>
+import {ref, onMounted, computed,watch} from 'vue'
 import {useRoute} from 'vue-router';
-import {ref, onMounted, computed} from 'vue'
-import { useStore } from '@/store'
+import {useStore} from '@/store'
 import {getUser, getUserToken} from "@/api/api";
 import axios from "axios";
 import {showToast} from "vant";
+import {h} from 'vue'
+import {Home, Cart, My} from '@nutui/icons-vue'
+import Login from "@/components/tailwind/Login.vue";
+import Top from "@/components/tailwind/Top.vue";
+import {router, routes} from "@/router/router";
 
 const route = useRoute();
 const store = useStore();
+const transitionName = ref('go')
+
 const deviceType = ref('');
 const isPersonalCenter = computed(() => route.path.startsWith('/PersonalCenter'));
 const product = computed(() => route.path.startsWith('/product'));
 const forgotPassword = computed(() => route.path.startsWith('/forgotPassword'));
 const home = computed(() => route.path === '/'); // 检查当前路由是否是首页
+const land = computed(() => store.userInfo.land)
 
 let userName = ref('请登录'); // 注意这里不再是一个对象，而是一个字符串
 let Avatar = ref('http://124.221.7.201:5000/login1.jpg'); // 同样，这里也不是一个对象，而是一个字符串
 let description = ref('')
 let gender = ref('')
+
+// watch $route 决定使用哪种过渡
+watch(
+    () => route.path,
+    (to, from) => {
+      store.setMaskDialog({ state: false, mode: store.maskDialogMode })
+      const toDepth = routes.findIndex((v) => v.path === to)
+      const fromDepth = routes.findIndex((v) => v.path === from)
+      transitionName.value = toDepth > fromDepth ? 'back' : 'go'
+    }
+)
 
 const parseTokenAndUserInfo = async () => {
   try {
@@ -51,7 +69,7 @@ const parseTokenAndUserInfo = async () => {
     if (token) {
       const response = await getUserToken(token);
       if (response.data) {
-        store.setUserInfo( {userId: response.data})
+        store.setUserInfo({userId: response.data})
         const userInfoResponse = await getUser(response.data);
         if (userInfoResponse.data != null) {
           userName.value = userInfoResponse.data.data.user.name;
@@ -88,14 +106,14 @@ onMounted(async () => {
   const token = localStorage.getItem('token');
   const lastShown = localStorage.getItem('lastShown');
 
-  const today = new Date().toISOString().slice(0,10); // 获取今天的日期
+  const today = new Date().toISOString().slice(0, 10); // 获取今天的日期
 
   if (token) {
     await parseTokenAndUserInfo(token);
   } else if (!token && (!lastShown || lastShown !== today)) {
     showToast("登录过期，请重新登录");
 
-    store.setUserInfo( {
+    store.setUserInfo({
       name: userName.value,
       userAvatar: Avatar.value,
       land: false
@@ -127,16 +145,12 @@ onMounted(async () => {
   const intervalId = setInterval(() => {
     if (deviceType.value !== undefined) {
       setTimeout(() => {
-        store.setDeviceType( deviceType.value);
+        store.setDeviceType(deviceType.value);
       }, 0);
       clearInterval(intervalId);
     }
   }, 500);
 });
-
-import { h } from 'vue'
-import { Home, Cart, My } from '@nutui/icons-vue'
-import {router} from "@/router/router";
 
 const List = [
   {
@@ -156,16 +170,31 @@ const List = [
   }
 ]
 const active = ref(0)
-const land = computed(() => store.userInfo.land)
+
 const PersonalCenter = (item, index) => {
+  if (index === 2) {
+    showModal()
+  }
   if (land.value && index === 2) {
     router.push({name: 'InforMation'})
   }
-  if (index === 0){
+  if (index === 0) {
     router.push({name: 'Home'})
   }
 };
 
+let open = ref(false)
+
+const handleOk = () => {
+  open.value = false
+}
+
+const showModal = () => {
+  if (land.value) {
+    return
+  }
+  open.value = true
+}
 </script>
 
 <style scoped>
@@ -174,5 +203,45 @@ const PersonalCenter = (item, index) => {
   padding: 20px;
   border-radius: 20px;
   background-color: white;
+}
+
+.go-enter-from {
+  transform: translate3d(100%, 0, 0);
+}
+
+.back-enter-to,
+.back-enter-from,
+.go-enter-to,
+.go-leave-from {
+  transform: translate3d(0, 0, 0);
+}
+
+.go-leave-to {
+  transform: translate3d(-100%, 0, 0);
+}
+
+.go-enter-active,
+.go-leave-active,
+.back-enter-active,
+.back-leave-active {
+  transition: all 0.3s;
+}
+
+.back-enter-from {
+  transform: translate3d(-100%, 0, 0);
+}
+
+.back-leave-to {
+  transform: translate3d(100%, 0, 0);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

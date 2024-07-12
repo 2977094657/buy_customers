@@ -55,36 +55,13 @@
           </div>
 
           <!--          手机端底栏-->
-          <div style="margin-left: -15px" class="sm:hidden p-2 w-full z-10 flex justify-between items-center lm:fixed lm:bottom-0 bg-white border-t-[1px]">
-            <div @click="goToVendor(product.name)" class="ml-3 text-sm text-gray-700 flex flex-col items-center">
-              <ShopOutlined style="color: #FF5000;font-size: 17px"/>
-              <span style="color: rgb(102,102,102)" class="text-sm">店铺</span>
-            </div>
-            <!--            小屏幕显示的收藏按钮-->
-            <div style="color: rgb(102,102,102)" class="flex flex-col items-center">
-              <button @click="addToFavorites()" type="button"
-                      class="flex items-center justify-center rounded-md">
-                <HeartIcon v-if="!isFavorite" class="h-5 w-5 flex-shrink-0" aria-hidden="true"/>
-                <HeartIconSolid v-else class="h-5 w-5 flex-shrink-0" aria-hidden="true" style="color: #fe9900"/>
-              </button>
-              <span class="text-sm">收藏</span>
-            </div>
-
-            <div class="flex justify-between items-center mr-2">
-              <button @click="addToCart"
-                      style="border-left: none; background: linear-gradient(90deg, rgb(255, 203, 0), rgb(255, 148, 2))"
-                      class="text-sm -mr-1 h-9 w-32 rounded-l-3xl rounded-r-none ml-5 flex items-center justify-center rounded-md border border-transparent px-5 py-3 text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
-                      data-ripple-light="true">
-                加入购物车
-              </button>
-              <button @click="goToProduct(product.productId);showModal();"
-                      style="border-left: none; background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))"
-                      class="text-sm h-9 w-32 rounded-r-3xl rounded-l-none flex items-center justify-center rounded-md border border-transparent px-5 py-3 text-white middle none center bg-orange-500 font-sans uppercase shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/40"
-                      data-ripple-light="true">
-                立即购买
-              </button>
-            </div>
-          </div>
+            <van-action-bar class="sm:hidden px-3 py-7 w-full z-10 items-center border-t-[1px]">
+              <van-action-bar-icon style="font-size: 13px" class="text-neutral-400" @click="goToVendor(product.name)" icon="shop-o" text="店铺" />
+              <van-action-bar-icon style="font-size: 13px" class="text-neutral-400" @click="addToFavorites()" v-if="!isFavorite" icon="star-o" text="收藏" />
+              <van-action-bar-icon @click="addToFavorites()" v-else icon="star" text="已收藏" color="#ff5000" />
+              <van-action-bar-button @click="addToCart" class="text-white rounded-l-lg" style="background: linear-gradient(90deg, rgb(255, 203, 0), rgb(255, 148, 2))" text="加入购物车" />
+              <van-action-bar-button @click="goToProduct(product.productId);showModal();" class="text-white rounded-r-lg" style="background: linear-gradient(90deg, rgb(255, 119, 0), rgb(255, 73, 0))" text="立即购买" />
+            </van-action-bar>
 
           <div style="line-height: 28px;
     color: #000;
@@ -119,12 +96,9 @@
             <p style="color: rgb(255,80,0);" class="lm:hidden text-3xl tracking-tight text-gray-900">
               <b>￥<span>{{ integerPart(product.price) }}</span><span class="text-2xl">{{ decimalPart(product.price) }}</span></b>
             </p>
-            <div>
-              <button @click="addToFavorites()" type="button"
-                      class="lm:hidden ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-                <HeartIcon v-if="!isFavorite" class="h-6 w-6 flex-shrink-0" aria-hidden="true"/>
-                <HeartIconSolid v-else class="h-6 w-6 flex-shrink-0" aria-hidden="true" style="color: #fe9900"/>
-              </button>
+            <div class="lm:hidden">
+              <van-action-bar-icon @click="addToFavorites()" v-if="!isFavorite" icon="star-o" />
+              <van-action-bar-icon @click="addToFavorites()" v-else icon="star" color="#ff5000" />
             </div>
             <div class="sm:hidden" @click="goToVendor(product.name)">
               <span>{{ product.name }}</span>
@@ -162,8 +136,6 @@
 <script setup>
 import {ref} from 'vue'
 import {Tab, TabGroup, TabList, TabPanels,} from '@headlessui/vue'
-import {HeartIcon} from '@heroicons/vue/24/outline'
-import {HeartIcon as HeartIconSolid} from '@heroicons/vue/20/solid'
 import {computed, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {router} from "@/router/router";
@@ -171,7 +143,6 @@ import { useStore } from '../../store/index'
 const store = useStore()
 import ProductComments from "@/components/tailwind/ProductComments.vue";
 import {addToCarts, addToFavorite, getProductById, selectStar} from "@/api/api";
-import { ShopOutlined } from '@ant-design/icons-vue';
 import Login from "@/components/tailwind/Login.vue";
 
 const route = useRoute()
@@ -235,6 +206,9 @@ const decimalPart = (price) => {
 };
 
 onMounted(async () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 300); // 延迟  秒
   await star()
 })
 
@@ -326,4 +300,7 @@ onMounted(async () => {
 
 <style scoped>
 @import '../../assets/Tailwind.css';
+:deep(.van-action-bar-icon__icon){
+  font-size: 20px;
+}
 </style>

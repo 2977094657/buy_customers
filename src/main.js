@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 
 
+
 dayjs.locale('zh-cn'); // 设置 dayjs 的全局 locale 为中文
 const app = createApp(App)
 app.use(router)

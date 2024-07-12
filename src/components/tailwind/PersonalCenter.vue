@@ -88,15 +88,11 @@
 
 <!--      显示内容-->
       <main style="background-color: rgb(243,244,246);padding-bottom: 50px;min-height: 100vh;">
-        <router-view name="personalInformation"></router-view>
-        <router-view name="address"></router-view>
-        <router-view name="MyComments"></router-view>
-        <router-view name="MyOrders"></router-view>
-        <div style="margin-left: 20px;">
-          <router-view name="star"></router-view>
-          <router-view name="ShoppingCart"></router-view>
-          <router-view name="History"></router-view>
-        </div>
+        <router-view v-slot="{ Component }">
+          <transition>
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </main>
     </div>
   </div>

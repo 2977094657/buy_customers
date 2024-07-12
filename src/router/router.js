@@ -1,10 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { ref } from 'vue';
-import Top from '@/components/tailwind/Top.vue';
-import Main from '@/components/tailwind/Main.vue';
-import Banner from '@/components/tailwind/Banner.vue';
+import {createRouter, createWebHistory} from 'vue-router';
+import {ref} from 'vue';
 import Search from "@/components/tailwind/Search.vue";
-import Description from '@/components/tailwind/Description.vue';
 import PersonalCenter from "@/components/tailwind/PersonalCenter.vue";
 import Orders from "@/components/tailwind/Orders.vue";
 import Vendor from "@/components/tailwind/Vendor.vue";
@@ -18,153 +14,127 @@ import ConfirmPay from "@/components/tailwind/ConfirmPay.vue";
 import Evaluated from "@/components/tailwind/Evaluated.vue";
 import Reviews from "@/components/tailwind/Reviews.vue";
 import ForgotPassword from "@/components/tailwind/ForgotPassword.vue";
+import Home from "@/components/tailwind/page/Home.vue";
+import Test from "@/components/tailwind/Test.vue";
+import Product from "@/components/tailwind/page/Product.vue";
+import {useStore} from "@/store";
+import InforMation from "@/components/tailwind/page/InforMation.vue";
 
 const routes = [
     {
         path: '/',
         name: 'Home',
-        components: {
-            top: Top,
-            banner: Banner,
-            main: Main,
-        }
+        component: Home
+    },
+    {
+        path: '/test',
+        name: 'test',
+        component: Test,
     },
     {
         path: '/search/:keyword',
         name: 'Search',
-        components: {
-            top: Top,
-            search: Search,
-        },
-        props: { search: true }
+        component: Search,
+        props: {search: true}
     },
     {
         path: '/product/:productId',
         name: 'Product',
-        components: {
-            top: Top,
-            description: Description,
-        },
-        props: { description: true }
+        component: Product,
+        props: {description: true},
     },
     {
         path: '/PersonalCenter',
         name: 'PersonalCenter',
-        components: {
-            personalCenter: PersonalCenter
-        },
-        children:[
+        component: PersonalCenter,
+        children: [
             {
                 path: "InforMation",
                 name: "InforMation",
-                components: {
-                    personalInformation: PersonalInformation,
-                    address: Address
-                }
+                component: InforMation, // 使用component代替components
+            },
+            {
+                path: "address", // 注意：原始配置中地址组件没有指定path，这里我添加了一个示例path
+                name: "Address", // 添加了一个name，因为每个路由最好有一个唯一的name
+                component: Address, // 使用component代替components
             },
             {
                 path: "star",
                 name: "star",
-                components: {
-                    star: Star1,
-                }
+                component: Star1, // 使用component代替components
             },
             {
                 path: "ShoppingCart",
                 name: "ShoppingCart",
-                components: {
-                    ShoppingCart: ShoppingCart,
-                }
+                component: ShoppingCart, // 使用component代替components
             },
             {
                 path: "History",
                 name: "History",
-                components: {
-                    History: History,
-                }
+                component: History, // 使用component代替components
             },
             {
                 path: "MyComments",
                 name: "MyComments",
-                components: {
-                    MyComments: Evaluated,
-                }
+                component: Evaluated, // 使用component代替components，并假设Evaluated是正确的组件名
             },
             {
                 path: "MyOrders",
                 name: "MyOrders",
-                components: {
-                    MyOrders: MyOrders,
-                }
+                component: MyOrders, // 使用component代替components
             },
         ],
     },
+
     {
         path: '/purchase/:productId',
         name: 'purchase',
-        components: {
-            top: Top,
-            orders: Orders,
-        },
-        props: { description: true }
+        component: Orders,
+        props: {description: true}
     },
     {
         path: '/vendor/:name',
         name: 'vendor',
-        components: {
-            top: Top,
-            vendor: Vendor,
-        },
-        props: { description: true }
+        component: Vendor,
+        props: {description: true}
     },
     {
         path: '/ConfirmPay/:id',
         name: 'ConfirmPay',
-        components: {
-            top: Top,
-            ConfirmPay: ConfirmPay,
-        },
-        props: { description: true }
+        component: ConfirmPay,
+        props: {description: true}
     },
     {
         path: '/Reviews/:id',
         name: 'Reviews',
-        components: {
-            top: Top,
-            Reviews: Reviews,
-        },
-        props: { description: true }
+        component: Reviews,
+        props: {description: true}
     },
     {
         path: '/Reviews/:id',
         name: 'Reviews',
-        components: {
-            top: Top,
-            Reviews: Reviews,
-        },
-        props: { description: true }
+        component: Reviews,
+        props: {description: true}
     },
     {
         path: '/forgotPassword',
         name: 'forgotPassword',
-        components: {
-            forgotPassword:ForgotPassword
-        },
+        component: ForgotPassword
     },
 ]
 
 const router = createRouter({
     history: createWebHistory("/"),
     routes,
-    scrollBehavior (to, from, savedPosition) {
+    scrollBehavior(to, from, savedPosition) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 if (savedPosition) {
                     resolve(savedPosition);
                 } else {
-                    resolve({ x: 0, y: 0 });
+                    resolve({x: 0, y: 0});
                 }
-            }, 500); // Adjust this delay as needed
+            }, 500); // 根据需要调整此延迟
         });
     }
 });
@@ -173,6 +143,16 @@ const router = createRouter({
 const isSwitchingRoute = ref(false)
 
 router.beforeEach((to, from, next) => {
+    const baseStore = useStore()
+
+    const toDepth = routes.findIndex((v) => v.path === to.path)
+    const fromDepth = routes.findIndex((v) => v.path === from.path)
+
+    if (toDepth > fromDepth) {
+        baseStore.direction = 'forward'
+    } else {
+        baseStore.direction = 'backward'
+    }
     isSwitchingRoute.value = true
     next()
 })
@@ -182,4 +162,4 @@ router.afterEach(() => {
 })
 
 
-export { router, isSwitchingRoute }
+export {router, isSwitchingRoute, routes}

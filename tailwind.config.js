@@ -20,6 +20,7 @@ module.exports = {
 
       'llg': {'max': '1023px'},
 
+      // 适用于只显示在手机端的时候
       'sm': '640px',
       // => @media (min-width: 640px) { ... }
 
