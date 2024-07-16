@@ -169,7 +169,7 @@ const empty = ref(true)
 const getProductInfo = async () => {
   try {
     const response = await getProductById(productId);
-    product.value = response.data;
+    product.value = response.data.data;
   } catch (error) {
     console.error(error);
   }

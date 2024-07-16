@@ -166,7 +166,7 @@ const showOrders = async () => {
       let orderData = response.data.data;
       // 请求所有商品的数据
       const productRequests = orderData.map(
-          order => getProductById(order.productId)
+          order => getProductById(order.productId).then(response => response.data)
       );
       const productResponses = await Promise.all(productRequests);
       // 将商品数据添加到相应的订单中

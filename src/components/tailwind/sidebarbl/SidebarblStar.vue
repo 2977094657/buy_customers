@@ -51,6 +51,8 @@ const empty = ref(false)
 const land = computed(() => store.userInfo.land)
 const loading = ref(true)
 const batchManageMode = ref(false)
+const totalCount = ref(0);
+
 const loadCartItems = async () => {
   loading.value = true
   if (land.value) {
@@ -61,12 +63,11 @@ const loadCartItems = async () => {
         empty.value = true
       }
 
-      const productRequests = cartItems.value.map(item =>
-          getProductById(item.productId)
-      )
+      const productRequests = cartItems.value.map(item => getProductById(item.productId).then(response => response.data))
       productResponses.value = await Promise.all(productRequests)
       // 数据加载完成后
       loading.value = false
+      totalCount.value=cartItems.value.length
     } catch (error) {
     }
   } else {
@@ -112,10 +113,6 @@ const goToProduct = (productId) => {
   const url = router.resolve({name: 'Product', params: {productId}}).href;
   window.open(url, '_blank');
 }
-
-const totalCount = computed(() => {
-  return cartItems.value.length
-})
 
 const open1 = () => {
   ElMessageBox.confirm(

@@ -181,9 +181,13 @@ const star = async () => {
   if (!isNaN(route.params.productId)) {
     try {
       const response = await getProductById(route.params.productId);
-      const data = response.data;
-      data.imgs = data.img.slice(1, -1).split(',');
-      product.value = data;
+      if (response.data.code===200){
+        const data = response.data.data;
+        data.imgs = data.img.slice(1, -1).split(',');
+        product.value = data;
+      }else {
+        showMessage("请求出错，请稍后再试")
+      }
     } catch (error) {
       if (error.message.startsWith('HTTP error 404')) { // 如果是 404 错误，设置 httpError 为 true
         childRef.value.switchShow()
@@ -291,10 +295,11 @@ let isFavorite = ref(false) // 创建一个响应式变量来存储当前商品�
 
 onMounted(async () => {
   await star()
-  const response = await selectStar(userid.value)
-
-  // 检查返回的数据中是否包含当前页面的商品 ID
-  isFavorite.value = response.data.some(item => item.productId === Number(route.params.productId))
+  if (land.value){
+    const response = await selectStar(userid.value)
+    // 检查返回的数据中是否包含当前页面的商品 ID
+    isFavorite.value = response.data.some(item => item.productId === Number(route.params.productId))
+  }
 })
 </script>
 

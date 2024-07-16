@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import {ref, computed,watch} from 'vue'
+import {ref, computed,watch } from 'vue'
 import { useStore } from '../../../store/index'
 const store = useStore()
 import {router} from "@/router/router";
@@ -51,29 +51,30 @@ const userid = computed(() => store.userInfo.userId)
 const land = computed(() => store.userInfo.land)
 const empty = ref(false)
 const batchManageMode = ref(false)
+const totalCount = ref(0);
 
 const loadCartItems = async () => {
-
-  if (land.value){
+  if (land.value) {
     try {
       const response = await cartList(userid.value);
-      cartItems.value = response.data
-      if (cartItems.value.length===0){
-        empty.value=true
+      console.log('cartList response:', response.data); // 调试信息
+      cartItems.value = response.data;
+      console.log('cartItems:', cartItems.value); // 调试信息
+      if (cartItems.value.length === 0) {
+        empty.value = true;
       }
       const productRequests = cartItems.value.map(item =>
-          getProductById(item.productId)
-      )
-
-      productResponses.value = await Promise.all(productRequests)
-
+          getProductById(item.productId).then(response => response.data)
+      );
+      productResponses.value = await Promise.all(productRequests);
+      totalCount.value=cartItems.value.length
     } catch (error) {
       console.error(error);
     }
-  }else {
-    empty.value=true
+  } else {
+    empty.value = true;
   }
-}
+};
 
 // 当 land.value 变为 true 时加载购物车项
 watch(land, (newVal) => {
@@ -112,10 +113,6 @@ const goToProduct = (productId) => {
   const url = router.resolve({ name: 'Product', params: { productId } }).href;
   window.open(url, '_blank');
 }
-
-const totalCount = computed(() => {
-  return cartItems.value.length
-})
 
 const updateQuantity = debounce(async (id, quantity) => {
   try {

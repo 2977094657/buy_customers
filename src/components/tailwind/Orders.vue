@@ -122,7 +122,7 @@ const star = async () => {
   if (!isNaN(route.params.productId)) {
     try {
       const response = await getProductById(route.params.productId);
-      const data = response.data;
+      const data = response.data.data;
       data.imgs = data.img.slice(1, -1).split(',');
       product.value = data;
     } catch (error) {

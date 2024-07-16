@@ -32,8 +32,8 @@ const loadComments = async () => {
         const productId = comment.productId;
         const productResponse = await getProductById(productId);
 
-        if (productResponse.data) {
-          comment.product = productResponse.data;  // 将产品详情添加到评论对象中
+        if (productResponse.data.data) {
+          comment.product = productResponse.data.data;  // 将产品详情添加到评论对象中
         } else {
           console.log('获取商品详情失败');
         }

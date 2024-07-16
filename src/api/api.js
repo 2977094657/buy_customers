@@ -15,15 +15,15 @@ instance.interceptors.request.use(
     async config => {
         if (config.headers['X-Needs-Decryption'] === 'true') {
             const rsaPublicKey = await publicKey();
-            // 生成随机的 AES 密钥
-            const aesKey = generateRandomAESKey();
-            // 使用 AES 密钥加密数据
+            const aesKey = generateRandomAESKey(); // 生成随机的 AES 密钥
             const encryptedData = {};
+
             for (const key in config.data) {
-                encryptedData[key] = encryptData(config.data[key], aesKey);
+                encryptedData[key] = encryptData(config.data[key], aesKey); // 使用 AES 密钥加密数据
             }
-            // 使用 RSA 公钥加密 AES 密钥
-            const encryptedAESKey = encryptAESKey(aesKey, rsaPublicKey.data.data.publicKey);
+
+            const encryptedAESKey = encryptAESKey(aesKey, rsaPublicKey.data.data.publicKey); // 使用 RSA 公钥加密 AES 密钥
+
             // 更新请求数据
             config.data = {
                 ...encryptedData,
@@ -33,28 +33,33 @@ instance.interceptors.request.use(
         }
 
         if (config.headers['X-Request-Type'] !== 'setNonce') {
-            // 获取当前时间戳
-            const timestamp = new Date().getTime();
-            // 生成随机字符串
-            const nonce = Math.random().toString(36).slice(2, 17);
+            const timestamp = new Date().getTime(); // 获取当前时间戳
+            const nonce = Math.random().toString(36).slice(2, 17); // 生成随机字符串
 
-            // 将 nonce 存入 Redis
-            await setNonce(nonce);
+            await setNonce(nonce); // 将 nonce 存入 Redis
 
-            // 将所有请求参数排序并拼接成字符串
             let paramsString = '';
-            const sortedParams = Object.keys(config.params || {}).sort();
-            sortedParams.forEach(key => {
-                paramsString += key + '=' + config.params[key] + '&';
-            });
-            paramsString = paramsString.slice(0, -1); // 移除最后一个'&'
+            const urlParams = new URLSearchParams(config.params || {});
 
-            // 生成签名
-            const secretKey = 'skfjnANJjmvkAFSVBNvn'; // 请替换为你的实际密钥
+            if (config.url.includes('?')) {
+                const urlQueryParams = new URLSearchParams(config.url.split('?')[1]);
+                for (const [key, value] of urlQueryParams.entries()) {
+                    urlParams.append(key, value);
+                }
+            }
+
+            urlParams.sort(); // 确保参数排序
+
+            for (const [key, value] of urlParams.entries()) {
+                paramsString += `${key}=${value}&`;
+            }
+
+            paramsString = paramsString.slice(0, -1);
+            // console.log(`请求参数: ${paramsString}`); // 打印请求参数
+
+            const secretKey = 'skfjnANJjmvkAFSVBNvn';
             const signString = `${paramsString}&timestamp=${timestamp}&nonce=${nonce}&secret=${secretKey}`;
-            // 使用 CryptoJS 生成签名
-            // 将签名信息添加到请求头中
-            config.headers['x-sign'] = CryptoJS.SHA256(signString).toString(CryptoJS.enc.Hex);
+            config.headers['x-sign'] = CryptoJS.SHA256(signString).toString(CryptoJS.enc.Hex); // 使用 CryptoJS 生成签名
             config.headers['x-timestamp'] = timestamp;
             config.headers['x-nonce'] = nonce;
         }
@@ -116,11 +121,14 @@ instance.interceptors.response.use(
 );
 
 function verifyResponseSign(responseData, responseSign) {
-    // 计算响应数据的签名
     const hash = CryptoJS.SHA256(responseData);
     const calculatedSign = hash.toString(CryptoJS.enc.Hex);
 
-    // 比较计算出的签名和响应头中的签名
+    // 记录调试信息
+    // console.log("前端响应数据:", responseData);
+    // console.log("前端计算签名:", calculatedSign);
+    // console.log("后端提供签名:", responseSign);
+
     return calculatedSign === responseSign;
 }
 
@@ -177,6 +185,8 @@ export const addHistorys = (userId, productId) => instance.post(`/user/addHistor
 export const deleteAllCartItems = (ids) => instance.delete(`/cart/deleteAll`, {params: {id: ids.join(',')}});
 export const deleteCartItem = (id) => instance.delete(`/cart/delete`, {params: {id}});
 export const updateCart = (id, quantity) => instance.put(`/cart/update?id=${id}&quantity=${quantity}`);
+export const messageUser = (phoneNumber) => instance.post(`/user/message?phoneNumber=${phoneNumber}`);
+export const registers = (phone, name, pwd, code) => instance.post(`/user/register?phone=${phone}&name=${name}&pwd=${pwd}&code=${code}`);
 export const cartList = (userId) => instance.get(`/cart/list`, {params: {userId}});
 export const getUnpaidOrder = (userId) => instance.get(`/order/getUnpaidOrder`, {params: {userId}});
 export const deleteUnpaidOrder = (orderLong, userId) => instance.delete(`/order/deleteUnpaidOrder`, {
@@ -256,8 +266,7 @@ export const forgotPassword = (phoneNumber, newPassword, code) => instance.post(
     newPassword,
     code
 });
-export const messageUser = (phoneNumber) => instance.post(`/user/message?phoneNumber=${phoneNumber}`);
-export const registers = (phone, name, pwd, code) => instance.post(`/user/register?phone=${phone}&name=${name}&pwd=${pwd}&code=${code}`);
+
 export const getAllProductsRandomly = (page, size, randomSeed) => instance.get(`/product/all`, {
     params: {
         current: page,

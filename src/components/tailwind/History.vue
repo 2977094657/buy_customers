@@ -93,7 +93,7 @@ const showHistory = async () => {
         }
         productsGroupedByDate.value[dateString].items.push({
           time: timeString,
-          data: productResponse.data,
+          data: productResponse.data.data,
           showDeleteIcon: false,
           dateForDeletion: dateStringForDeletion // 在这里保存 YYYY-MM-DD 格式的日期字符串
         })

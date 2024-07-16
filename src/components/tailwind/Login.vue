@@ -86,7 +86,7 @@ const loginUser = async () => {
       // 延迟一段时间后刷新页面
       setTimeout(() => {
         location.reload();
-      }, 500); // 1秒延迟
+      }, 500);
       localStorage.setItem('token', response.data.data);
       // 更新 userInfo 的值，触发 name.value 的变化
       store.setUserInfo( {
@@ -199,7 +199,7 @@ const registerUser = async () => {
   }
   try {
     const response = await registers(phoneNumber.value, name.value, password.value, phoneCode.value);
-    if (response.data === '注册成功') {
+    if (response.data.code === 200) {
       showSuccessMessage('注册成功');
       switchForm('login')
       name.value = null
@@ -209,7 +209,7 @@ const registerUser = async () => {
       phoneCode.value = null
       userInputVerifyCode.value = null
     } else {
-      showMessage(response.data);
+      showMessage(response.data.data);
     }
   } catch (error) {
     console.error(error);

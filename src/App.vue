@@ -4,7 +4,7 @@
   </a-modal>
 
   <div class="ld:mb-[50px]">
-    <Top v-if="deviceType==='PC'&& !isPersonalCenter"></Top>
+    <Top v-if="deviceType==='PC'&& !isPersonalCenter && !forgotPassword"></Top>
     <div style="min-height: 100vh"
         :class="isPersonalCenter ? '' : (home ? 'main lm:px-2 lm:pt-0 lm:bg-bg mx-auto max-w-7xl sm:px-6 lg:px-5 lm:rounded-none' : (product ? 'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:rounded-none lm:p-0' : (forgotPassword ? 'bg-white':'main mx-auto max-w-7xl sm:px-6 lg:px-8 lm:-mt-5 lm:rounded-none')))">
       <router-view v-slot="{ Component }">
@@ -56,12 +56,17 @@ let gender = ref('')
 watch(
     () => route.path,
     (to, from) => {
-      store.setMaskDialog({ state: false, mode: store.maskDialogMode })
-      const toDepth = routes.findIndex((v) => v.path === to)
-      const fromDepth = routes.findIndex((v) => v.path === from)
-      transitionName.value = toDepth > fromDepth ? 'back' : 'go'
+      store.setMaskDialog({ state: false, mode: store.maskDialogMode });
+
+      if (deviceType.value !== 'PC') {
+        const toDepth = routes.findIndex((v) => v.path === to);
+        const fromDepth = routes.findIndex((v) => v.path === from);
+        transitionName.value = toDepth > fromDepth ? 'back' : 'go';
+      } else {
+        transitionName.value = ''; // 不执行任何动画
+      }
     }
-)
+);
 
 const parseTokenAndUserInfo = async () => {
   try {

@@ -14,7 +14,7 @@
   </div>
   <!-- 添加等高度的空白块 -->
   <div style="height: 70px;"></div>
-  <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-8">
+  <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-8 ml-2">
     <div v-for="(item, index) in cartItems" :key="item.id" class="group flex product" @click="goToProduct(item.productId);addHistory(item.productId)"> <!-- 添加 flex 和 items-center -->
       <div class="w-36 h-36 overflow-hidden rounded-lg mr-auto"> <!-- 添加 mr-auto -->
         <img :src="productResponses[index].data.img.slice(1, -1).split(',')[0]" class="h-full w-full"  alt=""/>
@@ -63,7 +63,8 @@ const loadCartItems = async () => {
       if (cartItems.value.length===0){
         empty.value=true
       }
-      const productRequests = cartItems.value.map(item => getProductById(item.productId))
+      const productRequests = cartItems.value.map(item => getProductById(item.productId).then(response => response.data))
+
 
       productResponses.value = await Promise.all(productRequests)
 

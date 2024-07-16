@@ -127,7 +127,7 @@ const getOrderInfo = async () => {
 const getProductInfo = async (productId) => {
   try {
     const response = await getProductById(productId);
-    product.value = response.data;
+    product.value = response.data.data;
   } catch (error) {
     console.error(error);
   }
