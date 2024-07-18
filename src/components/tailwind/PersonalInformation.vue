@@ -46,7 +46,7 @@
         <el-upload
             class="avatar-uploader"
             :limit="1"
-            :show-file-list="true"
+            :show-file-list="false"
             :before-upload="beforeAvatarUpload"
             :http-request="test"
             :on-remove="remove"
@@ -91,13 +91,7 @@
 
           <el-tab-pane style="margin: 20px 0 0 -20px" label="更换手机号">
             <el-form-item label="旧手机号" :required="true">
-              <el-input v-model="phoneNumber" placeholder="请输入手机号">
-                <template #prepend>
-                  <el-select placeholder="中国大陆 +86">
-                    <el-option label="抱歉，暂时只支持中国大陆手机号"/>
-                  </el-select>
-                </template>
-              </el-input>
+              <el-input v-model="phoneNumber" placeholder="请输入手机号"></el-input>
             </el-form-item>
             <el-form-item label="验证码" :required="true">
               <el-row>
@@ -116,13 +110,7 @@
             </el-form-item>
 
             <el-form-item label="新手机号" :required="true">
-              <el-input v-model="newPhone" placeholder="请输入手机号">
-                <template #prepend>
-                  <el-select placeholder="中国大陆 +86">
-                    <el-option label="抱歉，暂时只支持中国大陆手机号"/>
-                  </el-select>
-                </template>
-              </el-input>
+              <el-input v-model="newPhone" placeholder="请输入手机号"></el-input>
             </el-form-item>
             <button @click="changePhone" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               修改
@@ -507,7 +495,7 @@ const sendSMSCode = async () => {
   }
 };
 
-let code = ref('');
+let code = ref();
 let newPhone = ref('');
 
 const changePhone = async () => {
@@ -532,7 +520,7 @@ const changePhone = async () => {
       showSuccessMessage('手机号修改成功')
     } else {
       // 修改失败，显示错误消息
-      showMessage('手机号修改失败: ', response.data.msg);
+      showMessage(response.data.msg);
     }
   } catch (error) {
     // 请求失败，显示错误消息

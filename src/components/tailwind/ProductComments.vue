@@ -368,7 +368,7 @@ const filterCommentsWithImage = async () => {
   const data = response.data
 
   // 过滤出 imgId 不为 null 的评论
-  comments.value = data[0].filter(comment => comment.imgId !== null);
+  comments.value = data[0].filter(comment => comment.imgId !== null && comment.imgId !== '');
 
 }
 

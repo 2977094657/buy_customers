@@ -57,9 +57,9 @@ const loadCartItems = async () => {
   if (land.value) {
     try {
       const response = await cartList(userid.value);
-      console.log('cartList response:', response.data); // 调试信息
+      // console.log('cartList response:', response.data); // 调试信息
       cartItems.value = response.data;
-      console.log('cartItems:', cartItems.value); // 调试信息
+      // console.log('cartItems:', cartItems.value); // 调试信息
       if (cartItems.value.length === 0) {
         empty.value = true;
       }

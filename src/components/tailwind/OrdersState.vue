@@ -257,7 +257,7 @@ const deleteOrder = async (id) => {
   try {
     const response = await deleteOrders(id);
     if (response.data.code === 200) {
-      // 从未支付订单列表中删除该订单
+      // 从订单列表中删除该订单
       unpaidOrders.value = unpaidOrders.value.filter(order => order.orderId !== id);
       showSuccessMessage(response.data.msg)
     } else {

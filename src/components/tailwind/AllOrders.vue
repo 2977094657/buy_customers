@@ -67,7 +67,7 @@
                   class="absolute right-0 z-10 mt-2 w-40 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div class="py-1">
                   <MenuItem v-slot="{ active }">
-                    <p @click="open(order.orderLong)" class="text-red-500"
+                    <p @click="open(order.orderLong,order.state)" class="text-red-500"
                        :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
                       删除订单</p>
                   </MenuItem>
@@ -306,7 +306,7 @@ const calculateRemainingTime = (createTime) => {
   return remaining > 0 ? remaining : 0;  // 如果剩余时间小于0，返回0
 }
 
-const open = (id) => {
+const open = (id,state) => {
   ElMessageBox.confirm(
       '确认要删除此订单吗?',
       '删除订单',
@@ -318,7 +318,7 @@ const open = (id) => {
       }
   )
       .then(() => {
-        deleteOrder(id)
+        deleteOrder(id,state)
       })
       .catch(() => {
         ElMessage({
@@ -328,16 +328,21 @@ const open = (id) => {
       })
 }
 
-const deleteOrder = async (id) => {
+const deleteOrder = async (id, state) => {
   try {
-    const response = await deleteUnpaidOrder(id,userid.value);
-    if (response.data.code === 200) {
-      // 从未支付订单列表中删除该订单
-      unpaidOrders.value = unpaidOrders.value.filter(order => order.orderId !== id);
-      await showOrders()
-      showSuccessMessage(response.data.msg)
+    let response;
+    if (state === undefined) {
+      response = await deleteUnpaidOrder(id, userid.value);
     } else {
-      console.log(response.data.msg)
+      response = await deleteOrders(id);
+    }
+
+    if (response.data.code === 200) {
+      unpaidOrders.value = unpaidOrders.value.filter(order => order.orderId !== id);
+      await showOrders();
+      showSuccessMessage(response.data.msg);
+    } else {
+      showMessage(response.data.msg);
     }
   } catch (error) {
     console.error("删除订单失败：", error);

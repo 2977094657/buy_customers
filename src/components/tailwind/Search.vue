@@ -6,14 +6,13 @@ import HighlightText from '../HighlightText.vue';
 import { useStore } from '../../store/index'
 const store = useStore()
 import {addHistorys, searchProduct} from "@/api/api";
+import {useRoute} from 'vue-router'
 
-
+const route = useRoute()
 const products = ref([])
 const currentPage = ref(1)
 const totalPages = ref(1)
-const props = defineProps({
-  keyword: String
-});
+const props = route.params.keyword
 
 onMounted(() => {
   goToPage(1)
@@ -21,7 +20,7 @@ onMounted(() => {
 
 const executeSearch = async (page = 1) => {
   try {
-    const response = await searchProduct(props.keyword, page);
+    const response = await searchProduct(props, page);
     // 在每个产品对象中添加一个 loading 字段
     products.value = response.data.records.map(product => ({
       ...product,
@@ -54,7 +53,7 @@ const goToPage = (page) => {
 };
 
 watchEffect(() => {
-  if (props.keyword !== undefined) {
+  if (props !== undefined) {
     currentPage.value = 1;
     executeSearch();
   }
@@ -116,7 +115,7 @@ const addHistory = async (productId) => {
       </div>
       <div class="flex-grow flex flex-col justify-between"> <!-- 将标题和价格包裹在一个 div 中 -->
         <p class="text-sm text-gray700 productName">
-            <HighlightText :text="product.productName" :keyword="props.keyword"/>
+            <HighlightText :text="product.productName" :keyword="props"/>
         </p>
         <p class="mt-l text-lg font-medium text-gray900 price"><span class="jge">￥</span>{{ product.price }}</p>
       </div>

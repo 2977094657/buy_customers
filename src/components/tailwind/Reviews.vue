@@ -132,7 +132,7 @@ const submitComment = async () => {
   })
 
   try {
-    console.log(ip.value)
+    // console.log(ip.value)
     await addComment(userid.value, commentContent.value, productId, star.value, ip.value, files.value);
     await updateOrderStatus(orderId,'已完成');
     ElNotification({
