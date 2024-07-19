@@ -65,6 +65,7 @@ instance.interceptors.request.use(
                 // 处理FormData数据
                 const formDataEntries = Array.from(config.data.entries())
                     .filter(([key, value]) => !(value instanceof File))// 排除文件类型参数
+                    .filter(([key, value]) => value !== undefined) // 排除undefined值
                     .sort(([a], [b]) => a.localeCompare(b));// 确保参数排序
                 paramsString = formDataEntries.map(([key, value]) => `${key}=${value}`).join('&');
             } else if (config.data) {
@@ -72,7 +73,9 @@ instance.interceptors.request.use(
                 // console.log(config.data);
                 // 处理JSON数据
                 const flattenedData = flattenObject(config.data);
-                const jsonEntries = Object.entries(flattenedData).sort(([a], [b]) => a.localeCompare(b));
+                const jsonEntries = Object.entries(flattenedData)
+                    .filter(([key, value]) => value !== undefined) // 排除undefined值
+                    .sort(([a], [b]) => a.localeCompare(b));
                 paramsString = jsonEntries.map(([key, value]) => `${key}=${value}`).join('&');
             } else {
                 // console.log("进入URL格式")
@@ -89,7 +92,9 @@ instance.interceptors.request.use(
                 urlParams.sort(); // 确保参数排序
 
                 for (const [key, value] of urlParams.entries()) {
-                    paramsString += `${key}=${value}&`;
+                    if (value !== undefined) {
+                        paramsString += `${key}=${value}&`;
+                    }
                 }
 
                 if (paramsString.length > 0) {
@@ -97,7 +102,7 @@ instance.interceptors.request.use(
                 }
             }
 
-            // console.log(`请求参数: ${paramsString}`); // 打印请求参数
+            console.log(`请求参数: ${paramsString}`); // 打印请求参数
 
             const signString = `${paramsString}&timestamp=${timestamp}&nonce=${nonce}&secret=${secretKey}`;
             config.headers['x-sign'] = CryptoJS.SHA256(signString).toString(CryptoJS.enc.Hex); // 使用CryptoJS生成签名
