@@ -251,7 +251,7 @@ const fetchComments = async (sortOption, page, pageSize, sortByLikes = true) => 
   if (!isNaN(route.params.productId)) {
     const sortByTime = sortOption === 'newest'
     const response = await getProductCommentsByTime(route.params.productId, page, sortByTime, pageSize, sortByLikes);
-    const data = response.data
+    const data = response.data.data
     comments.value = data[0]  // 第一个元素是评论列表
     if (comments.value.length === 0) {
       httpError.value = true
@@ -365,7 +365,7 @@ const filterCommentsWithImage = async () => {
   // 更新 currentSort 并重新获取评论
   currentSort.value = 'withImage'
   const response = await getProductComments(route.params.productId, currentPage.value, 10000);
-  const data = response.data
+  const data = response.data.data
 
   // 过滤出 imgId 不为 null 的评论
   comments.value = data[0].filter(comment => comment.imgId !== null && comment.imgId !== '');

@@ -28,11 +28,11 @@ instance.interceptors.request.use(
                 }
             }
             // 使用 RSA 公钥加密 AES 密钥
-            const encryptedAESKey = encryptAESKey(aesKey, rsaPublicKey.data.data.publicKey);
+            const encryptedAESKey = encryptAESKey(aesKey, rsaPublicKey.data.data);
             // 更新请求数据
             config.data = {
                 ...encryptedData,
-                rsaPublicKey: rsaPublicKey.data.data.publicKey,
+                rsaPublicKey: rsaPublicKey.data.data,
                 aesKey: encryptedAESKey
             };
             // console.log(config.data);
@@ -102,7 +102,7 @@ instance.interceptors.request.use(
                 }
             }
 
-            console.log(`请求参数: ${paramsString}`); // 打印请求参数
+            // console.log(`请求参数: ${paramsString}`); // 打印请求参数
 
             const signString = `${paramsString}&timestamp=${timestamp}&nonce=${nonce}&secret=${secretKey}`;
             config.headers['x-sign'] = CryptoJS.SHA256(signString).toString(CryptoJS.enc.Hex); // 使用CryptoJS生成签名
@@ -122,12 +122,16 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
     async response => {
+        // 如果请求头中包含 `X-Skip-Verification`，则跳过验证逻辑
+        if (response.config.headers['X-Skip-Verification'] === 'true') {
+            return response;
+        }
+
         // 检查请求头是否为 setNonce 请求
         const requestTypeHeader = response.config.headers['X-Request-Type'];
         if (requestTypeHeader && requestTypeHeader === 'setNonce') {
             return response; // 直接放行
         }
-
         // 验证响应数据签名
         const responseData = JSON.stringify(response.data);
         const responseSign = response.headers['x-response-sign'];
@@ -138,33 +142,40 @@ instance.interceptors.response.use(
             return Promise.reject(new Error('响应数据被篡改'));
         }
 
-        // 检查响应头
-        if (response.headers['x-encrypted'] === 'true') {
-
-            // 获取Base64编码后的AES密钥和IV
-            const encryptedAesKey = response.data.aesKey;
-            const encryptedIv = response.data.iv;
-
-            // 将Base64编码的AES密钥和IV解码为字节数组
-            const aesKeyBytes = CryptoJS.enc.Base64.parse(encryptedAesKey);
-            const ivBytes = CryptoJS.enc.Base64.parse(encryptedIv);
-
-            // 遍历响应数据，对每个值进行解密
-            try {
-                response.data = await decryptJsonValues(response.data.data, aesKeyBytes, ivBytes);
-            } catch (e) {
-                console.log('解密失败：'+e) // 输出解密失败的错误信息
-            }
-        }
-
-        // 返回整个response对象
-        return response;
+        return decryptResponseData(response);
     },
     error => {
         console.log('err' + error); // for debug
         return Promise.reject(error);
     }
 );
+
+// 解密响应数据的逻辑提取为一个独立函数
+const decryptResponseData = async (response) => {
+    if (response.headers['x-encrypted'] === 'true') {
+        // 获取Base64编码后的AES密钥和IV
+        const encryptedAesKey = response.data.data.aesKey;
+        const encryptedIv = response.data.data.iv;
+        const encryptedData = response.data.data
+
+        // 移除加密数据中的AES密钥和IV
+        delete encryptedData.aesKey;
+        delete encryptedData.iv;
+
+        // 将Base64编码的AES密钥和IV解码为字节数组
+        const aesKeyBytes = CryptoJS.enc.Base64.parse(encryptedAesKey);
+        const ivBytes = CryptoJS.enc.Base64.parse(encryptedIv);
+
+        // 遍历响应数据，对每个值进行解密
+        try {
+            // 将解密后的数据重新赋值给 response.data
+            response.data.data = await decryptJsonValues(encryptedData, aesKeyBytes, ivBytes);
+        } catch (e) {
+            console.log('解密失败：' + e); // 输出解密失败的错误信息
+        }
+    }
+    return response;
+};
 
 function verifyResponseSign(responseData, responseSign) {
     const hash = CryptoJS.SHA256(responseData);
@@ -219,8 +230,8 @@ async function decryptJsonValues(json, aesKeyBytes, ivBytes) {
 
 // 导出 API 函数
 /*glks********************************************* 网站相关api开始  **********************************************/
-// 网站是否开启侧边栏(此配置只对手机有效)
-export const getGlobalSettings = (id) => instance.get(`/globalSettings/selectOne`, {params: {id}});
+// 网站相关组件和权限的设置
+export const getGlobalSettings = (name) => instance.get(`/globalSettings/selectOne`, {params: {name},headers: {'X-Skip-Verification': 'true'}});
 
 // 获取公钥
 export const publicKey = () => instance.get(`/admin/publicKey`);
@@ -301,7 +312,7 @@ export const getUserToken = (tokenValue) => instance.post(`/user/getLoginIdByTok
 // 根据用户id查询收藏
 export const selectStar = (userId) => instance.get(`/star/select`, {params: {userId}});
 
-// 删除所有收藏
+// 删除单个或多个收藏
 export const deleteAllStars = (ids) => instance.delete(`/star/deleteAll`, {params: {id: ids.join(',')}});
 
 // 根据id获取用户信息 fixme 同样的加入权限防止其他人获取到该用户信息
@@ -319,13 +330,13 @@ export const addAddres = (userId, consignee, area, fullAddress, phone) => instan
     phone
 });
 
-// 更新收货地址
+// 修改收货地址
 export const updateAddress = (params) => instance.put(`/address/update`,params);
 
 // 删除收货地址
 export const deleteAddress = (id) => instance.delete(`/address/delete`, {params: {id}});
 
-// 更新默认收货地址
+// 修改默认收货地址
 export const updateDefaultAddress = (id, defaultOperate) => instance.put(`/address/updateDefault`, null, {
     params: {
         id,
@@ -419,11 +430,8 @@ export const getOrder = (orderNumber) => instance.get(`/order/getOrder`, {params
 // 获取购物车内容
 export const cartList = (userId) => instance.get(`/cart/list`, {params: {userId}});
 
-// 删除购物车所有商品
+// 删除购物车单个或多个商品
 export const deleteAllCartItems = (ids) => instance.delete(`/cart/deleteAll`, {params: {id: ids.join(',')}});
-
-// 删除购物车单个商品
-export const deleteCartItem = (id) => instance.delete(`/cart/delete`, {params: {id}});
 
 // 更新购物车数量
 export const updateCart = (id, quantity) => instance.put(`/cart/update?id=${id}&quantity=${quantity}`);
@@ -436,6 +444,7 @@ export const addToCarts = (userId, productId, quantity) => instance.post(`/cart/
         quantity
     }
 });
+
 /*gljs********************************************* 购物车相关api结束 **********************************************/
 
 

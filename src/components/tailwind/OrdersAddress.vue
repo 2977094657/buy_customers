@@ -188,12 +188,12 @@ const addAddress = async () => {
     const response = await addAddres(userid.value, ruleForm.consignee, selectedRegion.value.join('/'), ruleForm.fullAddress, ruleForm.phone);
 
     if (response.data.code === 200) {
-      showSuccessMessage(response.data.msg);
+      showSuccessMessage(response.data.data);
       open2.value = false
       // 通过更新表格值来刷新收货地址
       tableData.version++;
     } else {
-      showMessage(response.data.msg)
+      showMessage(response.data.data)
     }
   } catch (error) {
     if (error.response) {
@@ -245,9 +245,9 @@ const handleOk1 = async () => {
     if (response.data.code === 200) {
       open1.value = false
       tableData.version++;
-      showSuccessMessage(response.data.msg)
+      showSuccessMessage(response.data.data)
     } else {
-      showMessage(response.data.msg)
+      showMessage(response.data.data)
     }
   } catch (error) {
     showMessage('请求接口出错：' + error.message);

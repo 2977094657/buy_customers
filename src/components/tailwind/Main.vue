@@ -131,7 +131,7 @@ const activeName = ref('first')
 
 const fetchProducts = async (page) => {
   loadingMore.value = true;
-  const response = await getAllProductsRandomly(page, 12, randomSeed.value);
+  const response = await getAllProductsRandomly(page, 12, randomSeed.value).then(response => response.data);
   const data = response.data
   // 当加载更多数据时，将新数据添加到 products 数组中，而不是替换它
   products.value = [...products.value, ...data.records.map(product => ({...product, loading: false}))]

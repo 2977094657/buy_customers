@@ -139,26 +139,6 @@
 
 <script setup>
 import {ArrowRightOnRectangleIcon} from "@heroicons/vue/24/outline";
-
-const profile = {
-  name: 'Ricardo Cooper',
-  email: 'ricardo.cooper@example.com',
-  avatar:
-      'https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80',
-  backgroundImage:
-      'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-  fields: [
-    ['Phone', '(555) 123-4567'],
-    ['Email', 'ricardocooper@example.com'],
-    ['Title', 'Senior Front-End Developer'],
-    ['Team', 'Product Development'],
-    ['Location', 'San Francisco'],
-    ['Sits', 'Oasis, 4th floor'],
-    ['Salary', '$145,000'],
-    ['Birthday', 'June 8, 1990'],
-  ],
-}
-
 import {ref, onMounted, computed, reactive, watch} from 'vue';
 import { useStore } from '../../store/index'
 const store = useStore()
@@ -179,11 +159,10 @@ const fetchUserInfo = async () => {
   const userId = userid.value;
   if (userId) {
     const response = await getUser(userId);
-    const data = response.data;
-    if (data.code === 0) {
-      userInfo.value = data.data.user;
-      avatarUrl.value = data.data.user.userAvatar; // 获取头像图片URL
-      imageUrl1.value = data.data.user.userAvatar;
+    if (response.data.code === 200) {
+      userInfo.value = response.data.data;
+      avatarUrl.value = response.data.data.userAvatar; // 获取头像图片URL
+      imageUrl1.value = response.data.data.userAvatar;
     } else {
       console.error('获取用户信息失败');
     }
@@ -459,9 +438,8 @@ const sendSMSCode = async () => {
   try {
     const response = await messageUser(phoneNumber.value);
     isSending.value = false;
-    if (typeof response.data === 'object' && response.data.SendStatusSet && response.data.SendStatusSet.length > 0) {
       // 检查返回的数据中的 "Code" 属性
-      if (response.data.SendStatusSet[0].Code === 'Ok') {
+      if (response.data.data === 'send success') {
         // 短信验证码发送成功
         showSuccessMessage('验证码已发送，请注意查收！');
         // 禁用获取验证码按钮
@@ -483,12 +461,8 @@ const sendSMSCode = async () => {
         }, 1000);
       } else {
         // 短信验证码发送失败，显示错误信息
-        showMessage(response.data.SendStatusSet[0].Message || '验证码发送失败');
+        showMessage(response.data.data);
       }
-    } else {
-      // 服务器没有返回预期的数据格式，显示错误信息
-      showMessage('验证码发送失败，请稍后再试');
-    }
   } catch (error) {
     isSending.value = false;
     showMessage('验证码发送失败，请稍后再试');
@@ -511,6 +485,7 @@ const changePhone = async () => {
     return;
   }
   try {
+    console.log(userid.value)
     const response = await changePhones(userid.value, phoneNumber.value, code.value, newPhone.value);
 
     if (response.data.code === 200) {

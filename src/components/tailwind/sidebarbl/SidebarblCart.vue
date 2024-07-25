@@ -42,7 +42,7 @@ import { useStore } from '../../../store/index'
 const store = useStore()
 import {router} from "@/router/router";
 import { debounce } from 'lodash'
-import {addHistorys, cartList, deleteAllCartItems, deleteCartItem, getProductById, updateCart} from "@/api/api";
+import {addHistorys, cartList, deleteAllCartItems, getProductById, updateCart} from "@/api/api";
 
 
 const cartItems = ref([])
@@ -58,7 +58,7 @@ const loadCartItems = async () => {
     try {
       const response = await cartList(userid.value);
       // console.log('cartList response:', response.data); // 调试信息
-      cartItems.value = response.data;
+      cartItems.value = response.data.data;
       // console.log('cartItems:', cartItems.value); // 调试信息
       if (cartItems.value.length === 0) {
         empty.value = true;
@@ -117,9 +117,10 @@ const goToProduct = (productId) => {
 const updateQuantity = debounce(async (id, quantity) => {
   try {
     const response = await updateCart(id, quantity);
-    showSuccessMessage(response.data.message)
-    if (response.data.message==='超出购物车最大限制，请将所有商品数量控制在50以内'){
-      showMessage(response.data.message)
+    if (response.data.code === 200){
+      showSuccessMessage(response.data.data)
+    }else {
+      showMessage(response.data.msg)
     }
   } catch (error) {
     showMessage('更新购物车失败')
@@ -128,38 +129,6 @@ const updateQuantity = debounce(async (id, quantity) => {
 
 const handleChange = (value, id) => {
   updateQuantity(id, value)
-}
-
-const removeCartItem = async (id) => {
-  try {
-    await deleteCartItem(id);
-    showSuccessMessage('删除成功');
-    await loadCartItems();
-  } catch (error) {
-    showMessage('删除购物车失败');
-  }
-}
-
-const open = (id) => {
-  ElMessageBox.confirm(
-      '确认要删除该宝贝吗?',
-      '删除宝贝',
-      {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
-        type: 'warning',
-        center: true,
-      }
-  )
-      .then(() => {
-        removeCartItem(id);
-      })
-      .catch(() => {
-        ElMessage({
-          type: 'info',
-          message: '取消删除',
-        })
-      })
 }
 
 const open1 = () => {
@@ -203,8 +172,11 @@ const removeSelectedItems = async () => {
 
   try {
     const response = await deleteAllCartItems(selectedIds);
-
-    showSuccessMessage(response.data.message)
+    if (response.data.code === 200){
+      showSuccessMessage(response.data.data)
+    }else {
+      showMessage(response.data.msg)
+    }
     await loadCartItems()
   } catch (error) {
     showMessage('批量删除购物车商品失败')

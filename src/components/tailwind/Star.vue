@@ -56,7 +56,7 @@ const loadCartItems = async () => {
   if (land.value) {
     try {
       const response = await selectStar(userid.value);
-      cartItems.value = response.data
+      cartItems.value = response.data.data
       if (cartItems.value.length === 0) {
         empty.value = true
       }
@@ -159,7 +159,7 @@ const removeSelectedItems = async () => {
   try {
     const response = await deleteAllStars(selectedIds);
 
-    showSuccessMessage(response.data.message)
+    showSuccessMessage(response.data.data)
     await loadCartItems()
   } catch (error) {
     showMessage('批量删除购物车商品失败')

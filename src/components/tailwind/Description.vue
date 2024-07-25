@@ -245,11 +245,11 @@ const addToCart = async () => {
   }
   try {
     const response = await addToCarts(userid.value, route.params.productId, 1);
-    if (response.data.message === '您的购物车商品总数已满，请先清理后继续加入购物车') {
-      showMessage(response.data.message)
+    if (response.data.code ===200) {
+      showSuccessMessage(response.data.data)
       return
     }
-    showSuccessMessage(response.data.message)
+    showMessage(response.data.msg)
   } catch (error) {
     console.error(error);
   }
@@ -263,9 +263,9 @@ async function addToFavorites() {
 
   addToFavorite(userid.value,route.params.productId)
       .then(async response => {
-        if (response.data.code === -1) {
+        if (response.data.code !== 200) {
           showMessage(response.data.msg)
-        } else if (response.data.code === 0) {
+        } else {
           showSuccessMessage(response.data.data);
           // 直接更新 isFavorite 的值，而不是再次调用 selectStar API
           isFavorite.value = !isFavorite.value;
@@ -295,11 +295,9 @@ let isFavorite = ref(false) // 创建一个响应式变量来存储当前商品�
 
 onMounted(async () => {
   await star()
-  if (land.value){
-    const response = await selectStar(userid.value)
-    // 检查返回的数据中是否包含当前页面的商品 ID
-    isFavorite.value = response.data.some(item => item.productId === Number(route.params.productId))
-  }
+  const response = await selectStar(userid.value)
+  // 检查返回的数据中是否包含当前页面的商品 ID
+  isFavorite.value = response.data.data.some(item => item.productId === Number(route.params.productId))
 })
 </script>
 

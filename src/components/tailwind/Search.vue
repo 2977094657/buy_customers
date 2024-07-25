@@ -22,12 +22,12 @@ const executeSearch = async (page = 1) => {
   try {
     const response = await searchProduct(props, page);
     // 在每个产品对象中添加一个 loading 字段
-    products.value = response.data.records.map(product => ({
+    products.value = response.data.data.records.map(product => ({
       ...product,
       loading: true, // 设置为 true 表示正在加载
     }));
-    currentPage.value = response.data.current;
-    totalPages.value = response.data.pages;
+    currentPage.value = response.data.data.current;
+    totalPages.value = response.data.data.pages;
   } catch (error) {
     console.error('Request failed', error);
   }

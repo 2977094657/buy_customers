@@ -168,7 +168,7 @@
 
             <div v-if="order.state==='待评价'||order.state==='已完成'" class="mt-6 flex items-center space-x-4 divide-x divide-gray-200 border-t border-gray-200 pt-4 text-sm font-medium sm:ml-4 sm:mt-0 sm:border-none sm:pt-0">
               <div class="flex flex-1 justify-end">
-                <p @click="open(order.orderId)" style="cursor: pointer;color: red">删除订单</p>
+                <p @click="open(order.orderId,order.state)" style="cursor: pointer;color: red">删除订单</p>
               </div>
             </div>
           </li>

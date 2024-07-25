@@ -136,27 +136,23 @@ const getProductInfo = async (productId) => {
 onMounted(getOrderInfo);
 
 const ConfirmPay = async () => {
-  try {
-    const response = await confirmOrder(order.value.orderLong, userid.value);
+  const response = await confirmOrder(order.value.orderLong, userid.value);
 
-    if (response.data.code === 200) {
-      ElNotification({
-        duration: 0,
-        title: '支付成功',
-        message: '订单支付成功，快去订单列表里看看吧！',
-        type: 'success',
-      });
-    } else {
-      console.error(response.data.msg);
-    }
-  } catch (error) {
+  if (response.data.code === 200) {
+    ElNotification({
+      duration: 0,
+      title: '支付成功',
+      message: '订单支付成功，快去订单列表里看看吧！',
+      type: 'success',
+    });
+  } else {
+    // 禁用按钮
+    document.querySelector('button[type="submit"]').disabled = true;
     ElNotification({
       title: '支付失败',
       message: '订单已经支付过了，请不要反复支付哦',
       type: 'error',
     });
-    // 禁用按钮
-    document.querySelector('button[type="submit"]').disabled = true;
   }
 };
 

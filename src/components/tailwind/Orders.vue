@@ -199,6 +199,7 @@ const submitOrder = async (paymentMethod) => {
       // 生成一个唯一的随机数
       const id = Math.random().toString(36).substr(2);
       // 在这里添加支付跳转逻辑
+      console.log(response.data.data.orderLong)
       sessionStorage.setItem(id, response.data.data.orderLong);
       if (paymentMethod === '微信') {
         // 微信支付跳转逻辑

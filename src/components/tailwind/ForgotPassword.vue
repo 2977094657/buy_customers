@@ -59,12 +59,10 @@ const sendSMSCode = async () => {
   }
   isSending.value = true;
   try {
-    console.log(phoneNumber.value)
     const response = await messageUser(phoneNumber.value);
     isSending.value = false;
-    if (typeof response.data === 'object' && response.data.SendStatusSet && response.data.SendStatusSet.length > 0) {
       // 检查返回的数据中的 "Code" 属性
-      if (response.data.SendStatusSet[0].Code === 'Ok') {
+      if (response.data.data === 'send success') {
         // 短信验证码发送成功
         showSuccessMessage('验证码已发送，请注意查收！');
         // 禁用获取验证码按钮
@@ -86,12 +84,8 @@ const sendSMSCode = async () => {
         }, 1000);
       } else {
         // 短信验证码发送失败，显示错误信息
-        showMessage(response.data.SendStatusSet[0].Message || '验证码发送失败');
+        showMessage(response.data.data);
       }
-    } else {
-      // 服务器没有返回预期的数据格式，显示错误信息
-      showMessage('验证码发送失败，请稍后再试');
-    }
   } catch (error) {
     isSending.value = false;
     showMessage('验证码发送失败，请稍后再试');
@@ -114,17 +108,17 @@ const handleSubmit = async () => {
     // 调用后端API
     const response = await forgotPassword(phoneNumber.value,password.value,phoneCode.value);
 
-    if (response.data.success) {
-      showSuccessMessage(response.data.success);
+    if (response.data.code===200) {
+      showSuccessMessage(response.data.data);
       // 延迟一段时间后刷新页面
       setTimeout(() => {
         location.reload();
-      }, 500); // 1秒延迟
+      }, 1000);
       // 密码修改成功，跳转页面
       await router.push('/');
     } else {
       // 显示错误信息
-      showMessage(response.data.error);
+      showMessage(response.data.data);
     }
   } catch (error) {
     showMessage('请求失败，请稍后再试');

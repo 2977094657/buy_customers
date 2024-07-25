@@ -22,17 +22,17 @@ const product = computed(() => route.path.startsWith('/product'));
 
 // 定义一个新的函数，用于更新值
 async function updateValues() {
-  const globalSettings = await getGlobalSettings(1);
+  const globalSettings = await getGlobalSettings('sidebarbl');
   if(!product.value&&deviceType.value==='PC'){
-    sidebar.value=globalSettings.data.data.sidebar
+    sidebar.value=globalSettings.data.data.value
     return
   }else if (deviceType.value==='PC'){
-    sidebar.value=globalSettings.data.data.sidebar
+    sidebar.value=globalSettings.data.data.value
     return
   }else if (deviceType.value!=='PC'&&product.value){
     return
   }
-  sidebar.value=globalSettings.data.data.sidebar
+  sidebar.value=globalSettings.data.data.value
 }
 
 onMounted(updateValues);  // 在页面加载时调用函数

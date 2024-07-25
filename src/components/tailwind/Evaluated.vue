@@ -21,7 +21,8 @@ const loadComments = async () => {
   try {
     const userId = userid.value;
 
-    const commentsResponse = await getMyComments(userId);
+    const myComments = await getMyComments(userId);
+    const commentsResponse = myComments.data;
 
     if (commentsResponse.data.length === 0) {
       empty.value = true
@@ -109,7 +110,7 @@ const removeComments = async (id) => {
   try {
     const response = await deleteCommentById(id);
     if (response.data.data) {
-      showSuccessMessage(response.data.msg);
+      showSuccessMessage(response.data.data);
       // 删除成功后，重新获取一次用户地址列表
       await loadComments();
     } else {

@@ -9,8 +9,8 @@ const Banner = ref([])
 
 const banner = async () => {
   const response = await getAllProducts(currentPage.value, 5, 'score', false);
-  Banner.value = response.data.records
-  currentPage.value = response.data.current
+  Banner.value = response.data.data.records
+  currentPage.value = response.data.data.current
 }
 
 const goToProduct = (productId) => {

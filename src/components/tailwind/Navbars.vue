@@ -173,15 +173,16 @@ const parseTokenAndUserInfo = async () => {
   try {
     const token = localStorage.getItem('token');
     if (token) {
-      const response = await getUserToken(token);
+      const axiosResponse = await getUserToken(token);
+      const response = axiosResponse.data;
       if (response.data) {
         store.setUserInfo( {userId: response.data})
         const userInfoResponse = await getUser(response.data);
         if (userInfoResponse.data != null) {
-          userName.value = userInfoResponse.data.data.user.name;
-          Avatar.value = userInfoResponse.data.data.user.userAvatar;
-          description.value = userInfoResponse.data.data.user.description;
-          gender.value = userInfoResponse.data.data.user.gender;
+          userName.value = userInfoResponse.data.data.name;
+          Avatar.value = userInfoResponse.data.data.userAvatar;
+          description.value = userInfoResponse.data.data.description;
+          gender.value = userInfoResponse.data.data.gender;
           store.setUserInfo( {
             name: userName.value,
             userAvatar: Avatar.value,

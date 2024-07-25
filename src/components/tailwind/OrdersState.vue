@@ -282,9 +282,9 @@ const receiveOrder = async (orderId) => {
     // 从订单列表中移除已经收货的订单
     unpaidOrders.value = unpaidOrders.value.filter(order => order.state !== '待评价');
 
-    showSuccessMessage(response.data.msg)
+    showSuccessMessage(response.data.data)
   } else {
-    showMessage("收货失败: " + response.data.msg);
+    showMessage(response.data.data);
   }
 };
 
